@@ -1,10 +1,24 @@
 version: '3.8'
 services:
   backend:
-    build: ./backend
+    build:
+      context: backend
+      dockerfile: backend.Dockerfile
     command: go run main.go
     tty: true
     volumes:
       - ./backend:/go/src
     ports:
       - "8000:8000"
+  frontend:
+    build:
+      context: frontend
+      dockerfile: frontend.Dockerfile
+    tty: true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/app:/frontend
+    stdin_open: true
+
+    command: sh -c "npm run dev"
