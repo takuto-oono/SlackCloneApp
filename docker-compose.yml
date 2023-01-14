@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    command: go run main.go
+    tty: true
+    volumes:
+      - ./backend:/go/src
+    ports:
+      - "8000:8000"
