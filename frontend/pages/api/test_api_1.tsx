@@ -1,9 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-
-interface Test1 {
-    x: string
-}
-
 const url = 'http://localhost:8000/1'
 
 export default async function TestAPI1() {
