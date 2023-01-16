@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   backend:
+    platform: linux/amd64
     build:
       context: backend
       dockerfile: backend.Dockerfile
@@ -11,6 +12,7 @@ services:
     ports:
       - "8000:8000"
   frontend:
+    platform: linux/amd64
     build:
       context: frontend
       dockerfile: frontend.Dockerfile
@@ -18,7 +20,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend/app:/frontend
+      - ./frontend/app:/frontend/app
     stdin_open: true
 
     command: sh -c "npm run dev"
