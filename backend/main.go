@@ -15,6 +15,9 @@ import (
 func main() {
 	r := gin.Default()
 	fmt.Println(models.DbConnection)
+	models.CreateTestData()
+	fmt.Println("---------------------------------------")
+	models.GetTestData(2)
 	r.GET("/test/:x", func(c *gin.Context) {
 		x := c.Param("x")
 		c.IndentedJSON(http.StatusOK, "Hello Golang"+x)
