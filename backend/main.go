@@ -1,26 +1,19 @@
 package main
 
 import (
-	"strconv"
+	"net/http"
+	// "time"
 
 	"github.com/gin-gonic/gin"
+	// "github.com/gin-contrib/cors"
 )
 
 func main() {
-	router := gin.Default()
+	r := gin.Default()
 
-	router.GET("/:x", func(c *gin.Context) {
-		x, err := strconv.Atoi(c.Param("x"))
-		if err != nil {
-			c.JSON(400, gin.H{
-				"message": "error convert int",
-			})
-		} else {
-			c.JSON(200, gin.H{
-				"x": x + 1,
-			})
-		}
+	r.GET("/test/:x", func(c *gin.Context) {
+		x := c.Param("x")
+		c.IndentedJSON(http.StatusOK, "Hello Golang" + x)
 	})
-
-	router.Run(":8000")
+	r.Run(":8000")
 }
