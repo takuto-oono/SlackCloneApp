@@ -16,6 +16,7 @@ type userInput struct {
 }
 
 func GetUsers(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	users, err := models.GetAllUsers()
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
@@ -25,6 +26,7 @@ func GetUsers(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	id := c.Param("id")
 	user, err := models.GetUserById(id)
 	if err != nil {
@@ -37,6 +39,7 @@ func GetUser(c *gin.Context) {
 func PostUser(c *gin.Context) {
 	// test curl cmd
 	// curl -X POST -H "Content-Type: application/json" -d '{"name": "abc", "password":"pass"}' http://localhost:8000/user
+	c.Header("Access-Control-Allow-Origin", "*")
 
 	var input userInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -55,6 +58,7 @@ func PostUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found id"})
@@ -77,6 +81,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found id"})
