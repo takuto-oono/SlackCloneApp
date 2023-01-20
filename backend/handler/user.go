@@ -52,7 +52,7 @@ func PostUser(c *gin.Context) {
 	user := models.NewUser(uuid, input.Name, input.PassWord)
 	err := user.Create()
 	if err == nil {
-		c.IndentedJSON(http.StatusOK, input)
+		c.IndentedJSON(http.StatusOK, user)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error_message": err})
 	}
