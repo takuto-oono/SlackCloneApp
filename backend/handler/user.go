@@ -46,6 +46,7 @@ func PostUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error message": err})
 		return
 	}
+	
 	uuidWithHyphen := uuid.New()
 	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
 	user := models.NewUser(uuid, input.Name, input.PassWord)
@@ -93,6 +94,10 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	user := models.NewUser(id, input.Name, input.PassWord)
+	if user == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found user information"})
+		return
+	}
 	if err := user.DeleteUser(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return

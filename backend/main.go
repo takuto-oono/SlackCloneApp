@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
-	// "time"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	// "github.com/gin-contrib/cors"
 
 	"backend/handler"
 	"backend/models"
@@ -14,6 +14,15 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"POST", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge: 12 * time.Hour,
+	}))
 	fmt.Println(models.DbConnection)
 
 	// user handler (api test 2)
