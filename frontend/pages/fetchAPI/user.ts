@@ -4,7 +4,7 @@ export interface User {
     password: string;
 }
 
-const baseUrl = 'http://localhost:8000/'
+const baseUrl = 'http://localhost:8080/'
 
 export async function getUsers() {
     const url = baseUrl + 'users'
