@@ -10,6 +10,10 @@ import (
 
 var DbConnection *sql.DB
 
+const (
+	userTableName = "user_table"
+)
+
 func init() {
 	driver := "sqlite3"
 	dbName := "SlackCloneDB.sql"
@@ -24,5 +28,14 @@ func init() {
 			word STRING
 		)
 	`, "test_db1")
+	DbConnection.Exec(cmd)
+	
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
+			id STRING PRIMARY KEY NOT NULL,
+			name STRING,
+			password STRING
+		)
+	`, userTableName)
 	DbConnection.Exec(cmd)
 }
