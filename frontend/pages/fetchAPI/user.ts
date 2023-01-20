@@ -1,4 +1,4 @@
-interface User {
+export interface User {
     id: string;
     name: string;
     password: string;
@@ -8,37 +8,38 @@ const baseUrl = 'http://localhost:8000/'
 
 export async function getUsers() {
     const url = baseUrl + 'users'
+    let users: User[]
     try {
         const res = await fetch(url, {
             method: 'GET',
         })
         console.log(res)
-        const data = await res.json()
-        console.log(data)
-        return data
+        users = await res.json()
+        console.log(users)
+        return users
     } catch (err) {
         console.log(err)
     }
 }
 
-export async function getUserById() {
-    const id = "1bd5adb749d24b60a364b5b864d49f10"
-    const url = baseUrl + 'user/' + id
+export async function getUserById(user: User): Promise<User> {
+    const url = baseUrl + 'user/' + user.id
     try {
         const res = await fetch(url, {
             method: 'GET',
         })
         console.log(res)
-        const data: User = await res.json()
-        console.log(data)
-        return data
+        const user: User = await res.json()
+        console.log(user)
     } catch (err) {
         console.log(err)
     }
+    return user
 }
 
-export async function postUser() {
+export async function postUser(user: User): Promise<User> {
     const url = baseUrl + 'user'
+
     try {
         const res = await fetch(url, {
             method: 'POST',
@@ -46,21 +47,21 @@ export async function postUser() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                name: "admin3",
-                password: 'admin3',
+                name: user.name,
+                password: user.password,
             })
         })
         console.log(res)
-        const data = await res.json()
-        console.log(data)
-        return data
+        user = await res.json()
+        console.log(user)
     } catch (err) {
         console.log(err)
     }
+    return user
 }
 
-export async function updateUser() {
-    const url = baseUrl + 'user/' + '4c0bb0020bec47d9a8f9e1cc2db1822e'
+export async function updateUser(user: User) :Promise<User> {
+    const url = baseUrl + 'user/' + user.id
     try {
         const res = await fetch(url, {
             method: 'PATCH',
@@ -68,21 +69,21 @@ export async function updateUser() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                name: "joker",
-                password: 'joker',
+                name: user.name,
+                password: user.password,
             })
         })
         console.log(res)
-        const data = await res.json()
-        console.log(data)
-        return data
+        user = await res.json()
+        console.log(user)
     } catch (err) {
         console.log(err)
     }
+    return user
 }
 
-export async function deleteUser() {
-    const url = baseUrl + 'user/' + '4c0bb0020bec47d9a8f9e1cc2db1822e'
+export async function deleteUser(user: User) :Promise<User> {
+    const url = baseUrl + 'user/' + user.id
     try {
         const res = await fetch(url, {
             method: 'DELETE',
@@ -90,17 +91,16 @@ export async function deleteUser() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                name: "joker",
-                password: 'joker',
+                name: user.name,
+                password: user.password,
             })
         })
         console.log(res)
-        const data = await res.json()
-        console.log(data)
-        return data
+        user = await res.json()
+        console.log(user)
     } catch (err) {
         console.log(err)
     }
-    
+    return user
 }
 
