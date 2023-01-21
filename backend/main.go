@@ -21,7 +21,7 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 	fmt.Println(models.DbConnection)
 
