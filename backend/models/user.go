@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+
+	"backend/config"
+)
 
 type User struct {
 	ID       string `json:"id"`
@@ -13,7 +17,7 @@ func NewUser(id, name, password string) *User {
 }
 
 func (user *User) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name, password) VALUES (?, ?, ?)", userTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name, password) VALUES (?, ?, ?)", config.Config.UserTableName)
 	_, err := DbConnection.Exec(cmd, user.ID, user.Name, user.PassWord)
 	if err != nil {
 		fmt.Println(err)
@@ -23,7 +27,7 @@ func (user *User) Create() error {
 }
 
 func GetAllUsers() ([]User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s", userTableName)
+	cmd := fmt.Sprintf("SELECT id, name, password FROM %s", config.Config.UserTableName)
 	rows, err := DbConnection.Query(cmd)
 	if err != nil {
 		return []User{}, err
@@ -43,7 +47,7 @@ func GetAllUsers() ([]User, error) {
 }
 
 func GetUserById(uuid string) (User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE id = ?", userTableName)
+	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE id = ?", config.Config.UserTableName)
 	row := DbConnection.QueryRow(cmd, uuid)
 	var user User
 	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
@@ -54,13 +58,13 @@ func GetUserById(uuid string) (User, error) {
 }
 
 func (user *User) UpdateUser() error {
-	cmd := fmt.Sprintf("UPDATE %s SET name = ?, password = ? WHERE id = ?", userTableName)
+	cmd := fmt.Sprintf("UPDATE %s SET name = ?, password = ? WHERE id = ?", config.Config.UserTableName)
 	_, err := DbConnection.Exec(cmd, user.Name, user.PassWord, user.ID)
 	return err
 }
 
 func (user *User) DeleteUser() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = ?", userTableName)
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = ?", config.Config.UserTableName)
 	_, err := DbConnection.Exec(cmd, user.ID, user.Name, user.PassWord)
 	return err
 }

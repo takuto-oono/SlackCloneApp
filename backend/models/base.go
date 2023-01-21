@@ -6,17 +6,15 @@ import (
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"backend/config"
 )
 
 var DbConnection *sql.DB
 
-const (
-	userTableName = "user_table"
-)
-
 func init() {
-	driver := "sqlite3"
-	dbName := "SlackCloneDB.sql"
+	driver := config.Config.Driver
+	dbName := config.Config.DbName
 	var err error
 	DbConnection, err = sql.Open(driver, dbName)
 	if err != nil {
@@ -29,13 +27,13 @@ func init() {
 		)
 	`, "test_db1")
 	DbConnection.Exec(cmd)
-	
+
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id STRING PRIMARY KEY NOT NULL,
 			name STRING,
 			password STRING
 		)
-	`, userTableName)
+	`, config.Config.UserTableName)
 	DbConnection.Exec(cmd)
 }
