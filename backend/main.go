@@ -28,6 +28,7 @@ func SetupRouter() *gin.Engine {
 	user := api.Group("/user")
 
 	user.POST("/signUp", handler.SignUp)
+	user.POST("/login", handler.Login)
 	return r
 }
 
