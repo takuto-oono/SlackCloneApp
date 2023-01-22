@@ -31,8 +31,8 @@ func init() {
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id STRING PRIMARY KEY NOT NULL,
-			name STRING,
-			password STRING
+			name STRING NOT NULL UNIQUE,
+			password STRING NOT NULL
 		)
 	`, config.Config.UserTableName)
 	DbConnection.Exec(cmd)

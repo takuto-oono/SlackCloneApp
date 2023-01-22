@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -12,7 +11,7 @@ import (
 	"backend/models"
 )
 
-func main() {
+func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -24,18 +23,15 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 	fmt.Println(models.DbConnection)
+	api := r.Group("/api")
 
-	// user handler (api test 2)
-	r.GET("/users", handler.GetUsers)
-	r.GET("/user/:id", handler.GetUser)
-	r.POST("/user", handler.PostUser)
-	r.PATCH("/user/:id", handler.UpdateUser)
-	r.DELETE("/user/:id", handler.DeleteUser)
+	user := api.Group("/user")
 
-	// test api 1 handler
-	r.GET("/test/:x", func(c *gin.Context) {
-		x := c.Param("x")
-		c.IndentedJSON(http.StatusOK, "Hello Golang"+x)
-	})
+	user.POST("/signUp", handler.SignUp)
+	return r
+}
+
+func main() {
+	r := SetupRouter()
 	r.Run(":8080")
 }

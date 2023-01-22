@@ -10,42 +10,33 @@ import (
 	"backend/models"
 )
 
-type userInput struct {
+type UserInput struct {
 	Name     string `json:"name"`
 	PassWord string `json:"password"`
 }
 
-func GetUsers(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	users, err := models.GetAllUsers()
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
-		return
+func (uin *UserInput) validate() bool {
+	if uin.Name == "" {
+		return false
 	}
-	c.IndentedJSON(http.StatusOK, users)
+	if uin.PassWord == "" {
+		return false
+	}
+	return true
 }
 
-func GetUser(c *gin.Context) {
+func SignUp(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	id := c.Param("id")
-	user, err := models.GetUserById(id)
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
-		return
-	}
-	c.IndentedJSON(http.StatusOK, user)
-}
-
-func PostUser(c *gin.Context) {
-	// test curl cmd
-	// curl -X POST -H "Content-Type: application/json" -d '{"name": "abc", "password":"pass"}' http://localhost:8000/user
-	c.Header("Access-Control-Allow-Origin", "*")
-
-	var input userInput
+	var input UserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": err})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
+	if !input.validate() {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is blank"})
+		return
+	}
+
 	
 	uuidWithHyphen := uuid.New()
 	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
@@ -56,51 +47,4 @@ func PostUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error_message": err})
 	}
-}
-
-func UpdateUser(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found id"})
-		return
-	}
-
-	var input userInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found user information"})
-		return
-	}
-	user := models.NewUser(id, input.Name, input.PassWord)
-
-	if err := user.UpdateUser(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, user)
-}
-
-func DeleteUser(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found id"})
-		return
-	}
-	var input userInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found user information"})
-		return
-	}
-	user := models.NewUser(id, input.Name, input.PassWord)
-	if user == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error message": "not found user information"})
-		return
-	}
-	if err := user.DeleteUser(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
-		return
-	}
-	c.IndentedJSON(http.StatusOK, user)
 }
