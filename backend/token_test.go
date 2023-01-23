@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -17,7 +16,6 @@ func TestGenerateJWTToken(t *testing.T) {
 		uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
 		token, err := token.GenerateToken(uuid)
 		assert.Empty(t, err)
-		// assert.Equal(t, "", token)
-		fmt.Println("token", token)
+		assert.NotEqual(t, "", token)
 	}
 }
