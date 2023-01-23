@@ -16,22 +16,40 @@ type ConfigList struct {
 	Driver        string
 	DbName        string
 	UserTableName string
+
+	//jwt-token
+	TokenHourLifeSpan string
+	SecretKey         string
 }
 
 var Config ConfigList
 
+func loadConfigFile() (*ini.File, error) {
+	file, err := ini.Load("config.ini")
+	if err == nil {
+		return file, nil
+	}
+	file, err = ini.Load("./config.ini")
+
+	return file, err
+
+}
+
 func init() {
-	cfg, err := ini.Load("config.ini")
+	cfg, err := loadConfigFile()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Failed to read file: %v", err)
 		os.Exit(1)
+
 	}
 
 	Config = ConfigList{
-		BackendBaseUrl:  cfg.Section("web").Key("backendBaseUrl").String(),
-		FrontendBaseUrl: cfg.Section("web").Key("frontendBaseUrl").String(),
-		Driver:          cfg.Section("db").Key("driver").String(),
-		DbName:          cfg.Section("db").Key("dbName").String(),
-		UserTableName:   cfg.Section("db").Key("userTableName").String(),
+		BackendBaseUrl:    cfg.Section("web").Key("backendBaseUrl").String(),
+		FrontendBaseUrl:   cfg.Section("web").Key("frontendBaseUrl").String(),
+		Driver:            cfg.Section("db").Key("driver").String(),
+		DbName:            cfg.Section("db").Key("dbName").String(),
+		UserTableName:     cfg.Section("db").Key("userTableName").String(),
+		TokenHourLifeSpan: cfg.Section("jwt-token").Key("tokenHourLifespan").String(),
+		SecretKey: cfg.Section("jwt-token").Key("secretKey").String(),
 	}
 }
