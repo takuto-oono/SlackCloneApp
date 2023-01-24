@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"backend/models"
+	"backend/token"
 )
 
 type UserInput struct {
@@ -70,7 +71,12 @@ func Login(c *gin.Context) {
 	}
 
 	// TODO generate Token
+	token, err := token.GenerateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 
-	c.IndentedJSON(http.StatusOK, user)
+	c.IndentedJSON(http.StatusOK, token)
 	
 }
