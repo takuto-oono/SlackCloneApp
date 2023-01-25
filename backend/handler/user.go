@@ -78,7 +78,6 @@ func Login(c *gin.Context) {
 }
 
 func GetCurrentUser(c *gin.Context) {
-
 	c.Header("Access-Control-Allow-Origin", "*")
 	tokenString := token.GetTokenFromContext(c)
 	if tokenString == "" {
