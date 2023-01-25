@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
+	ID       uint32 `json:"id"`
 	Name     string `json:"name"`
 	PassWord string `json:"password"`
 }
 
-func NewUser(id, name, password string) *User {
+func NewUser(id uint32, name, password string) *User {
 	return &User{ID: id, Name: name, PassWord: password}
 }
 
@@ -34,7 +34,7 @@ func GetUserByName(name string) (User, error) {
 	if err != nil {
 		return User{}, err
 	}
-	if user.ID == "" || user.Name == "" || user.PassWord == "" {
+	if user.Name == "" || user.PassWord == "" {
 		err = fmt.Errorf("not found name = %s", name)
 		return User{}, err
 	}

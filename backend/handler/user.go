@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"backend/models"
 	"backend/token"
@@ -38,9 +38,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	uuidWithHyphen := uuid.New()
-	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
-	user := models.NewUser(uuid, input.Name, input.PassWord)
+	user := models.NewUser(rand.Uint32(), input.Name, input.PassWord)
 	err := user.Create()
 	if err == nil {
 		c.IndentedJSON(http.StatusOK, user)
@@ -78,5 +76,11 @@ func Login(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, token)
-	
+}
+
+func GetCurrentUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	tokenString := token.GetTokenFromContext(c)
+	userId, _ := token.GetUserIdFromToken(tokenString)
+	fmt.Println(userId)
 }

@@ -30,7 +30,7 @@ func init() {
 
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
-			id STRING PRIMARY KEY NOT NULL,
+			id INT PRIMARY KEY NOT NULL,
 			name STRING NOT NULL UNIQUE,
 			password STRING NOT NULL
 		)
