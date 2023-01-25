@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,47 @@ import (
 )
 
 var router = SetupRouter()
+
+
+func TestCurrentUser(t *testing.T) {
+	for i := 0; i < 1000; i ++ {
+		w := httptest.NewRecorder()
+		name := "testCurrentUser" + strconv.Itoa(i)
+		password := "testCurrentPass" + strconv.Itoa(i)
+		input := handler.UserInput{
+			Name:     name,
+			PassWord: password,
+		}
+		jsonInput, _ := json.Marshal(input)
+		req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+		router.ServeHTTP(w, req)
+
+		w = httptest.NewRecorder()
+		input = handler.UserInput{
+			Name:     name,
+			PassWord: password,
+		}
+		jsonInput, _ = json.Marshal(input)
+		req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+		router.ServeHTTP(w, req)
+		jwtToken := w.Body.String()
+
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("GET", "/api/user/currentUser", nil)
+		req.Header.Add("Authorization", jwtToken)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+	}
+
+	for i := 0; i < 1000; i ++ {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/user/currentUser", nil)
+		router.ServeHTTP(w, req)
+		fmt.Println(w.Code)
+		assert.NotEqual(t, http.StatusOK, w.Code)
+		
+	}
+}
 
 func TestLogin(t *testing.T) {
 

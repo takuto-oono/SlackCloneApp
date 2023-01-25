@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"math/rand"
 	"net/http"
 
@@ -79,8 +78,23 @@ func Login(c *gin.Context) {
 }
 
 func GetCurrentUser(c *gin.Context) {
+
 	c.Header("Access-Control-Allow-Origin", "*")
 	tokenString := token.GetTokenFromContext(c)
-	userId, _ := token.GetUserIdFromToken(tokenString)
-	fmt.Println(userId)
+	if tokenString == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
+		return
+	}
+	userId, err := token.GetUserIdFromToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, user)
 }
