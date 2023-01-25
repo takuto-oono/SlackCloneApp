@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"math/rand"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"backend/models"
+	"backend/token"
 )
 
 type UserInput struct {
@@ -37,9 +37,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	uuidWithHyphen := uuid.New()
-	uuid := strings.Replace(uuidWithHyphen.String(), "-", "", -1)
-	user := models.NewUser(uuid, input.Name, input.PassWord)
+	user := models.NewUser(rand.Uint32(), input.Name, input.PassWord)
 	err := user.Create()
 	if err == nil {
 		c.IndentedJSON(http.StatusOK, user)
@@ -70,7 +68,32 @@ func Login(c *gin.Context) {
 	}
 
 	// TODO generate Token
+	token, err := token.GenerateToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 
+	c.IndentedJSON(http.StatusOK, token)
+}
+
+func GetCurrentUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	tokenString := token.GetTokenFromContext(c)
+	if tokenString == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
+		return
+	}
+	userId, err := token.GetUserIdFromToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 	c.IndentedJSON(http.StatusOK, user)
-	
 }

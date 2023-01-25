@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
+	ID       uint32 `json:"id"`
 	Name     string `json:"name"`
 	PassWord string `json:"password"`
 }
 
-func NewUser(id, name, password string) *User {
+func NewUser(id uint32, name, password string) *User {
 	return &User{ID: id, Name: name, PassWord: password}
 }
 
@@ -27,15 +27,30 @@ func (user *User) Create() error {
 }
 
 func GetUserByName(name string) (User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = ?", config.Config.UserTableName )
+	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = ?", config.Config.UserTableName)
 	row := DbConnection.QueryRow(cmd, name)
 	var user User
 	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
 	if err != nil {
 		return User{}, err
 	}
-	if user.ID == "" || user.Name == "" || user.PassWord == "" {
+	if user.Name == "" || user.PassWord == "" {
 		err = fmt.Errorf("not found name = %s", name)
+		return User{}, err
+	}
+	return user, nil
+}
+
+func GetUserById(id uint32) (User, error) {
+	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE id = ?", config.Config.UserTableName)
+	row := DbConnection.QueryRow(cmd, id)
+	var user User
+	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
+	if err != nil {
+		return User{}, err
+	}
+	if user.Name == "" || user.PassWord == "" {
+		err = fmt.Errorf("not found id")
 		return User{}, err
 	}
 	return user, nil

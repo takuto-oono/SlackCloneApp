@@ -4,16 +4,72 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"backend/handler"
+	"backend/models"
 )
 
 var router = SetupRouter()
+
+func TestCurrentUser(t *testing.T) {
+	errSlice := []int{}
+	for i := 1; i < 1000; i++ {
+		fmt.Println(i)
+		w := httptest.NewRecorder()
+		name := "testCurrentUser" + strconv.Itoa(i)
+		password := "testCurrentPass" + strconv.Itoa(i)
+		input := handler.UserInput{
+			Name:     name,
+			PassWord: password,
+		}
+		jsonInput, _ := json.Marshal(input)
+		req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+		router.ServeHTTP(w, req)
+
+		w = httptest.NewRecorder()
+		input = handler.UserInput{
+			Name:     name,
+			PassWord: password,
+		}
+		jsonInput, _ = json.Marshal(input)
+		req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+		router.ServeHTTP(w, req)
+		jwtToken := w.Body.String()
+
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("GET", "/api/user/currentUser", nil)
+		req.Header.Add("Authorization", jwtToken)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+		fmt.Println(w.Body)
+		byteArray, _ := ioutil.ReadAll(w.Body)
+		jsonBody := ([]byte)(byteArray)
+		user := new(models.User)
+		if err := json.Unmarshal(jsonBody, user); err != nil {
+			errSlice = append(errSlice, i)
+			fmt.Println(err.Error())
+			continue
+		}
+		assert.Equal(t, input.Name, user.Name)
+		assert.Equal(t, input.PassWord, user.PassWord)
+	}
+	fmt.Println(errSlice)
+
+	for i := 0; i < 100000; i++ {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/user/currentUser", nil)
+		router.ServeHTTP(w, req)
+		fmt.Println(w.Code)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	}
+}
 
 func TestLogin(t *testing.T) {
 
@@ -157,5 +213,4 @@ func TestSignUp(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 400, w.Code)
-
 }
