@@ -29,10 +29,9 @@ func loadConfigFile() (*ini.File, error) {
 	if err == nil {
 		return file, nil
 	}
-	file, err = ini.Load("./config.ini")
+	file, err = ini.Load("../config.ini")
 
 	return file, err
-
 }
 
 func init() {
