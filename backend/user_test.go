@@ -213,4 +213,6 @@ func TestSignUp(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 400, w.Code)
+
+	// git test
 }
