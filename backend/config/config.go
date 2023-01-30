@@ -13,9 +13,12 @@ type ConfigList struct {
 	FrontendBaseUrl string
 
 	//db関連
-	Driver        string
-	DbName        string
-	UserTableName string
+	Driver                    string
+	DbName                    string
+	UserTableName             string
+	WorkspaceTableName        string
+	WorkspaceAndUserTableName string
+	RoleTableName             string
 
 	//jwt-token
 	TokenHourLifeSpan string
@@ -43,12 +46,17 @@ func init() {
 	}
 
 	Config = ConfigList{
-		BackendBaseUrl:    cfg.Section("web").Key("backendBaseUrl").String(),
-		FrontendBaseUrl:   cfg.Section("web").Key("frontendBaseUrl").String(),
-		Driver:            cfg.Section("db").Key("driver").String(),
-		DbName:            cfg.Section("db").Key("dbName").String(),
-		UserTableName:     cfg.Section("db").Key("userTableName").String(),
+		BackendBaseUrl:  cfg.Section("web").Key("backendBaseUrl").String(),
+		FrontendBaseUrl: cfg.Section("web").Key("frontendBaseUrl").String(),
+
+		Driver:                    cfg.Section("db").Key("driver").String(),
+		DbName:                    cfg.Section("db").Key("dbName").String(),
+		UserTableName:             cfg.Section("db").Key("userTableName").String(),
+		WorkspaceTableName:        cfg.Section("db").Key("workspaceTableName").String(),
+		WorkspaceAndUserTableName: cfg.Section("db").Key("workspaceAndUserTableName").String(),
+		RoleTableName:             cfg.Section("db").Key("roleTableName").String(),
+
 		TokenHourLifeSpan: cfg.Section("jwt-token").Key("tokenHourLifespan").String(),
-		SecretKey: cfg.Section("jwt-token").Key("secretKey").String(),
+		SecretKey:         cfg.Section("jwt-token").Key("secretKey").String(),
 	}
 }
