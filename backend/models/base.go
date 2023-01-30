@@ -60,4 +60,19 @@ func init() {
 		)
 	`, config.Config.RoleTableName)
 	DbConnection.Exec(cmd)
+
+	// insert 4 roles in roles table
+	roleNames := []string{
+		"Workspace Primary Owner",
+		"Workspace Owners",
+		"Workspace Admins",
+		"Full members",
+	}
+	for i, n := range roleNames {
+		r := NewRole(i+1, n)
+		err := r.Create()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
 }
