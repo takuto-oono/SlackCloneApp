@@ -20,20 +20,44 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	cmd := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			num INT PRIMARY KEY NOT NULL,
-			word STRING
-		)
-	`, "test_db1")
-	DbConnection.Exec(cmd)
 
-	cmd = fmt.Sprintf(`
+	// create users table
+	cmd := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id INT PRIMARY KEY NOT NULL,
 			name STRING NOT NULL UNIQUE,
 			password STRING NOT NULL
 		)
 	`, config.Config.UserTableName)
+	DbConnection.Exec(cmd)
+
+	// create workspace table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL UNIQUE,
+			workspace_primary_owner_id
+		)
+	`, config.Config.WorkspaceTableName)
+	DbConnection.Exec(cmd)
+
+	// create workspace and user table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
+			workspace_id INT NOT NULL,
+			user_id INT NOT NULL,
+			role_id INT NOT NULL,
+			PRIMARY KEY (workspace_id, user_id)
+		)
+	`, config.Config.WorkspaceAndUserTableName)
+	DbConnection.Exec(cmd)
+
+	// create role table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL
+		)
+	`, config.Config.RoleTableName)
 	DbConnection.Exec(cmd)
 }
