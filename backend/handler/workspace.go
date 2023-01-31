@@ -30,10 +30,14 @@ func CreateWorkspace(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	workspaceName := input.Name
-	if workspaceName == "" {
+	if input.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace name"})
+		return
+	}
+	w := models.NewWorkspace(0, input.Name, primaryOwnerId)
+	if err := w.CreateWorkspace(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	w := models.NewWorkspace(workspaceName, primaryOwnerId)
+	c.IndentedJSON(http.StatusOK, w)
 }
