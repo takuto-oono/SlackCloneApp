@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"backend/handler"
 	"backend/models"
 )
 
@@ -25,7 +24,7 @@ func TestCurrentUser(t *testing.T) {
 		w := httptest.NewRecorder()
 		name := "testCurrentUser" + strconv.Itoa(i)
 		password := "testCurrentPass" + strconv.Itoa(i)
-		input := handler.UserInput{
+		input := UserInput{
 			Name:     name,
 			PassWord: password,
 		}
@@ -34,7 +33,7 @@ func TestCurrentUser(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		w = httptest.NewRecorder()
-		input = handler.UserInput{
+		input = UserInput{
 			Name:     name,
 			PassWord: password,
 		}
@@ -75,7 +74,7 @@ func TestLogin(t *testing.T) {
 
 	//passwordが入力されていない場合 400
 	w := httptest.NewRecorder()
-	input := handler.UserInput{
+	input := UserInput{
 		Name:     "testUser",
 		PassWord: "",
 	}
@@ -86,7 +85,7 @@ func TestLogin(t *testing.T) {
 
 	// OKな場合 200
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "loginTestUserOK",
 		PassWord: "loginTestPassOK",
 	}
@@ -94,7 +93,7 @@ func TestLogin(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "loginTestUserOK",
 		PassWord: "loginTestPassOK",
 	}
@@ -106,7 +105,7 @@ func TestLogin(t *testing.T) {
 
 	// 存在しないNameだった場合 400
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "notExistName",
 		PassWord: "testPass",
 	}
@@ -117,7 +116,7 @@ func TestLogin(t *testing.T) {
 
 	// passwordが間違っている場合 400
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testWrongUser",
 		PassWord: "testWrongPass",
 	}
@@ -125,7 +124,7 @@ func TestLogin(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testWrongUser",
 		PassWord: "wrongPass",
 	}
@@ -139,7 +138,7 @@ func TestLogin(t *testing.T) {
 func TestSignUp(t *testing.T) {
 	//正常な場合 200
 	w := httptest.NewRecorder()
-	input := handler.UserInput{
+	input := UserInput{
 		Name:     "testUser",
 		PassWord: "testPass",
 	}
@@ -150,7 +149,7 @@ func TestSignUp(t *testing.T) {
 
 	// Passwordがユニークでない場合 200
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testUserUnique1",
 		PassWord: "testPassUnique",
 	}
@@ -158,7 +157,7 @@ func TestSignUp(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testUserUnique2",
 		PassWord: "testPassUnique",
 	}
@@ -169,7 +168,7 @@ func TestSignUp(t *testing.T) {
 
 	// Nameがない場合 400
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "",
 		PassWord: "testPass",
 	}
@@ -180,7 +179,7 @@ func TestSignUp(t *testing.T) {
 
 	// Passwordがない場合 400
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testUser",
 		PassWord: "",
 	}
@@ -197,7 +196,7 @@ func TestSignUp(t *testing.T) {
 
 	// Nameがユニークでない場合 400
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testUserUnique",
 		PassWord: "testPassUnique1",
 	}
@@ -205,7 +204,7 @@ func TestSignUp(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	w = httptest.NewRecorder()
-	input = handler.UserInput{
+	input = UserInput{
 		Name:     "testUserUnique",
 		PassWord: "testPassUnique2",
 	}

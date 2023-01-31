@@ -36,7 +36,7 @@ func init() {
 		CREATE TABLE IF NOT EXISTS %s (
 			id INT PRIMARY KEY NOT NULL,
 			name STRING NOT NULL UNIQUE,
-			workspace_primary_owner_id
+			workspace_primary_owner_id STRING not NULL
 		)
 	`, config.Config.WorkspaceTableName)
 	DbConnection.Exec(cmd)
