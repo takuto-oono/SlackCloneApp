@@ -15,6 +15,6 @@ func TestIsExist4Roles(t *testing.T) {
 	}
 	for i, n := range roleNames {
 		r, _ := GetRoleById(i + 1)
-		assert.Equal(t, r.Name, n)
+		assert.Equal(t, n, r.Name)
 	}
 }

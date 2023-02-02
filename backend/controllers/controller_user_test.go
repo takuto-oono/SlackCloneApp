@@ -1,4 +1,4 @@
-package handler
+package controllers
 
 import (
 	"bytes"
@@ -81,7 +81,7 @@ func TestLogin(t *testing.T) {
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// OKな場合 200
 	w = httptest.NewRecorder()
@@ -101,7 +101,7 @@ func TestLogin(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
 	fmt.Println(w)
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	// 存在しないNameだった場合 400
 	w = httptest.NewRecorder()
@@ -112,7 +112,7 @@ func TestLogin(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// passwordが間違っている場合 400
 	w = httptest.NewRecorder()
@@ -131,7 +131,7 @@ func TestLogin(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 }
 
@@ -145,7 +145,7 @@ func TestSignUp(t *testing.T) {
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Passwordがユニークでない場合 200
 	w = httptest.NewRecorder()
@@ -164,7 +164,7 @@ func TestSignUp(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Nameがない場合 400
 	w = httptest.NewRecorder()
@@ -175,7 +175,7 @@ func TestSignUp(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// Passwordがない場合 400
 	w = httptest.NewRecorder()
@@ -186,13 +186,13 @@ func TestSignUp(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// bodyがない場合 400
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("POST", "/api/user/signUp", nil)
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	// Nameがユニークでない場合 400
 	w = httptest.NewRecorder()
@@ -211,5 +211,5 @@ func TestSignUp(t *testing.T) {
 	jsonInput, _ = json.Marshal(input)
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 400, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }

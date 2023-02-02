@@ -1,4 +1,4 @@
-package handler
+package controllers
 
 import (
 	"fmt"
@@ -32,6 +32,7 @@ func SetupRouter() *gin.Engine {
 
 	workspace := api.Group("/workspace")
 	workspace.POST("/create", CreateWorkspace)
+	workspace.POST("/add_user", AddUserWorkspace)
 
 	return r
 }
