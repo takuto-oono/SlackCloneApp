@@ -41,3 +41,26 @@ func (w *Workspace) CreateWorkspace() error {
 	}
 	return err
 }
+
+func GetWorkspaceByName(name string) (Workspace, error) {
+	if name == "" {
+		return Workspace{}, fmt.Errorf("not found workspace name")
+	}
+	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE name = ?", config.Config.WorkspaceTableName)
+	row := DbConnection.QueryRow(cmd, name)
+	var w Workspace
+	err := row.Scan(&w.ID, &w.Name, &w.PrimaryOwnerId)
+	if err != nil {
+		return Workspace{}, err
+	}
+
+	if w.ID == 0 || w.Name == "" || w.PrimaryOwnerId == 0 {
+		return Workspace{}, fmt.Errorf("find empty fields")
+	}
+
+	if w.Name != name {
+		return Workspace{}, fmt.Errorf("find wrong workspace")
+	}
+
+	return w, nil
+}
