@@ -1,10 +1,10 @@
 package main
 
 import (
-	"backend/handler"
+	"backend/controllers"
 )
 
 func main() {
-	r := handler.SetupRouter()
+	r := controllers.SetupRouter()
 	r.Run(":8080")
 }
