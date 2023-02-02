@@ -16,9 +16,9 @@ func TestNewWorkspace(t *testing.T) {
 		name := "testNewWorkspaceName" + strconv.Itoa(i)
 		primary_owner_id := uint32(i) + 10
 		w := NewWorkspace(id, name, primary_owner_id)
-		assert.Equal(t, w.ID, id)
-		assert.Equal(t, w.Name, name)
-		assert.Equal(t, w.PrimaryOwnerId, primary_owner_id)
+		assert.Equal(t, id, w.ID)
+		assert.Equal(t, name, w.Name)
+		assert.Equal(t, primary_owner_id, w.PrimaryOwnerId)
 	}
 }
 
@@ -44,9 +44,9 @@ func TestCreateWorkspace(t *testing.T) {
 		var w Workspace
 		err := row.Scan(&w.ID, &w.Name, &w.PrimaryOwnerId)
 		assert.Empty(t, err)
-		assert.NotEqual(t, w.ID, 0)
-		assert.Equal(t, w.Name, names[i])
-		assert.Equal(t, w.PrimaryOwnerId, primaryOwnerIds[i])
+		assert.NotEqual(t, 0, w.ID)
+		assert.Equal(t, names[i], w.Name)
+		assert.Equal(t, primaryOwnerIds[i], w.PrimaryOwnerId)
 	}
 
 	// workspace nameが既に存在する場合 error

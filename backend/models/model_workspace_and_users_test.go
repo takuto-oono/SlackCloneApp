@@ -53,5 +53,4 @@ func TestGetWorkspaceAndUserByWorkspaceIdAndUserId(t *testing.T) {
 			assert.NotEmpty(t, err)
 		}
 	}
-
 }

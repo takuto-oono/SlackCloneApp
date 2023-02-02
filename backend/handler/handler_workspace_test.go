@@ -30,7 +30,7 @@ func TestCreateWorkspace(t *testing.T) {
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	workspaceRouter.ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, rr.Code)
 
 	rr = httptest.NewRecorder()
 	jsonInput, _ = json.Marshal(input)
@@ -56,7 +56,7 @@ func TestCreateWorkspace(t *testing.T) {
 	jsonInput, _ = json.Marshal(inputWorkspace)
 	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
 	workspaceRouter.ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 
 	// 3
 	rr = httptest.NewRecorder()
@@ -67,7 +67,7 @@ func TestCreateWorkspace(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
 	req.Header.Add("Authorization", "testJWTToken")
 	workspaceRouter.ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 
 	// 4
 	// body自体がない場合
@@ -75,7 +75,7 @@ func TestCreateWorkspace(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/workspace/create", nil)
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 
 	// bodyはあるが、Nameに何も指定がない場合
 	rr = httptest.NewRecorder()
@@ -86,7 +86,7 @@ func TestCreateWorkspace(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
-	assert.Equal(t, rr.Code, http.StatusBadRequest)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
 func TestAddUserWorkspace(t *testing.T) {
