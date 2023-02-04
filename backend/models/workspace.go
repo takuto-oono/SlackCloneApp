@@ -64,15 +64,11 @@ func GetWorkspaceByName(name string) (Workspace, error) {
 	return w, nil
 }
 
-func (w *Workspace) RenameWorkspaceName(newName string) error {
-	if w.ID == 0 || newName == "" {
+func (w *Workspace) RenameWorkspaceName() error {
+	if w.ID == 0 || w.Name == "" {
 		return fmt.Errorf("id or newName is empty")
 	}
 	cmd := fmt.Sprintf("UPDATE %s SET name = ? WHERE id = ?", config.Config.WorkspaceTableName)
-	_, err := DbConnection.Exec(cmd, newName, w.ID)
-	if err != nil {
-		return err
-	}
-	w.Name = newName
+	_, err := DbConnection.Exec(cmd, w.Name, w.ID)
 	return err
 }

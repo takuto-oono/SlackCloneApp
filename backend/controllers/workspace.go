@@ -110,3 +110,49 @@ func AddUserWorkspace(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, nwau)
 }
+
+func RenameWorkspaceName(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	tokenString := token.GetTokenFromContext(c)
+	if tokenString == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
+		return
+	}
+	userId, err := token.GetUserIdFromToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// requestのbodyの情報を取得
+	var w models.Workspace
+	if err := c.ShouldBindJSON(&w); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// 必要な情報があるか確認
+	if w.Name == "" || w.ID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "id or name is empty"})
+		return
+	}
+
+	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
+	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(w.ID, userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	if !(wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		return
+	}
+
+	// データベースをupdate
+	if err := w.RenameWorkspaceName(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, w)
+}

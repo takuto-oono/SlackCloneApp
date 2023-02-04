@@ -60,13 +60,14 @@ func TestCreateWorkspace(t *testing.T) {
 }
 
 func TestRenameWorkspaceName(t *testing.T) {
-	w := NewWorkspace(3333, "oldName", 3)
+	w := NewWorkspace(3333, "old name", 3)
 	w.CreateWorkspace()
-	err := w.RenameWorkspaceName("new name")
+	w.Name = "new name"
+	err := w.RenameWorkspaceName()
 	assert.Empty(t, err)
 	w2, err := GetWorkspaceByName("new name")
 	assert.Empty(t, err)
-	assert.Equal(t, w.ID, w2.ID)
-	assert.Equal(t, w.Name, w2.Name)
-	assert.Equal(t, w.PrimaryOwnerId, w2.PrimaryOwnerId)
+	assert.Equal(t, w2.ID, w.ID)
+	assert.Equal(t, w2.Name, w.Name)
+	assert.Equal(t, w2.PrimaryOwnerId, w.PrimaryOwnerId)
 }
