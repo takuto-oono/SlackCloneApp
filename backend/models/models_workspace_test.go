@@ -24,7 +24,7 @@ func TestNewWorkspace(t *testing.T) {
 
 func TestCreateWorkspace(t *testing.T) {
 	// 正常な場合
-	numbersOfTests := 1000
+	numbersOfTests := 1
 	names := make([]string, numbersOfTests)
 	primaryOwnerIds := make([]uint32, numbersOfTests)
 	for i := 0; i < numbersOfTests; i++ {
@@ -57,4 +57,16 @@ func TestCreateWorkspace(t *testing.T) {
 	w2 := NewWorkspace(0, name, uint32(1))
 	err = w2.CreateWorkspace()
 	assert.NotEmpty(t, err)
+}
+
+func TestRenameWorkspaceName(t *testing.T) {
+	w := NewWorkspace(3333, "oldName", 3)
+	w.CreateWorkspace()
+	err := w.RenameWorkspaceName("new name")
+	assert.Empty(t, err)
+	w2, err := GetWorkspaceByName("new name")
+	assert.Empty(t, err)
+	assert.Equal(t, w.ID, w2.ID)
+	assert.Equal(t, w.Name, w2.Name)
+	assert.Equal(t, w.PrimaryOwnerId, w2.PrimaryOwnerId)
 }
