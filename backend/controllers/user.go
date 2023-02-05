@@ -79,12 +79,7 @@ func Login(c *gin.Context) {
 
 func GetCurrentUser(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	userId, err := token.GetUserIdFromToken(tokenString)
+	userId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/token"
 )
 
 type WorkspaceInput struct {
@@ -21,12 +20,7 @@ type AddUserWorkspaceInput struct {
 
 func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	primaryOwnerId, err := token.GetUserIdFromToken(tokenString)
+	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -56,12 +50,7 @@ func CreateWorkspace(c *gin.Context) {
 
 func AddUserWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	userId, err := token.GetUserIdFromToken(tokenString)
+	userId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -113,12 +102,7 @@ func AddUserWorkspace(c *gin.Context) {
 
 func RenameWorkspaceName(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	userId, err := token.GetUserIdFromToken(tokenString)
+	userId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -155,4 +139,55 @@ func RenameWorkspaceName(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, w)
+}
+
+func DeleteUserFromWorkSpace(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// bodyの情報を取得
+	var wau models.WorkspaceAndUsers
+	if err := c.ShouldBindJSON(&wau); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// wauにWorkspaceId, UserId, RoleIdの情報があるかを確認
+	if wau.WorkspaceId == 0 || wau.UserId == 0 || wau.RoleId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspaceId or userId or roleId"})
+		return
+	}
+
+	// requestしたuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかチェック
+	reqWau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	if !(reqWau.RoleId == 1 || reqWau.RoleId == 2 || reqWau.RoleId == 3) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		return
+	}
+
+	// 削除されるユーザーがPrimaryOwnerすなわち role = 1でないかチェック
+	if wau.RoleId == 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not delete primary owner"})
+		return
+	}
+
+	// wauがdbに存在するかチェック
+	if !wau.IsExistWorkspaceAndUser() {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspaceAndUser"})
+		return
+	}
+
+	if err := wau.DeleteWorkspaceAndUser(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, wau)
 }
