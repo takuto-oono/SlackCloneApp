@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/token"
 )
 
 type WorkspaceInput struct {
@@ -21,12 +20,7 @@ type AddUserWorkspaceInput struct {
 
 func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	primaryOwnerId, err := token.GetUserIdFromToken(tokenString)
+	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -56,12 +50,7 @@ func CreateWorkspace(c *gin.Context) {
 
 func AddUserWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	userId, err := token.GetUserIdFromToken(tokenString)
+	userId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -113,12 +102,7 @@ func AddUserWorkspace(c *gin.Context) {
 
 func RenameWorkspaceName(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	tokenString := token.GetTokenFromContext(c)
-	if tokenString == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found jwt token"})
-		return
-	}
-	userId, err := token.GetUserIdFromToken(tokenString)
+	userId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
