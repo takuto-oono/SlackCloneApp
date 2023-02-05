@@ -54,3 +54,23 @@ func TestGetWorkspaceAndUserByWorkspaceIdAndUserId(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteWorkspaceAndUser(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		workspaceId := i + 200
+		for j := 0; j < 100; j++ {
+			userId := uint32(j + 2)
+			roleId := j%4 + 1
+			wau := NewWorkspaceAndUsers(workspaceId, userId, roleId)
+			assert.Empty(t, wau.Create())
+			_, err := GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
+			assert.Empty(t, err)
+			err = wau.DeleteWorkspaceAndUser()
+			assert.Empty(t, err)
+			_, err = GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
+			assert.NotEmpty(t, err)
+			err = wau.DeleteWorkspaceAndUser()
+			assert.Empty(t, err)
+		}
+	}
+}
