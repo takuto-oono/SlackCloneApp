@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"backend/models"
 )
 
 var workspaceRouter = SetupRouter()
@@ -200,7 +203,7 @@ func TestAddUserWorkspace(t *testing.T) {
 	jwtToken = rr.Body.String()
 
 	rr = httptest.NewRecorder()
-	wi := WorkspaceInput {
+	wi := WorkspaceInput{
 		Name: "testAddUserWorkspaceName5",
 	}
 	jsonInput, _ = json.Marshal(wi)
@@ -230,7 +233,7 @@ func TestAddUserWorkspace(t *testing.T) {
 	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
 	workspaceRouter.ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusOK, rr.Code)
-	
+
 	rr = httptest.NewRecorder()
 	input = UserInput{
 		Name:     "addUserWorkspaceTest6Name",
@@ -248,7 +251,7 @@ func TestAddUserWorkspace(t *testing.T) {
 	jwtToken = rr.Body.String()
 
 	rr = httptest.NewRecorder()
-	wi = WorkspaceInput {
+	wi = WorkspaceInput{
 		Name: "testAddUserWorkspaceName6",
 	}
 	jsonInput, _ = json.Marshal(wi)
@@ -267,7 +270,6 @@ func TestAddUserWorkspace(t *testing.T) {
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
-
 
 	// 7
 	rr = httptest.NewRecorder()
@@ -320,5 +322,340 @@ func TestAddUserWorkspace(t *testing.T) {
 	workspaceRouter.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
+}
 
+func TestRenameWorkspaceName(t *testing.T) {
+	// 1. 正常時 200
+	// 2. headerに認証情報がない場合 400
+	// 3. 認証が正常にできない場合 400
+	// 4. 認証したユーザーがworkspaceに参加していない場合 400
+	// 5. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれか出ない場合 400
+	// 6. 変更したいNameがすでに使用されていた場合 400
+
+	// 1
+	rr := httptest.NewRecorder()
+	input := UserInput{
+		Name:     "renameWorkspaceNameUser1",
+		PassWord: "pass",
+	}
+	jsonInput, _ := json.Marshal(input)
+	req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken := rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput := WorkspaceInput{
+		Name: "renameWorkspaceNameOld1",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ := ioutil.ReadAll(rr.Body)
+	jsonBody := ([]byte)(byteArray)
+	w := new(models.Workspace)
+	err := json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew1"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	// 2
+	rr = httptest.NewRecorder()
+	input = UserInput{
+		Name:     "renameWorkspaceNameUser2",
+		PassWord: "pass",
+	}
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameOld2",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	jsonBody = ([]byte)(byteArray)
+	w = new(models.Workspace)
+	err = json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew3"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	// 3
+	rr = httptest.NewRecorder()
+	input = UserInput{
+		Name:     "renameWorkspaceNameUser3",
+		PassWord: "pass",
+	}
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameOld3",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	jsonBody = ([]byte)(byteArray)
+	w = new(models.Workspace)
+	err = json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew3"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", "wrong jwt token")
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	//4
+	rr = httptest.NewRecorder()
+	input = UserInput{
+		Name:     "renameWorkspaceNameUser4",
+		PassWord: "pass",
+	}
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	input2 := UserInput{
+		Name:     "renameWorkspaceNameUser4.2",
+		PassWord: "pass",
+	}
+
+	jsonInput, _ = json.Marshal(input2)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input2)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken2 := rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameOld4",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	jsonBody = ([]byte)(byteArray)
+	w = new(models.Workspace)
+	err = json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew4"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken2)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	// 5
+	rr = httptest.NewRecorder()
+	input = UserInput{
+		Name:     "renameWorkspaceNameUser5",
+		PassWord: "pass",
+	}
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	input2 = UserInput{
+		Name:     "renameWorkspaceNameUser5.2",
+		PassWord: "pass",
+	}
+
+	jsonInput, _ = json.Marshal(input2)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input2)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken2 = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameOld5",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	jsonBody = ([]byte)(byteArray)
+	w = new(models.Workspace)
+	err = json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	addUserWorkspaceInput := AddUserWorkspaceInput{
+		WorkspaceName: w.Name,
+		AddUserName:   input2.Name,
+		RoleId:        4,
+	}
+	jsonInput, _ = json.Marshal(addUserWorkspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/add_user", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew5"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken2)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	// 6
+	rr = httptest.NewRecorder()
+	input = UserInput{
+		Name:     "renameWorkspaceNameUser6",
+		PassWord: "pass",
+	}
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	jsonInput, _ = json.Marshal(input)
+	req, _ = http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	jwtToken = rr.Body.String()
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameNew6",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	rr = httptest.NewRecorder()
+	workspaceInput = WorkspaceInput{
+		Name: "renameWorkspaceNameOld6",
+	}
+	jsonInput, _ = json.Marshal(workspaceInput)
+	req, _ = http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	jsonBody = ([]byte)(byteArray)
+	w = new(models.Workspace)
+	err = json.Unmarshal(jsonBody, w)
+	assert.Empty(t, err)
+	assert.Equal(t, workspaceInput.Name, w.Name)
+	assert.NotEmpty(t, w.ID)
+	assert.NotEmpty(t, w.PrimaryOwnerId)
+
+	rr = httptest.NewRecorder()
+	w.Name = "renameWorkspaceNameNew6"
+	jsonInput, _ = json.Marshal(w)
+	req, _ = http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	assert.NotEqual(t, http.StatusOK, rr.Code)
 }

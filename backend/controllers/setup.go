@@ -10,7 +10,6 @@ import (
 	"backend/models"
 )
 
-
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
@@ -33,6 +32,6 @@ func SetupRouter() *gin.Engine {
 	workspace := api.Group("/workspace")
 	workspace.POST("/create", CreateWorkspace)
 	workspace.POST("/add_user", AddUserWorkspace)
-
+	workspace.POST("/rename", RenameWorkspaceName)
 	return r
 }
