@@ -670,7 +670,7 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 	// 7. requestしたuserのrole = 4の場合
 	// 8. 削除されるユーザーのrole = 1の場合 400
 	// 9. dbに一致する情報が存在しない場合 400
-
+	
 	// 1
 	rr := httptest.NewRecorder()
 	input := UserInput{
