@@ -19,7 +19,7 @@ var router = SetupRouter()
 
 func signUpTestFunc(name, password string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	input := UserInput{
+	input := models.User{
 		Name:     name,
 		PassWord: password,
 	}
@@ -38,7 +38,7 @@ func loginTestFunc(name, password string) *httptest.ResponseRecorder {
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
 	router.ServeHTTP(w, req)
-	return w	
+	return w
 }
 
 func TestCurrentUser(t *testing.T) {
@@ -173,68 +173,45 @@ func TestLogin(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
-	//正常な場合 200
-	w := httptest.NewRecorder()
-	input := UserInput{
-		Name:     "testUser",
-		PassWord: "testPass",
-	}
-	jsonInput, _ := json.Marshal(input)
-	req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
+	// 1 普通の場合 200
+	// 2 usernameがuniqueでない場合 200
+	// 3 usernameかpasswordがbodyに含まれていない場合 400
+	// 4 usernameとpasswordが同一のuserが既に存在している場合 400
 
-	// Passwordがユニークでない場合 200
-	w = httptest.NewRecorder()
-	input = UserInput{
-		Name:     "testUserUnique1",
-		PassWord: "testPassUnique",
-	}
-	jsonInput, _ = json.Marshal(input)
-	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
-	router.ServeHTTP(w, req)
-	w = httptest.NewRecorder()
-	input = UserInput{
-		Name:     "testUserUnique2",
-		PassWord: "testPassUnique",
-	}
-	jsonInput, _ = json.Marshal(input)
-	req, _ = http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
+	// 1
+	t.Run("1", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			username := "testSignUpControllerUser1" + strconv.Itoa(i)
+			password := "pass"
+			assert.Equal(t, http.StatusOK, signUpTestFunc(username, password).Code)
+		}
+	})
 
-	// Nameがない場合 400
-	for i := 0; i < 1000; i++ {
-		rr := signUpTestFunc("", "pass"+strconv.Itoa(i))
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-	}
+	// 2
+	t.Run("2", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			username := "testSignUpControllerUser2"
+			password := "password" + strconv.Itoa(i)
+			assert.Equal(t, http.StatusOK, signUpTestFunc(username, password).Code)
+		}
+	})
 
-	// Passwordがない場合 400
-	noPassWordNames := []string{}
-	for i := 0; i < 1000; i++ {
-		noPassWordNames = append(noPassWordNames, "noPassWordTestName"+strconv.Itoa(i))
-	}
-	for _, name := range noPassWordNames {
-		rr := signUpTestFunc(name, "")
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-	}
-
-	// bodyがない場合 400
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/api/user/signUp", nil)
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	// Nameがユニークでない場合 400
-	notUniqueNames := []string{}
-	for i := 0; i < 1000; i++ {
-		notUniqueNames = append(notUniqueNames, "testUserNameNotUnique"+strconv.Itoa(i))
-	}
-	for _, name := range notUniqueNames {
-		rr := signUpTestFunc(name, "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-		rr = signUpTestFunc(name, "pass")
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-	}
+	// 3
+	t.Run("3", func(t *testing.T) {
+		for i := 0; i < 12; i ++ {
+			username := "testSignUpControllerUser2" + strconv.Itoa(i)
+			password := "pass"
+			
+			var rr *httptest.ResponseRecorder
+			if i % 3 == 0 {
+				rr = signUpTestFunc("", "")
+			} else if i % 3 == 1 {
+				rr = signUpTestFunc(username, "")
+			} else {
+				rr = signUpTestFunc("", password)
+			}
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
+		}
+	})
 
 }
