@@ -69,3 +69,9 @@ func (u *User) IsExistUserSameUsernameAndPassword() (bool, error) {
 	}
 	return cnt != 0, nil
 }
+
+func (u *User) GetUserByNameAndPassword() error {
+	cmd := fmt.Sprintf("SELECT id FROM %s WHERE name = ? AND password = ?", config.Config.UserTableName)
+	row := DbConnection.QueryRow(cmd, u.Name, u.PassWord)
+	return row.Scan(&u.ID)
+}
