@@ -67,7 +67,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// TODO generate Token
 	token, err := token.GenerateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
