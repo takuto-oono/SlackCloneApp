@@ -27,23 +27,58 @@ func (uin *UserInput) validate() bool {
 
 func SignUp(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	var input UserInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	// var input UserInput
+	// if err := c.ShouldBindJSON(&input); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	// 	return
+	// }
+	// if !input.validate() {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is blank"})
+	// 	return
+	// }
+
+	// user := models.NewUser(rand.Uint32(), input.Name, input.PassWord)
+	// err := user.Create()
+	// if err == nil {
+	// 	c.IndentedJSON(http.StatusOK, )
+	// } else {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error_message": err})
+	// }
+
+	// bodyの情報を取得
+	var u models.User
+	if err := c.ShouldBindJSON(&u); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if !input.validate() {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is blank"})
+
+	// 必要な項目が取得できているか確認
+	if u.Name == "" || u.PassWord == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "username pr password is blank"})
 		return
 	}
 
-	user := models.NewUser(rand.Uint32(), input.Name, input.PassWord)
-	err := user.Create()
-	if err == nil {
-		c.IndentedJSON(http.StatusOK, user)
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error_message": err})
+	// IDを確定
+	u.ID = rand.Uint32()
+
+	// 既に同じuserNameとpasswordの組み合わせのユーザーが存在しないかを確認
+	b, err := u.IsExistUserSameUsernameAndPassword()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
+	if b {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "already exist same username and password"})
+		return
+	}
+
+	// dbに登録
+	if err := u.Create(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, u)
 }
 
 func Login(c *gin.Context) {
