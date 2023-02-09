@@ -1,16 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
 )
-
-type WorkspaceInput struct {
-	Name string `json:"name"`
-}
 
 type AddUserWorkspaceInput struct {
 	WorkspaceName string `json:"workspace_name"`
@@ -19,32 +16,51 @@ type AddUserWorkspaceInput struct {
 }
 
 func CreateWorkspace(c *gin.Context) {
+	fmt.Println("in func")
 	c.Header("Access-Control-Allow-Origin", "*")
 	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	var input WorkspaceInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	// bodyの情報を取得
+	var w models.Workspace
+	if err := c.ShouldBindJSON(&w); err != nil {
+		fmt.Println("err")
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if input.Name == "" {
+
+	// workspaceのnameがあるか確認
+	if w.Name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace name"})
 		return
 	}
-	w := models.NewWorkspace(0, input.Name, primaryOwnerId)
+
+	// requestをしたuserとbodyのprimaryOwnerIdが等しいか確認
+	if w.PrimaryOwnerId != primaryOwnerId || w.PrimaryOwnerId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		return
+	}
+
+	// はじめはidを0にしておく
+	w.ID = 0
+
+	// dbに保存
 	if err := w.CreateWorkspace(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
+	// workspace_and_users tableにもuserを保存する
 	wau := models.NewWorkspaceAndUsers(w.ID, w.PrimaryOwnerId, 1)
 	err = wau.Create()
 	if err != nil {
+		// TODO deleteWorkspaceを実行する
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
 	c.IndentedJSON(http.StatusOK, w)
 }
 
