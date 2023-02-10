@@ -71,3 +71,10 @@ func TestRenameWorkspaceName(t *testing.T) {
 	assert.Equal(t, w2.Name, w.Name)
 	assert.Equal(t, w2.PrimaryOwnerId, w.PrimaryOwnerId)
 }
+
+func TestIsExistWorkspaceAndUser(t *testing.T) {
+	w := NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
+	w.CreateWorkspace()
+	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
+	assert.Equal(t, false, IsExistWorkspaceById(-1))
+}

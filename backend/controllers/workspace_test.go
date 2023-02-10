@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -16,24 +17,29 @@ import (
 
 var workspaceRouter = SetupRouter()
 
-func createWorkSpaceTestFunc(workspaceName, jwtToken string) *httptest.ResponseRecorder {
+func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	inputWorkspace := WorkspaceInput{
-		Name: workspaceName,
+	inputWorkspace := models.Workspace{
+		Name:           workspaceName,
+		PrimaryOwnerId: userId,
 	}
 	jsonInput, _ := json.Marshal(inputWorkspace)
-	req, _ := http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
-	req.Header.Add("Authorization", jwtToken)
+	req, err := http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
+	if err != nil {
+		return rr
+	}
+	req.Header.Set("Authorization", jwtToken)
+	fmt.Println(req.Header.Get("Authorization"))
 	workspaceRouter.ServeHTTP(rr, req)
 	return rr
 }
 
-func addUserWorkspaceTestFunc(workspaceName, userName, jwtToken string, roleId int) *httptest.ResponseRecorder {
+func addUserWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	auwi := AddUserWorkspaceInput{
-		WorkspaceName: workspaceName,
-		AddUserName:   userName,
-		RoleId:        roleId,
+	auwi := models.WorkspaceAndUsers{
+		WorkspaceId: workspaceId,
+		UserId:      userId,
+		RoleId:      roleId,
 	}
 	jsonInput, _ := json.Marshal(auwi)
 	req, _ := http.NewRequest("POST", "/api/workspace/add_user", bytes.NewBuffer(jsonInput))
@@ -52,11 +58,11 @@ func renameWorkSpaceNameTestFunc(workspaceId, workspacePrimaryOwnerId int, newWo
 	return rr
 }
 
-func deleteUserFromWorkspaceTestFunc(workspaceId, userId, roleId int, jwtToken string) *httptest.ResponseRecorder {
+func deleteUserFromWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(models.WorkspaceAndUsers{
 		WorkspaceId: workspaceId,
-		UserId:      uint32(userId),
+		UserId:      userId,
 		RoleId:      roleId,
 	})
 	req, _ := http.NewRequest("POST", "/api/workspace/delete_user", bytes.NewBuffer(jsonInput))
@@ -67,11 +73,12 @@ func deleteUserFromWorkspaceTestFunc(workspaceId, userId, roleId int, jwtToken s
 
 func TestCreateWorkspace(t *testing.T) {
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
-	// 2. ログインしていない状態でのアクセス(headerにauthenticate情報がない) 400
-	// 3. authenticate情報からUserIdが特定できない場合 400
+	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
+	// 3. bodyにNameかPrimaryOwnerIdが含まれていない場合 400
 
 	// 1
 	t.Run("correctCase", func(t *testing.T) {
+		userIds := []uint32{}
 		UserNames := []string{}
 		WorkSpaceNames := []string{}
 		JwtTokens := []string{}
@@ -89,19 +96,31 @@ func TestCreateWorkspace(t *testing.T) {
 			assert.Equal(t, http.StatusOK, rr.Code)
 			rr = loginTestFunc(name, "pass")
 			assert.Equal(t, http.StatusOK, rr.Code)
-			JwtTokens = append(JwtTokens, rr.Body.String())
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			lr := new(LoginResponse)
+			json.Unmarshal(([]byte)(byteArray), lr)
+			userIds = append(userIds, lr.UserId)
+			JwtTokens = append(JwtTokens, lr.Token)
 		}
 
 		for i, workspaceName := range WorkSpaceNames {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceName, JwtTokens[i%10]).Code)
-			fmt.Println(i)
+			rr := createWorkSpaceTestFunc(workspaceName, JwtTokens[i%10], userIds[i%10])
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			w := new(models.Workspace)
+			json.Unmarshal(([]byte)(byteArray), w)
+			assert.Equal(t, workspaceName, w.Name)
+			assert.Equal(t, userIds[i%10], w.PrimaryOwnerId)
+			assert.NotEqual(t, 0, w.ID)
 		}
 	})
 
 	// 2
-	t.Run("no login", func(t *testing.T) {
+	t.Run("2", func(t *testing.T) {
+		userIds := []uint32{}
 		UserNames := []string{}
 		WorkSpaceNames := []string{}
+		jwtTokens := []string{}
 
 		for i := 0; i < 10; i++ {
 			UserNames = append(UserNames, "createWorkSpaceTestUserName2"+strconv.Itoa(i))
@@ -114,17 +133,35 @@ func TestCreateWorkspace(t *testing.T) {
 		for _, name := range UserNames {
 			rr := signUpTestFunc(name, "pass")
 			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			jsonBody := ([]byte)(byteArray)
+			u := new(models.User)
+			json.Unmarshal(jsonBody, u)
+			userIds = append(userIds, u.ID)
 		}
 
-		for _, workspaceName := range WorkSpaceNames {
-			assert.Equal(t, http.StatusBadRequest, createWorkSpaceTestFunc(workspaceName, "").Code)
+		for i, name := range UserNames {
+			rr := loginTestFunc(name, "pass")
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			jsonBody := ([]byte)(byteArray)
+			lr := new(LoginResponse)
+			json.Unmarshal(jsonBody, lr)
+			assert.Equal(t, userIds[i], lr.UserId)
+			jwtTokens = append(jwtTokens, lr.Token)
+		}
+
+		for i, workspaceName := range WorkSpaceNames {
+			assert.Equal(t, http.StatusBadRequest, createWorkSpaceTestFunc(workspaceName, jwtTokens[i%10], userIds[(i+1)%10]).Code)
 		}
 	})
 
 	// 3
-	t.Run("no jwt token", func(t *testing.T) {
+	t.Run("3", func(t *testing.T) {
+		userIds := []uint32{}
 		UserNames := []string{}
 		WorkSpaceNames := []string{}
+		jwtTokens := []string{}
 
 		for i := 0; i < 10; i++ {
 			UserNames = append(UserNames, "createWorkSpaceTestUserName3"+strconv.Itoa(i))
@@ -134,281 +171,277 @@ func TestCreateWorkspace(t *testing.T) {
 			WorkSpaceNames = append(WorkSpaceNames, "createWorkspaceTestWorkspaceNames3"+strconv.Itoa(i))
 		}
 
-		for _, name := range UserNames {
+		for i, name := range UserNames {
 			rr := signUpTestFunc(name, "pass")
 			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			jsonBody := ([]byte)(byteArray)
+			u := new(models.User)
+			json.Unmarshal(jsonBody, u)
+			userIds = append(userIds, u.ID)
+			assert.Equal(t, UserNames[i], u.Name)
+
 			rr = loginTestFunc(name, "pass")
+			byteArray, _ = ioutil.ReadAll(rr.Body)
+			jsonBody = ([]byte)(byteArray)
+			lr := new(LoginResponse)
+			json.Unmarshal(jsonBody, lr)
 			assert.Equal(t, http.StatusOK, rr.Code)
+			jwtTokens = append(jwtTokens, lr.Token)
 		}
 
-		for _, workspaceName := range WorkSpaceNames {
-			assert.Equal(t, http.StatusBadRequest, createWorkSpaceTestFunc(workspaceName, "abc").Code)
+		for i, workspaceName := range WorkSpaceNames {
+			var rr *httptest.ResponseRecorder
+			if i%3 == 0 {
+				rr = createWorkSpaceTestFunc("", jwtTokens[i%10], userIds[i%10])
+			} else if i%3 == 1 {
+				rr = createWorkSpaceTestFunc(workspaceName, jwtTokens[i%10], 0)
+			} else {
+				rr = createWorkSpaceTestFunc("", jwtTokens[i%10], 0)
+			}
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
 		}
 	})
 }
 
-func TestAddUserWorkspace(t *testing.T) {
+func TestAddUserInWorkspace(t *testing.T) {
 	// 1. 正常な場合 200
-	// 2. jwtTokenがheaderに含まれていない場合 400
-	// 3. jwtTokenからuserIdが取得できない場合 400
-	// 4. requestのbodyの情報に不足がある場合 400
-	// 5. 存在しないworkspaceNameかuserNameだった場合 400
-	// 6. role = 4の場合 400
+	// 2. requestのbodyの情報に不足がある場合 400
+	// 3. 存在しないworkspaceIdだった場合 400
+	// 4. requestしたユーザーがrole = 1 or role = 2 or role = 3でない場合 400
+	// 5. 追加されるユーザーがrole = 1の場合 400
+	// 6. 既に登録されているユーザーを追加する場合 400
 
 	// 1
-	t.Run("test case 1", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		jwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("1", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser1"
+		addUserName := "AddUserInWorkspaceTestUser1"
+		workspaceName := "AddUserInWorkspaceTestWorkspace1"
+		addUserRoleId := 4
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName1"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName1"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName1"+strconv.Itoa(i))
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
 
-		for i, jwtToken := range jwtTokens {
-			for _, userName := range userNames {
-				assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(workspaceNames[i], userName, jwtToken, 4).Code)
-			}
-		}
+		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		wau := new(models.WorkspaceAndUsers)
+		json.Unmarshal(([]byte)(byteArray), wau)
+		assert.Equal(t, alr.UserId, wau.UserId)
+		assert.Equal(t, w.ID, wau.WorkspaceId)
+		assert.Equal(t, addUserRoleId, wau.RoleId)
 	})
 
-	// 2
-	t.Run("test case 2", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		jwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("2", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser2"
+		addUserName := "AddUserInWorkspaceTestUser2"
+		workspaceName := "AddUserInWorkspaceTestWorkspace2"
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName2"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName2"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName2"+strconv.Itoa(i))
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
 
-		for _, workspaceName := range workspaceNames {
-			for _, userName := range userNames {
-				assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceName, userName, "", 4).Code)
-			}
-		}
+		rr = addUserWorkspaceTestFunc(w.ID, 0, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"field empty\"}", rr.Body.String())
 	})
 
-	// 3
-	t.Run("test case 3", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		jwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("3", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser3"
+		addUserName := "AddUserInWorkspaceTestUser3"
+		workspaceName := "AddUserInWorkspaceTestWorkspace3"
+		addUserRoleId := 4
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName3"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName3"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName3"+strconv.Itoa(i))
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
 
-		for _, workspaceName := range workspaceNames {
-			for _, userName := range userNames {
-				assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceName, userName, "jwtToken", 4).Code)
-			}
-		}
+		rr = addUserWorkspaceTestFunc(10000000000000000, addUserRoleId, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspace\"}", rr.Body.String())
 	})
 
-	// 4
-	t.Run("test case 4", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		jwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("4", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser4"
+		reqUserName := "reqUserInWorkspaceTestReqUser4"
+		addUserName := "AddUserInWorkspaceTestUser4"
+		workspaceName := "AddUserInWorkspaceTestWorkspace4"
+		addUserRoleId := 4
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName4"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName4"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(reqUserName, "pass").Code)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName4"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = loginTestFunc(reqUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
 
-		for i, jwtToken := range jwtTokens {
-			for _, userName := range userNames {
-				if i%3 == 0 {
-					assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceNames[i], userName, jwtToken, 0).Code)
-				}
-				if i%3 == 1 {
-					assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceNames[i], "", jwtToken, 4).Code)
-				}
-				if i%3 == 2 {
-					assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc("", userName, jwtToken, 4).Code)
-				}
-			}
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, rlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		wau := new(models.WorkspaceAndUsers)
+		json.Unmarshal(([]byte)(byteArray), wau)
+		assert.Equal(t, rlr.UserId, wau.UserId)
+		assert.Equal(t, w.ID, wau.WorkspaceId)
+		assert.Equal(t, addUserRoleId, wau.RoleId)
+
+		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, alr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"Unauthorized add user in workspace\"}", rr.Body.String())
+
 	})
 
-	// 5
-	t.Run("test case 5", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		jwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("5", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser5"
+		addUserName := "AddUserInWorkspaceTestUser5"
+		workspaceName := "AddUserInWorkspaceTestWorkspace5"
+		addUserRoleId := 1
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName5"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName5"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName5"+strconv.Itoa(i))
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
 
-		for i, jwtToken := range jwtTokens {
-			for j, userName := range userNames {
-				if j%2 == 0 {
-					assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceNames[i], "wrongUserName", jwtToken, 4).Code)
-				}
-				if j%2 == 1 {
-					assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc("wrongWorkspaceName", userName, jwtToken, 4).Code)
-				}
-			}
-		}
+		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"can't add roleId = 1\"}", rr.Body.String())
 	})
 
-	// 6
-	t.Run("test case 6", func(t *testing.T) {
-		primaryUserNames := []string{}
-		userNames := []string{}
-		workspaceUserNames := []string{}
-		jwtTokens := []string{}
-		primaryUserJwtTokens := []string{}
-		workspaceNames := []string{}
+	t.Run("6", func(t *testing.T) {
+		ownerUserName := "AddUserInWorkspaceTestOwnerUser6"
+		addUserName := "AddUserInWorkspaceTestUser6"
+		workspaceName := "AddUserInWorkspaceTestWorkspace6"
+		addUserRoleId := 4
 
-		for i := 0; i < 10; i++ {
-			primaryUserNames = append(primaryUserNames, "addUserWorkspacePrimaryUserName6"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceUserName6.1"+strconv.Itoa(i))
-			workspaceNames = append(workspaceNames, "addUserWorkspaceName6"+strconv.Itoa(i))
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
-		for _, name := range primaryUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			primaryUserJwtTokens = append(primaryUserJwtTokens, rr.Body.String())
-		}
+		assert.Equal(t, http.StatusOK, signUpTestFunc(addUserName, "pass").Code)
 
-		for _, name := range workspaceUserNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, rr.Body.String())
-		}
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
 
-		for i := 0; i < 100; i++ {
-			userNames = append(userNames, "addUserWorkspaceUserName6"+strconv.Itoa(i))
-		}
+		rr = loginTestFunc(addUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		alr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), alr)
 
-		for _, name := range userNames {
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
-		}
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
 
-		for i, jwtToken := range primaryUserJwtTokens {
-			assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceNames[i], jwtToken).Code)
-		}
+		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		wau := new(models.WorkspaceAndUsers)
+		json.Unmarshal(([]byte)(byteArray), wau)
+		assert.Equal(t, alr.UserId, wau.UserId)
+		assert.Equal(t, w.ID, wau.WorkspaceId)
+		assert.Equal(t, addUserRoleId, wau.RoleId)
 
-		for i, jwtToken := range jwtTokens {
-			assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(workspaceNames[i], workspaceUserNames[i], jwtToken, 4).Code)
+		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
 
-		}
-
-		for i, jwtToken := range jwtTokens {
-			for _, userName := range userNames {
-				assert.Equal(t, http.StatusBadRequest, addUserWorkspaceTestFunc(workspaceNames[i], userName, jwtToken, 4).Code)
-			}
-		}
 	})
 }
 
@@ -420,20 +453,223 @@ func TestRenameWorkspaceName(t *testing.T) {
 	// 5. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれか出ない場合 400
 	// 6. 変更したいNameがすでに使用されていた場合 400
 
-	// 1
-
-
 }
 
 func TestDeleteUserFromWorkSpace(t *testing.T) {
 	// 1. 正常時 200
-	// 2. headerにJWTTokenがない場合 400
-	// 3. JWTTokenでuserIdが復元できない場合 400
-	// 4. bodyにworkspaceIdが0の場合 400
-	// 5. bodyにuserIdがない場合 400
-	// 6. bodyにroleIdがない場合 400
-	// 7. requestしたuserのrole = 4の場合
-	// 8. 削除されるユーザーのrole = 1の場合 400
-	// 9. dbに一致する情報が存在しない場合 400
+	// 2. bodyにworkspaceId, userId, roleIdのいずれかが含まれていない場合 400
+	// 3. requestしたuserのrole = 4の場合
+	// 4. 削除されるユーザーのrole = 1の場合 400
+	// 5. 該当するUserがいない場合 400
 
+	// 1
+	t.Run("1", func(t *testing.T) {
+		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser1"
+		deleteUserName := "deleteUserFromWorkspaceTestUser1"
+		workspaceName := "deleteUserFromWorkspaceTestWorkspace1"
+		deleteUserRoleId := 4
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
+
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		wau := new(models.WorkspaceAndUsers)
+		json.Unmarshal(([]byte)(byteArray), wau)
+		assert.Equal(t, dlr.UserId ,wau.UserId)
+		assert.Equal(t, w.ID, wau.WorkspaceId)
+		assert.Equal(t, deleteUserRoleId, wau.RoleId)		
+	})
+	
+	// 2
+	t.Run("2", func(t *testing.T) {
+		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser2"
+		deleteUserName := "deleteUserFromWorkspaceTestUser2"
+		workspaceName := "deleteUserFromWorkspaceTestWorkspace2"
+		deleteUserRoleId := 4
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
+
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, 0, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
+		
+		rr = deleteUserFromWorkspaceTestFunc(0, deleteUserRoleId, dlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
+		
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, 0, dlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
+	})
+
+	// 3
+	t.Run("3", func(t *testing.T) {
+		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser3"
+		reqUserName := "deleteUserFromWorkspaceTestReqUser3"
+		deleteUserName := "deleteUserFromWorkspaceTestUser3"
+		workspaceName := "deleteUserFromWorkspaceTestWorkspace3"
+		deleteUserRoleId := 4
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(reqUserName, "pass").Code)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
+
+		rr = loginTestFunc(reqUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, olr.Token).Code)
+		
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
+
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not permission\"}", rr.Body.String())
+	})
+
+	//4
+	t.Run("4", func(t *testing.T) {
+		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser4"
+		reqUserName := "deleteUserFromWorkspaceTestReqUser4"
+		workspaceName := "deleteUserFromWorkspaceTestWorkspace4"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(reqUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
+
+		rr = loginTestFunc(reqUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 2, rlr.UserId, olr.Token).Code)
+		
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, 1, olr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not delete primary owner\"}", rr.Body.String())
+	})
+	
+	// 5
+	t.Run("5", func(t *testing.T) {
+		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser5"
+		deleteUserName := "deleteUserFromWorkspaceTestUser5"
+		workspaceName := "deleteUserFromWorkspaceTestWorkspace5"
+		deleteUserRoleId := 4
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		olr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), olr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, olr.Token, olr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
+
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, 441553453, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspaceAndUser\"}", rr.Body.String())
+		
+		rr = deleteUserFromWorkspaceTestFunc(5934759792, deleteUserRoleId, dlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, 5, dlr.UserId, olr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found workspaceAndUser\"}", rr.Body.String())
+	})
 }

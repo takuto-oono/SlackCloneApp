@@ -25,7 +25,7 @@ func init() {
 	cmd := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id INT PRIMARY KEY NOT NULL,
-			name STRING NOT NULL UNIQUE,
+			name STRING NOT NULL,
 			password STRING NOT NULL
 		)
 	`, config.Config.UserTableName)

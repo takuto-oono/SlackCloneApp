@@ -55,3 +55,23 @@ func GetUserById(id uint32) (User, error) {
 	}
 	return user, nil
 }
+
+func (u *User) IsExistUserSameUsernameAndPassword() (bool, error) {
+	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = ? AND password = ?", config.Config.UserTableName)
+	rows, err := DbConnection.Query(cmd, u.Name, u.PassWord)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	cnt := 0
+	for rows.Next() {
+		cnt += 1
+	}
+	return cnt != 0, nil
+}
+
+func (u *User) GetUserByNameAndPassword() error {
+	cmd := fmt.Sprintf("SELECT id FROM %s WHERE name = ? AND password = ?", config.Config.UserTableName)
+	row := DbConnection.QueryRow(cmd, u.Name, u.PassWord)
+	return row.Scan(&u.ID)
+}

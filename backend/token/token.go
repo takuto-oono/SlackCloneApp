@@ -25,11 +25,12 @@ func GenerateToken(userId uint32) (string, error) {
 }
 
 func GetTokenFromContext(c *gin.Context) string {
+	fmt.Println(c.Request.Header)
 	token := c.Request.Header.Get("Authorization")
 	if len(strings.Split(token, "\"")) == 3 {
 		return strings.Split(token, "\"")[1]
 	}
-	return ""
+	return token
 }
 
 func GetUserIdFromToken(tokenString string) (uint32, error) {

@@ -1,22 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
 )
-
-type WorkspaceInput struct {
-	Name string `json:"name"`
-}
-
-type AddUserWorkspaceInput struct {
-	WorkspaceName string `json:"workspace_name"`
-	AddUserName   string `json:"add_user_name"`
-	RoleId        int    `json:"role_id"`
-}
 
 func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -25,30 +16,56 @@ func CreateWorkspace(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	var input WorkspaceInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	// bodyの情報を取得
+	var w models.Workspace
+	if err := c.ShouldBindJSON(&w); err != nil {
+		fmt.Println("err")
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if input.Name == "" {
+
+	// workspaceのnameがあるか確認
+	if w.Name == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace name"})
 		return
 	}
-	w := models.NewWorkspace(0, input.Name, primaryOwnerId)
+
+	// requestをしたuserとbodyのprimaryOwnerIdが等しいか確認
+	if w.PrimaryOwnerId != primaryOwnerId || w.PrimaryOwnerId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		return
+	}
+
+	// はじめはidを0にしておく
+	w.ID = 0
+
+	// dbに保存
 	if err := w.CreateWorkspace(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
+	// workspace_and_users tableにもuserを保存する
 	wau := models.NewWorkspaceAndUsers(w.ID, w.PrimaryOwnerId, 1)
 	err = wau.Create()
 	if err != nil {
+		// TODO deleteWorkspaceを実行する
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
 	c.IndentedJSON(http.StatusOK, w)
 }
 
-func AddUserWorkspace(c *gin.Context) {
+func havePermissionAddUserInWorkspace(userId uint32, workspaceId int) bool {
+	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+	if err != nil {
+		return false
+	}
+	return wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3
+}
+
+func AddUserInWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
@@ -56,48 +73,42 @@ func AddUserWorkspace(c *gin.Context) {
 		return
 	}
 
-	var input AddUserWorkspaceInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	// bodyの情報を受け取る
+	var wau models.WorkspaceAndUsers
+	if err := c.ShouldBindJSON(&wau); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if input.WorkspaceName == "" || input.AddUserName == "" || input.RoleId == 0 {
+	if wau.WorkspaceId == 0 || wau.UserId == 0 || wau.RoleId == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "field empty"})
 		return
 	}
 
-	// workspaceNameからworkspaceを取得
-	w, err := models.GetWorkspaceByName(input.WorkspaceName)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	// roleId = 1でないかを確認
+	if wau.RoleId == 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "can't add roleId = 1"})
 		return
 	}
 
-	// userNameからuserIdを取得
-	u, err := models.GetUserByName(input.AddUserName)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	// workspaceが存在するか確認
+	if !models.IsExistWorkspaceById(wau.WorkspaceId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace"})
 		return
 	}
 
 	// userIdがそのworkspaceで追加する権限を持っているかを判定(roleId == 1 or roleId == 2 or roleId == 3)
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(w.ID, userId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-	if !(wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3) {
+	if !havePermissionAddUserInWorkspace(userId, wau.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Unauthorized add user in workspace"})
 		return
 	}
-	// userをワークスペースに追加
-	nwau := models.NewWorkspaceAndUsers(w.ID, u.ID, input.RoleId)
-	err = nwau.Create()
+
+	// dbに保存する
+	err = wau.Create()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, nwau)
+	c.IndentedJSON(http.StatusOK, wau)
 }
 
 func RenameWorkspaceName(c *gin.Context) {
@@ -179,7 +190,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 		return
 	}
 
-	// wauがdbに存在するかチェック
+	// wauがdbに存在するか確認
 	if !wau.IsExistWorkspaceAndUser() {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspaceAndUser"})
 		return
