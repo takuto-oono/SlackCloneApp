@@ -191,7 +191,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 		return
 	}
 
-	// wauがdbに存在するかチェック
+	// wauがdbに存在するか確認
 	if !wau.IsExistWorkspaceAndUser() {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspaceAndUser"})
 		return
