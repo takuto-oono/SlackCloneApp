@@ -10,7 +10,6 @@ import (
 )
 
 func CreateWorkspace(c *gin.Context) {
-	fmt.Println("in func")
 	c.Header("Access-Control-Allow-Origin", "*")
 	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
