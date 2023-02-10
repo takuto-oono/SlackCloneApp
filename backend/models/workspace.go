@@ -72,3 +72,17 @@ func (w *Workspace) RenameWorkspaceName() error {
 	_, err := DbConnection.Exec(cmd, w.Name, w.ID)
 	return err
 }
+
+func IsExistWorkspaceById(workspaceId int) bool {
+	cmd := fmt.Sprintf("SELECT * FROM %s WHERE id = ?", config.Config.WorkspaceTableName)
+	rows, err := DbConnection.Query(cmd, workspaceId)
+	if err != nil {
+		return false
+	}
+	defer rows.Scan()
+	cnt := 0
+	for rows.Next() {
+		cnt += 1
+	}
+	return cnt == 1
+}
