@@ -75,4 +75,41 @@ func init() {
 			fmt.Println(err.Error())
 		}
 	}
+
+	// create channels table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s 
+		(
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL,
+			description STRING,
+			is_private BOOLEAN NOT NULL,
+			is_archive BOOLEAN NOT NULL
+		)
+	`, config.Config.ChannelsTableName)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
+
+	// create channels_and_users table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s
+		(
+			channel_id INT NOT NULL,
+			user_id INT NOT NULL,
+			is_admin BOOLEAN NOT NULL,
+			PRIMARY KEY (channel_id, user_id)
+		)
+	`, config.Config.ChannelsAndUserTableName)
+	DbConnection.Exec(cmd)
+
+	// create channels_and_workspaces table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s
+		(
+			channel_id INT PRIMARY KEY NOT NULL,
+			workspace_id INT NOT NULL
+		)
+	`, config.Config.ChannelsAndWorkspaceTableName)
+	DbConnection.Exec(cmd)
+
 }
