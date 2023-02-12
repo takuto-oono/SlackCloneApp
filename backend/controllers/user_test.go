@@ -104,6 +104,10 @@ func loginTestFunc(name, password string) *httptest.ResponseRecorder {
 // }
 
 func TestLogin(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	// 1 正常な場合 200
 	// 2 usernameが同一のuserをpasswordで区別できているか 200
 	// 3 usernameかpasswordのどちらかがbodyに含まれていない場合 400
@@ -214,6 +218,10 @@ func TestLogin(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	// 1 普通の場合 200
 	// 2 usernameがuniqueでない場合 200
 	// 3 usernameかpasswordがbodyに含まれていない場合 400

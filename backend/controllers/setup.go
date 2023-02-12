@@ -34,5 +34,8 @@ func SetupRouter() *gin.Engine {
 	workspace.POST("/add_user", AddUserInWorkspace)
 	workspace.POST("/rename", RenameWorkspaceName)
 	workspace.POST("/delete_user", DeleteUserFromWorkSpace)
+
+	channel := api.Group("/channel")
+	channel.POST("/create/:workspace_id", CreateChannel)
 	return r
 }
