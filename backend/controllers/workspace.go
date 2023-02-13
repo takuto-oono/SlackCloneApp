@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,6 @@ func CreateWorkspace(c *gin.Context) {
 	// bodyの情報を取得
 	var w models.Workspace
 	if err := c.ShouldBindJSON(&w); err != nil {
-		fmt.Println("err")
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}

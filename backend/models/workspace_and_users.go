@@ -43,7 +43,6 @@ func (wau *WorkspaceAndUsers) IsExistWorkspaceAndUser() bool {
 		cmd = fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = ? AND user_id = ?", config.Config.WorkspaceAndUserTableName)
 	} else {
 		cmd = fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = ? AND user_id = ? AND role_id = ?", config.Config.WorkspaceAndUserTableName)
-
 	}
 	rows, err := DbConnection.Query(cmd, wau.WorkspaceId, wau.UserId, wau.RoleId)
 	if err != nil {

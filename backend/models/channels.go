@@ -62,3 +62,5 @@ func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, erro
 	}
 	return false, nil
 }
+
+
