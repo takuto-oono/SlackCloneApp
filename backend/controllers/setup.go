@@ -37,5 +37,7 @@ func SetupRouter() *gin.Engine {
 
 	channel := api.Group("/channel")
 	channel.POST("/create/:workspace_id", CreateChannel)
+	channel.POST("/add_user/:workspace_id", AddUserInChannel)
+
 	return r
 }

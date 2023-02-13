@@ -42,3 +42,17 @@ func FindChannelIdsByWorkspaceId(workspaceId int) ([]int, error) {
 	}
 	return res, nil
 }
+
+func IsExistCAWByChannelIdAndWorkspaceId(channelId, workspaceId int) bool {
+	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = ? AND workspace_id = ?", config.Config.ChannelsAndWorkspaceTableName)
+	rows, err := DbConnection.Query(cmd, channelId, workspaceId)
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+	cnt := 0
+	for rows.Next() {
+		cnt++
+	}
+	return cnt == 1
+}

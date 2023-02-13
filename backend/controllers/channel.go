@@ -87,3 +87,75 @@ func CreateChannel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ch)
 }
+
+func AddUserInChannel(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからパラメータを取得
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// bodyの情報を取得
+	var cau models.ChannelsAndUsers
+	if err := c.ShouldBindJSON(&cau); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// bodyにuserIdとchannelIdが含まれているか確認
+	if cau.ChannelId == 0 || cau.UserId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel_id or user_id"})
+		return
+	}
+
+	// とりあえず管理権限はなし
+	cau.IsAdmin = false
+
+	// リクエストしたuserがworkspaceに参加してるかを確認
+	rwau := models.NewWorkspaceAndUsers(workspaceId, userId, 0)
+	if !rwau.IsExistWorkspaceAndUser() {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist request user in workspace"})
+		return
+	}
+
+	// 追加されるuserがworkspaceに参加しているかを確認
+	awau := models.NewWorkspaceAndUsers(workspaceId, cau.UserId, 0)
+	if !awau.IsExistWorkspaceAndUser() {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist added user in workspace"})
+		return
+	}
+
+	// 対象のchannelがworkspace内に存在するかを確認
+	if !models.IsExistCAWByChannelIdAndWorkspaceId(cau.ChannelId, workspaceId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist channel in workspace"})
+		return
+	}
+
+	// 追加されるユーザーが既に対象のchannelに存在していないかを確認
+	if models.IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "already exist user in channel"})
+		return
+	}
+
+	// リクエストしたuserにchannelの管理権限があるかを確認(結果的にリクエストしたuserがchannelに所属しているかも確認される)
+	if !models.IsAdminUserInChannel(cau.ChannelId, userId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission adding user in channel"})
+		return
+	}
+
+	// channels_and_users tableに登録
+	if err := cau.CreateChannelAndUsers(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, cau)
+}

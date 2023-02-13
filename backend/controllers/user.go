@@ -56,31 +56,6 @@ func SignUp(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	// var input UserInput
-	// if err := c.ShouldBindJSON(&input); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-	// 	return
-	// }
-	// if !input.validate() {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "username or password in blank"})
-	// 	return
-	// }
-	// user, err := models.GetUserByName(input.Name)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-	// 	return
-	// }
-	// if user.PassWord != input.PassWord {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "wrong password"})
-	// 	return
-	// }
-
-	// token, err := token.GenerateToken(user.ID)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-	// 	return
-	// }
-
 	// bodyの情報を取得
 	var u models.User
 	if err := c.ShouldBindJSON(&u); err != nil {
