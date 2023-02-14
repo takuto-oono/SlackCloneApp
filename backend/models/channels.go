@@ -47,7 +47,7 @@ func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	
+
 	cmd := fmt.Sprintf("SELECT name FROM %s WHERE id = ?", config.Config.ChannelsTableName)
 	for _, channelId := range channelIds {
 		row := DbConnection.QueryRow(cmd, channelId)
@@ -63,4 +63,10 @@ func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, erro
 	return false, nil
 }
 
-
+func GetChannelById(channelId int) (Channel, error) {
+	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive FROM %s WHERE id = ?", config.Config.ChannelsTableName)
+	row := DbConnection.QueryRow(cmd, channelId)
+	var c Channel
+	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive)
+	return c, err
+}

@@ -53,3 +53,9 @@ func IsAdminUserInChannel(channelId int, userId uint32) bool {
 	}
 	return cnt == 1
 }
+
+func (cau *ChannelsAndUsers) DeleteUserFromChannel() error {
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
+	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId)
+	return err
+}
