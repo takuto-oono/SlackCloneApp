@@ -74,3 +74,14 @@ func TestDeleteWorkspaceAndUser(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRoleIdByWorkspaceIdAndUserId(t *testing.T) {
+	wau := NewWorkspaceAndUsers(37598379769, uint32(793457957), 3)
+	wau.Create()
+	roleId, err := GetRoleIdByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
+	assert.Equal(t, wau.RoleId, roleId)
+	assert.Empty(t, err)
+
+	_, err = GetRoleIdByWorkspaceIdAndUserId(-1, wau.UserId)
+	assert.NotEmpty(t, err)
+}

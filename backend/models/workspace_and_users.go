@@ -61,3 +61,11 @@ func (wau *WorkspaceAndUsers) DeleteWorkspaceAndUser() error {
 	_, err := DbConnection.Exec(cmd, wau.WorkspaceId, wau.UserId, wau.RoleId)
 	return err
 }
+
+func GetRoleIdByWorkspaceIdAndUserId(workspaceId int, userId uint32) (int, error) {
+	cmd := fmt.Sprintf("SELECT role_id FROM %s WHERE workspace_id = ? AND user_id = ?", config.Config.WorkspaceAndUserTableName)
+	row := DbConnection.QueryRow(cmd, workspaceId, userId)
+	var roleId int
+	err := row.Scan(&roleId)
+	return roleId, err
+}

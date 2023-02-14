@@ -46,6 +46,16 @@ func addUserInChannelTestFunc(channelId, workspaceId int, userId uint32, jwtToke
 	return rr
 }
 
+func deleteUserFromChannelTestFunc(channelId, workspaceId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	cau := models.NewChannelsAndUses(channelId, userId, false)
+	jsonInput, _ := json.Marshal(cau)
+	req, _ := http.NewRequest("POST", "/api/channel/delete_user/"+strconv.Itoa(workspaceId), bytes.NewBuffer(jsonInput))
+	req.Header.Set("Authorization", jwtToken)
+	channelRouter.ServeHTTP(rr, req)
+	return rr
+}
+
 func TestCreateChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
@@ -204,9 +214,9 @@ func TestCreateChannel(t *testing.T) {
 }
 
 func TestAddUserInChannel(t *testing.T) {
-	/* if testing.Short() { */
-	/* 	t.Skip("skipping test in short mode.") */
-	/* } */
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1. 正常な場合 200
 	// 2. bodyに不足がある場合(channel_id, user_id) 400
@@ -527,4 +537,524 @@ func TestAddUserInChannel(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"no permission adding user in channel\"}", rr.Body.String())
 	})
+}
+
+func TestDeleteUserFromChannel(t *testing.T) {
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
+
+	// 1. 正常な場合(private channel) 200
+	// 2. 正常な場合(public channel) 200
+	// 3. bodyに不足がある場合(channel_id, user_id) 400
+	// 4. deleteされるuserがworkspaceにいない場合 400
+	// 5. requestしたuserがworkspaceにいない場合 400
+	// 6. channelが存在しない場合 400
+	// 7. channelがworkspaceに存在しない場合 400
+	// 8. channelのnameがgeneralの場合 400
+	// 9. deleteされるuserがchannelにいない場合 400
+	// 10. deleteする権限がないuserからのリクエストの場合(private channel) 400
+	// 11. deleteする権限がないuserからのリクエストの場合(public channel) 400
+	// 12. channelがアーカイブされている場合 400
+
+	t.Run("1", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName1"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName1"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName1"
+		channelName := "testDeleteUserFromChannelName1"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		cau := new(models.ChannelsAndUsers)
+		json.Unmarshal(([]byte)(byteArray), cau)
+		assert.Equal(t, c.ID, cau.ChannelId)
+		assert.Equal(t, dlr.UserId, cau.UserId)
+	})
+
+	t.Run("2", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName2"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName2"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName2"
+		channelName := "testDeleteUserFromChannelName2"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", false, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		cau := new(models.ChannelsAndUsers)
+		json.Unmarshal(([]byte)(byteArray), cau)
+		assert.Equal(t, c.ID, cau.ChannelId)
+		assert.Equal(t, dlr.UserId, cau.UserId)
+	})
+
+	t.Run("3", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName3"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName3"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName3"
+		channelName := "testDeleteUserFromChannelName3"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(0, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found user_id or channel_id\"}", rr.Body.String())
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, 0, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found user_id or channel_id\"}", rr.Body.String())
+	})
+
+	t.Run("4", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName4"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName4"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName4"
+		channelName := "testDeleteUserFromChannelName4"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found user in workspace\"}", rr.Body.String())
+	})
+
+	t.Run("5", func(t *testing.T) {
+		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName5"
+		requestUserName := "testDeleteUserFromChannelRequestUserName5"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName5"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName5"
+		channelName := "testDeleteUserFromChannelName5"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(createChannelUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		clr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), clr)
+
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, clr.Token, clr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, clr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, clr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, clr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found request user in workspace\"}", rr.Body.String())
+	})
+	
+	t.Run("6", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName6"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName6"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName6"
+		channelName := "testDeleteUserFromChannelName6"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(-1, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+	})
+
+	t.Run("7", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserNam7"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName7"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName7"
+		workspaceName2 := "testDeleteUserFromChannelWorkspaceName7.2"
+		channelName := "testDeleteUserFromChannelName7"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+		
+		rr = createWorkSpaceTestFunc(workspaceName2, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w2 := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w2)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w2.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found channel in workspace\"}", rr.Body.String())
+	})
+
+	t.Run("8", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName8"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName8"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName8"
+		channelName := "general"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"don't delete general channel\"}", rr.Body.String())
+	})
+
+	t.Run("9", func(t *testing.T) {
+		requestUserName := "testDeleteUserFromChannelRequestUserName9"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName9"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName9"
+		channelName := "testDeleteUserFromChannelName9"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, rlr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, rlr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not found user in channel\"}", rr.Body.String())
+	})
+
+	t.Run("10", func(t *testing.T) {
+		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName10"
+		requestUserName := "testDeleteUserFromChannelRequestUserName10"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName10"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName10"
+		channelName := "testDeleteUserFromChannelName10"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(createChannelUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		clr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), clr)
+
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, clr.Token, clr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, clr.Token).Code)
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, clr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", true, clr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, clr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not permission deleting user in channel\"}", rr.Body.String())
+	})
+		
+	t.Run("11", func(t *testing.T) {
+		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName11"
+		requestUserName := "testDeleteUserFromChannelRequestUserName11"
+		deleteUserName := "testDeleteUserFromChannelDeleteUserName11"
+		workspaceName := "testDeleteUserFromChannelWorkspaceName11"
+		channelName := "testDeleteUserFromChannelName11"
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(deleteUserName, "pass").Code)
+
+		rr := loginTestFunc(createChannelUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		clr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), clr)
+
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = loginTestFunc(deleteUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		dlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), dlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, clr.Token, clr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, dlr.UserId, clr.Token).Code)
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, clr.Token).Code)
+
+		rr = createChannelTestFunc(channelName, "des", false, clr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		c := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), c)
+
+		assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c.ID, w.ID, dlr.UserId, clr.Token).Code)
+
+		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"not permission deleting user in channel\"}", rr.Body.String())
+	})
+
+	// TODO test 12 アーカイブされている場合
+	
 }

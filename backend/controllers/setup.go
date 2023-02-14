@@ -15,7 +15,7 @@ func SetupRouter() *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET" ,"POST", "PATCH", "DELETE"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Access-Control-Allow-Headers", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
@@ -38,6 +38,7 @@ func SetupRouter() *gin.Engine {
 	channel := api.Group("/channel")
 	channel.POST("/create/:workspace_id", CreateChannel)
 	channel.POST("/add_user/:workspace_id", AddUserInChannel)
+	channel.POST("/delete_user/:workspace_id", DeleteUserFromChannel)
 
 	return r
 }

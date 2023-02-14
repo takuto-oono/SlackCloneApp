@@ -47,3 +47,31 @@ func TestIsAdminUserInChannel(t *testing.T) {
 	assert.Empty(t, cau.CreateChannelAndUsers())
 	assert.Equal(t, false, IsAdminUserInChannel(cau.ChannelId, cau.UserId))
 }
+
+func TestDeleteUserFromChannel(t *testing.T) {
+	cau := NewChannelsAndUses(9479923, 646433, true)
+	assert.Empty(t, cau.CreateChannelAndUsers())
+	assert.Empty(t, cau.DeleteUserFromChannel())
+
+	cau = NewChannelsAndUses(6464333, 79797, true)
+	assert.Empty(t, cau.CreateChannelAndUsers())
+	cau.IsAdmin = false
+	assert.Empty(t, cau.DeleteUserFromChannel())
+	assert.Equal(t, false, IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId))
+
+	channelId := 37597692793
+	userId := uint32(35362622)
+	cau = NewChannelsAndUses(channelId, userId, true)
+	assert.Empty(t, cau.CreateChannelAndUsers())
+	assert.Equal(t, true, IsExistCAUByChannelIdAndUserId(channelId, userId))
+
+	cau.ChannelId = -1
+	assert.Empty(t, cau.DeleteUserFromChannel())
+	assert.Equal(t, true, IsExistCAUByChannelIdAndUserId(channelId, userId))
+
+	cau.ChannelId = channelId
+	assert.Empty(t, cau.DeleteUserFromChannel())
+	assert.Equal(t, false, IsExistCAUByChannelIdAndUserId(channelId, userId))
+
+
+}
