@@ -24,7 +24,7 @@ func NewChannel(id int, name, description string, isPrivate, isArchive bool) *Ch
 	}
 }
 
-func (c *Channel) CreateChannel() error {
+func (c *Channel) Create() error {
 	cmd := fmt.Sprintf("SELECT * FROM %s", config.Config.ChannelsTableName)
 	rows, err := DbConnection.Query(cmd)
 	if err != nil {
@@ -69,4 +69,10 @@ func GetChannelById(channelId int) (Channel, error) {
 	var c Channel
 	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive)
 	return c, err
+}
+
+func (c *Channel) Delete() error {
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = ? AND name = ? AND description = ? AND is_private = ? AND is_archive = ?", config.Config.ChannelsTableName)
+	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive)
+	return err
 }

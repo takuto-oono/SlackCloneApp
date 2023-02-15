@@ -20,7 +20,7 @@ func NewChannelsAndUses(channelId int, userId uint32, isAdmin bool) *ChannelsAnd
 	}
 }
 
-func (cau *ChannelsAndUsers) CreateChannelAndUsers() error {
+func (cau *ChannelsAndUsers) Create() error {
 	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, user_id, is_admin) VALUES (?, ?, ?)", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId, cau.IsAdmin)
 	return err
@@ -54,8 +54,14 @@ func IsAdminUserInChannel(channelId int, userId uint32) bool {
 	return cnt == 1
 }
 
-func (cau *ChannelsAndUsers) DeleteUserFromChannel() error {
+func (cau *ChannelsAndUsers) Delete() error {
 	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId)
+	return err
+}
+
+func DeleteCAUByChannelId(channelId int) error {
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ?", config.Config.ChannelsAndUserTableName)
+	_, err := DbConnection.Exec(cmd, channelId)
 	return err
 }

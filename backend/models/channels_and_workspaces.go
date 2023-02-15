@@ -18,7 +18,7 @@ func NewChannelsAndWorkspaces(channelId, workspaceId int) *ChannelsAndWorkspaces
 	}
 }
 
-func (caw *ChannelsAndWorkspaces) CreateChannelsAndWorkspaces() error {
+func (caw *ChannelsAndWorkspaces) Create() error {
 	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, workspace_id) VALUES (?, ?)", config.Config.ChannelsAndWorkspaceTableName)
 	_, err := DbConnection.Exec(cmd, caw.ChannelId, caw.WorkspaceId)
 	return err
@@ -55,4 +55,10 @@ func IsExistCAWByChannelIdAndWorkspaceId(channelId, workspaceId int) bool {
 		cnt++
 	}
 	return cnt == 1
+}
+
+func (caw *ChannelsAndWorkspaces) Delete() error {
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ? AND workspace_id = ?", config.Config.ChannelsAndWorkspaceTableName)
+	_, err := DbConnection.Exec(cmd, caw.ChannelId, caw.WorkspaceId)
+	return err
 }
