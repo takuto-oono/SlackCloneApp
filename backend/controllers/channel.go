@@ -303,6 +303,7 @@ func DeleteChannel(c *gin.Context) {
 	// channelがworkspaceにあるかどうかを確認
 	if !models.IsExistCAWByChannelIdAndWorkspaceId(caw.ChannelId, caw.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel in workspace"})
+		return
 	}
 
 	// channels tableからデータを削除
