@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
+	"backend/utils"
 )
 
 func CreateWorkspace(c *gin.Context) {
@@ -161,13 +162,13 @@ func RenameWorkspaceName(c *gin.Context) {
 	}
 
 	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(w.ID, userId)
+	b, err := utils.HasPermissionRenamingWorkspaceName(w.ID, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if !(wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+	if !b {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission renaming name of workspace"})
 		return
 	}
 
@@ -202,12 +203,12 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 
 	// requestしたuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかチェック
-	reqWau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, userId)
+	b, err := utils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	if !(reqWau.RoleId == 1 || reqWau.RoleId == 2 || reqWau.RoleId == 3) {
+	if !b {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
 		return
 	}
