@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
+	"backend/utils"
 )
 
 func CreateChannel(c *gin.Context) {
@@ -146,7 +147,7 @@ func AddUserInChannel(c *gin.Context) {
 	}
 
 	// リクエストしたuserにchannelの管理権限があるかを確認(結果的にリクエストしたuserがchannelに所属しているかも確認される)
-	if !models.IsAdminUserInChannel(cau.ChannelId, userId) {
+	if !utils.HasPermissionAddingUserInChannel(cau.ChannelId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission adding user in channel"})
 		return
 	}
@@ -158,17 +159,6 @@ func AddUserInChannel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, cau)
-}
-
-func havePermissionDeletingUserInChannel(userId uint32, workspaceId int, ch models.Channel) bool {
-	if ch.IsPrivate {
-		return models.IsExistCAUByChannelIdAndUserId(ch.ID, userId)
-	}
-	roleId, err := models.GetRoleIdByWorkspaceIdAndUserId(workspaceId, userId)
-	if err != nil {
-		return false
-	}
-	return roleId == 1 || roleId == 2 || roleId == 3
 }
 
 func DeleteUserFromChannel(c *gin.Context) {
@@ -245,7 +235,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 	}
 
 	// deleteする権限があるかを確認
-	if !havePermissionDeletingUserInChannel(userId, workspaceId, ch) {
+	if !utils.HasPermissionDeletingUserInChannel(userId, workspaceId, ch) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission deleting user in channel"})
 		return
 	}
@@ -288,7 +278,7 @@ func DeleteChannel(c *gin.Context) {
 	}
 
 	// deleteする権限があるかを確認
-	if !(wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3) {
+	if !utils.HasPermissionDeletingChannel(wau) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission deleting channel"})
 		return
 	}
@@ -303,6 +293,7 @@ func DeleteChannel(c *gin.Context) {
 	// channelがworkspaceにあるかどうかを確認
 	if !models.IsExistCAWByChannelIdAndWorkspaceId(caw.ChannelId, caw.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel in workspace"})
+		return
 	}
 
 	// channels tableからデータを削除
