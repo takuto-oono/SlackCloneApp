@@ -78,7 +78,7 @@ func TestCreateChannel(t *testing.T) {
 		description := "description1"
 		isPrivate := true
 
-		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code, "OK")
 
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)

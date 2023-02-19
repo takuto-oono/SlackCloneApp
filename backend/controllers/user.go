@@ -6,33 +6,34 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"backend/controllerUtils"
 	"backend/models"
 	"backend/token"
 )
-
-type UserInput struct {
-	Name     string `json:"name"`
-	PassWord string `json:"password"`
-}
 
 func SignUp(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 
 	// bodyの情報を取得
-	var u models.User
-	if err := c.ShouldBindJSON(&u); err != nil {
+	// if err := c.ShouldBindJSON(&u); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	// 	return
+	// }
+
+	// // 必要な項目が取得できているか確認
+	// if u.Name == "" || u.PassWord == "" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "username pr password is blank"})
+	// 	return
+	// }
+	
+	ui, err := controllerUtils.InputSignUp(c)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	// 必要な項目が取得できているか確認
-	if u.Name == "" || u.PassWord == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "username pr password is blank"})
-		return
-	}
-
 	// IDを確定
-	u.ID = rand.Uint32()
+	u := models.NewUser(rand.Uint32(), ui.Name, ui.Password)
 
 	// 既に同じuserNameとpasswordの組み合わせのユーザーが存在しないかを確認
 	b, err := u.IsExistUserSameUsernameAndPassword()

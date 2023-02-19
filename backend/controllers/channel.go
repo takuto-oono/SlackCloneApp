@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/utils"
+	"backend/controllerUtils"
 )
 
 func CreateChannel(c *gin.Context) {
@@ -136,7 +136,7 @@ func AddUserInChannel(c *gin.Context) {
 	}
 
 	// リクエストしたuserにchannelの管理権限があるかを確認(結果的にリクエストしたuserがchannelに所属しているかも確認される)
-	if !utils.HasPermissionAddingUserInChannel(cau.ChannelId, userId) {
+	if !controllerUtils.HasPermissionAddingUserInChannel(cau.ChannelId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission adding user in channel"})
 		return
 	}
@@ -224,7 +224,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 	}
 
 	// deleteする権限があるかを確認
-	if !utils.HasPermissionDeletingUserInChannel(userId, workspaceId, ch) {
+	if !controllerUtils.HasPermissionDeletingUserInChannel(userId, workspaceId, ch) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission deleting user in channel"})
 		return
 	}
@@ -267,7 +267,7 @@ func DeleteChannel(c *gin.Context) {
 	}
 
 	// deleteする権限があるかを確認
-	if !utils.HasPermissionDeletingChannel(wau) {
+	if !controllerUtils.HasPermissionDeletingChannel(wau) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission deleting channel"})
 		return
 	}

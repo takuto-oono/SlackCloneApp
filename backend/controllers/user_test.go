@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"backend/models"
+	"backend/controllerUtils"
 )
 
 var router = SetupRouter()
@@ -28,9 +29,9 @@ type LoginResponse struct {
 
 func signUpTestFunc(name, password string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	input := models.User{
+	input := controllerUtils.SignUpInput{
 		Name:     name,
-		PassWord: password,
+		Password: password,
 	}
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/signUp", bytes.NewBuffer(jsonInput))
@@ -218,9 +219,9 @@ func TestLogin(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	// 1 普通の場合 200
 	// 2 usernameがuniqueでない場合 200
@@ -248,7 +249,7 @@ func TestSignUp(t *testing.T) {
 	// 3
 	t.Run("3", func(t *testing.T) {
 		for i := 0; i < 12; i++ {
-			username := "testSignUpControllerUser2" + strconv.Itoa(i)
+			username := "testSignUpControllerUser3" + strconv.Itoa(i)
 			password := "pass"
 
 			var rr *httptest.ResponseRecorder

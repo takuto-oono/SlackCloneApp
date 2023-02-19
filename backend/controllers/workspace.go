@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/utils"
+	"backend/controllerUtils"
 )
 
 func CreateWorkspace(c *gin.Context) {
@@ -151,7 +151,7 @@ func RenameWorkspaceName(c *gin.Context) {
 	}
 
 	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
-	b, err := utils.HasPermissionRenamingWorkspaceName(w.ID, userId)
+	b, err := controllerUtils.HasPermissionRenamingWorkspaceName(w.ID, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -192,7 +192,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 
 	// requestしたuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかチェック
-	b, err := utils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
+	b, err := controllerUtils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
