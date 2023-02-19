@@ -18,16 +18,11 @@ var channelRouter = SetupRouter()
 
 func createChannelTestFunc(name, description string, isPrivate bool, jwtToken string, workspaceId int) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	ch := models.NewChannel(0, name, description, isPrivate, false)
+	ch := models.NewChannel(0, name, description, isPrivate, false, workspaceId)
 	jsonInput, _ := json.Marshal(ch)
 	var req *http.Request
 	var err error
-	if workspaceId == 0 {
-		req, err = http.NewRequest("POST", "/api/channel/create/", bytes.NewBuffer(jsonInput))
-	} else {
-		req, err = http.NewRequest("POST", "/api/channel/create/"+strconv.Itoa(workspaceId), bytes.NewBuffer(jsonInput))
-
-	}
+	req, err = http.NewRequest("POST", "/api/channel/create", bytes.NewBuffer(jsonInput))
 	if err != nil {
 		return rr
 	}
@@ -58,8 +53,8 @@ func deleteUserFromChannelTestFunc(channelId, workspaceId int, userId uint32, jw
 
 func deleteChannelTestFunc(channelId, workspaceId int, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	caw := models.NewChannelsAndWorkspaces(channelId, workspaceId)
-	jsonInput, _ := json.Marshal(caw)
+	ch := models.NewChannel(channelId, "", "", false, false, workspaceId)
+	jsonInput, _ := json.Marshal(ch)
 	req, _ := http.NewRequest("POST", "/api/channel/delete", bytes.NewBuffer(jsonInput))
 	req.Header.Set("Authorization", jwtToken)
 	channelRouter.ServeHTTP(rr, req)
@@ -72,7 +67,6 @@ func TestCreateChannel(t *testing.T) {
 	}
 
 	// 1. 正常な場合 200
-	// 2. urlからパラメータが取得できない場合 400
 	// 3. bodyにchannel nameがない場合 400
 	// 4. requestしたuserが対象のworkspaceに所属していない場合 400
 	// 5. すでに同じ名前のchannelが対象のworkspaceに存在している場合 400
@@ -109,32 +103,6 @@ func TestCreateChannel(t *testing.T) {
 		assert.Equal(t, false, ch.IsArchive)
 	})
 
-	t.Run("2", func(t *testing.T) {
-		userName := "testCreateChannelUserName2"
-		workspaceName := "testCreateChannelWorkspaceName2"
-		channelName := "testCreateChannelName2"
-		description := "description2"
-		isPrivate := true
-
-		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
-
-		rr := loginTestFunc(userName, "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-		byteArray, _ := ioutil.ReadAll(rr.Body)
-		lr := new(LoginResponse)
-		json.Unmarshal(([]byte)(byteArray), lr)
-
-		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
-		assert.Equal(t, http.StatusOK, rr.Code)
-		byteArray, _ = ioutil.ReadAll(rr.Body)
-		w := new(models.Workspace)
-		json.Unmarshal(([]byte)(byteArray), w)
-
-		rr = createChannelTestFunc(channelName, description, isPrivate, lr.Token, 0)
-		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "404 page not found", rr.Body.String())
-	})
-
 	t.Run("3", func(t *testing.T) {
 		userName := "testCreateChannelUserName3"
 		workspaceName := "testCreateChannelWorkspaceName3"
@@ -157,7 +125,7 @@ func TestCreateChannel(t *testing.T) {
 
 		rr = createChannelTestFunc("", description, isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel name\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"not found channel name or workspace_id\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
@@ -550,9 +518,9 @@ func TestAddUserInChannel(t *testing.T) {
 }
 
 func TestDeleteUserFromChannel(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	// 1. 正常な場合(private channel) 200
 	// 2. 正常な場合(public channel) 200
@@ -1128,11 +1096,11 @@ func TestDeleteChannel(t *testing.T) {
 		rr = deleteChannelTestFunc(c.ID, w.ID, rlr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = ioutil.ReadAll(rr.Body)
-		caw := new(models.ChannelsAndWorkspaces)
-		json.Unmarshal(([]byte)(byteArray), caw)
+		ch := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), ch)
 
-		assert.Equal(t, c.ID, caw.ChannelId)
-		assert.Equal(t, w.ID, caw.WorkspaceId)
+		assert.Equal(t, c.ID, ch.ID)
+		assert.Equal(t, w.ID, ch.WorkspaceId)
 	})
 	
 	t.Run("2", func(t *testing.T) {
@@ -1361,7 +1329,7 @@ func TestDeleteChannel(t *testing.T) {
 
 		rr = deleteChannelTestFunc(c.ID, w.ID, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
 	})
 	
 	

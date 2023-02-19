@@ -54,21 +54,11 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// general channelを作成する
-	ch := models.NewChannel(0, "general", "all users join", false, false)
+	ch := models.NewChannel(0, "general", "all users join", false, false, w.ID)
 	if err := ch.Create(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
-		return
-	}
-
-	// channelをworkspaceに保存する
-	caw := models.NewChannelsAndWorkspaces(ch.ID, w.ID)
-	if err := caw.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
-		// TODO delete general channel
 		return
 	}
 
@@ -79,7 +69,6 @@ func CreateWorkspace(c *gin.Context) {
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
 		// TODO delete general channel
-		// TODO delete CAW
 		return
 	}
 
