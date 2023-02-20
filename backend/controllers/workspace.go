@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/utils"
+	"backend/controllerUtils"
 )
 
 func CreateWorkspace(c *gin.Context) {
@@ -54,21 +54,11 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// general channelを作成する
-	ch := models.NewChannel(0, "general", "all users join", false, false)
+	ch := models.NewChannel(0, "general", "all users join", false, false, w.ID)
 	if err := ch.Create(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
-		return
-	}
-
-	// channelをworkspaceに保存する
-	caw := models.NewChannelsAndWorkspaces(ch.ID, w.ID)
-	if err := caw.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
-		// TODO delete general channel
 		return
 	}
 
@@ -79,7 +69,6 @@ func CreateWorkspace(c *gin.Context) {
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
 		// TODO delete general channel
-		// TODO delete CAW
 		return
 	}
 
@@ -162,7 +151,7 @@ func RenameWorkspaceName(c *gin.Context) {
 	}
 
 	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
-	b, err := utils.HasPermissionRenamingWorkspaceName(w.ID, userId)
+	b, err := controllerUtils.HasPermissionRenamingWorkspaceName(w.ID, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -203,7 +192,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 
 	// requestしたuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかチェック
-	b, err := utils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
+	b, err := controllerUtils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

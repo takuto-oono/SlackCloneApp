@@ -84,7 +84,8 @@ func init() {
 			name STRING NOT NULL,
 			description STRING,
 			is_private BOOLEAN NOT NULL,
-			is_archive BOOLEAN NOT NULL
+			is_archive BOOLEAN NOT NULL,
+			workspace_id INT NOT NULL
 		)
 	`, config.Config.ChannelsTableName)
 	_, err = DbConnection.Exec(cmd)
@@ -101,15 +102,4 @@ func init() {
 		)
 	`, config.Config.ChannelsAndUserTableName)
 	DbConnection.Exec(cmd)
-
-	// create channels_and_workspaces table
-	cmd = fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s
-		(
-			channel_id INT PRIMARY KEY NOT NULL,
-			workspace_id INT NOT NULL
-		)
-	`, config.Config.ChannelsAndWorkspaceTableName)
-	DbConnection.Exec(cmd)
-
 }

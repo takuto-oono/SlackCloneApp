@@ -1,4 +1,4 @@
-package utils
+package controllerUtils
 
 import (
 	"backend/models"

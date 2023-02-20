@@ -7,19 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"backend/models"
-	"backend/utils"
+	"backend/controllerUtils"
 )
 
 func CreateChannel(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
-	// urlからパラメータを取得
-	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -32,20 +25,20 @@ func CreateChannel(c *gin.Context) {
 		return
 	}
 
-	// channel nameがbodyに含まれているか確認
-	if ch.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel name"})
+	// channelにnameとworkspace_idがbodyに含まれているか確認
+	if ch.Name == "" || ch.WorkspaceId == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel name or workspace_id"})
 		return
 	}
 
 	// workspaceIdに対応するworkspaceが存在するか確認
-	if !models.IsExistWorkspaceById(workspaceId) {
+	if !models.IsExistWorkspaceById(ch.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace"})
 		return
 	}
 
 	// 同じ名前のchannelが対応するworkspaceに存在しないか確認
-	b, err := ch.IsExistSameNameChannelInWorkspace(workspaceId)
+	b, err := ch.IsExistSameNameChannelInWorkspace(ch.WorkspaceId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -56,7 +49,7 @@ func CreateChannel(c *gin.Context) {
 	}
 
 	// userが対象のworkspaceに参加しているか確認
-	wau := models.NewWorkspaceAndUsers(workspaceId, userId, 0)
+	wau := models.NewWorkspaceAndUsers(ch.WorkspaceId, userId, 0)
 	if !wau.IsExistWorkspaceAndUser() {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found user in workspace"})
 		return
@@ -68,19 +61,10 @@ func CreateChannel(c *gin.Context) {
 		return
 	}
 
-	// channels_and_workspaces tableに保存する情報を作成し保存
-	caw := models.NewChannelsAndWorkspaces(ch.ID, workspaceId)
-	if err := caw.Create(); err != nil {
-		// TODO DeleteChannelsAndWorkspaces funcを実行する
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
 	// channels_and_users tableに保存する情報を作成し保存
 	cau := models.NewChannelsAndUses(ch.ID, userId, true)
 	if err := cau.Create(); err != nil {
 		// TODO DeleteChannel funcを実行する
-		// TODO DeleteChannelsAndWorkspace funcを実行
 
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -135,7 +119,12 @@ func AddUserInChannel(c *gin.Context) {
 	}
 
 	// 対象のchannelがworkspace内に存在するかを確認
-	if !models.IsExistCAWByChannelIdAndWorkspaceId(cau.ChannelId, workspaceId) {
+	b, err := models.IsExistChannelByChannelIdAndWorkspaceId(cau.ChannelId, workspaceId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	if !b {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist channel in workspace"})
 		return
 	}
@@ -147,7 +136,7 @@ func AddUserInChannel(c *gin.Context) {
 	}
 
 	// リクエストしたuserにchannelの管理権限があるかを確認(結果的にリクエストしたuserがchannelに所属しているかも確認される)
-	if !utils.HasPermissionAddingUserInChannel(cau.ChannelId, userId) {
+	if !controllerUtils.HasPermissionAddingUserInChannel(cau.ChannelId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission adding user in channel"})
 		return
 	}
@@ -211,7 +200,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 	}
 
 	// channelがworkspaceに存在することを確認
-	if !models.IsExistCAWByChannelIdAndWorkspaceId(cau.ChannelId, workspaceId) {
+	if ch.WorkspaceId != workspaceId {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel in workspace"})
 		return
 	}
@@ -235,7 +224,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 	}
 
 	// deleteする権限があるかを確認
-	if !utils.HasPermissionDeletingUserInChannel(userId, workspaceId, ch) {
+	if !controllerUtils.HasPermissionDeletingUserInChannel(userId, workspaceId, ch) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission deleting user in channel"})
 		return
 	}
@@ -258,41 +247,34 @@ func DeleteChannel(c *gin.Context) {
 	}
 
 	// bodyの情報を取得
-	var caw models.ChannelsAndWorkspaces
-	if err := c.ShouldBindJSON(&caw); err != nil {
+	var ch models.Channel
+	if err := c.ShouldBindJSON(&ch); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	// bodyの情報に不足がないか確認
-	if caw.ChannelId == 0 || caw.WorkspaceId == 0 {
+	if ch.ID == 0 || ch.WorkspaceId == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel_id or workspace_id"})
 		return
 	}
 
 	// requestしたuserがworkspaceに参加しているかを確認
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(caw.WorkspaceId, userId)
+	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(ch.WorkspaceId, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	// deleteする権限があるかを確認
-	if !utils.HasPermissionDeletingChannel(wau) {
+	if !controllerUtils.HasPermissionDeletingChannel(wau) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission deleting channel"})
 		return
 	}
 
-	// channelが存在するかどうかを確認
-	ch, err := models.GetChannelById(caw.ChannelId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
 	// channelがworkspaceにあるかどうかを確認
-	if !models.IsExistCAWByChannelIdAndWorkspaceId(caw.ChannelId, caw.WorkspaceId) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel in workspace"})
+	if err := ch.GetChannelByIdAndWorkspaceId(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -302,19 +284,13 @@ func DeleteChannel(c *gin.Context) {
 		return
 	}
 
-	// channels_and_workspaces tableからデータを削除
-	if err := caw.Delete(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
 	// channel_and_users tableからデータを削除
-	if err := models.DeleteCAUByChannelId(caw.ChannelId); err != nil {
+	if err := models.DeleteCAUByChannelId(ch.ID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	// TODO roll back func
 
-	c.JSON(http.StatusOK, caw)
+	c.JSON(http.StatusOK, ch)
 }
