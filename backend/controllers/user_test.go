@@ -29,7 +29,7 @@ type LoginResponse struct {
 
 func signUpTestFunc(name, password string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	input := controllerUtils.SignUpInput{
+	input := controllerUtils.SignUpAndLoginInput{
 		Name:     name,
 		Password: password,
 	}
@@ -41,9 +41,9 @@ func signUpTestFunc(name, password string) *httptest.ResponseRecorder {
 
 func loginTestFunc(name, password string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	input := models.User{
+	input := controllerUtils.SignUpAndLoginInput{
 		Name:     name,
-		PassWord: password,
+		Password: password,
 	}
 	jsonInput, _ := json.Marshal(input)
 	req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonInput))
@@ -219,9 +219,9 @@ func TestLogin(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1 普通の場合 200
 	// 2 usernameがuniqueでない場合 200

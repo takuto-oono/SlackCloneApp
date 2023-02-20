@@ -26,7 +26,7 @@ func SignUp(c *gin.Context) {
 	// 	return
 	// }
 	
-	ui, err := controllerUtils.InputSignUp(c)
+	ui, err := controllerUtils.InputSignUpAndLogin(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -58,17 +58,14 @@ func SignUp(c *gin.Context) {
 func Login(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	// bodyの情報を取得
-	var u models.User
-	if err := c.ShouldBindJSON(&u); err != nil {
+
+	input, err := controllerUtils.InputSignUpAndLogin(c)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	// 必要な情報が取得できているか確認
-	if u.Name == "" || u.PassWord == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is blank"})
-		return
-	}
+	u := models.NewUser(0, input.Name, input.Password)
 
 	// usernameとpasswordからIDを特定
 	if err := u.GetUserByNameAndPassword(); err != nil {

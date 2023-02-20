@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"backend/models"
 	"backend/controllerUtils"
+	"backend/models"
 )
 
 func CreateChannel(c *gin.Context) {
@@ -19,17 +19,12 @@ func CreateChannel(c *gin.Context) {
 	}
 
 	// bodyの情報を取得
-	var ch models.Channel
-	if err := c.ShouldBindJSON(&ch); err != nil {
+	in, err := controllerUtils.InputAndValidateCreateChannel(c)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	// channelにnameとworkspace_idがbodyに含まれているか確認
-	if ch.Name == "" || ch.WorkspaceId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel name or workspace_id"})
-		return
-	}
+	ch := models.NewChannel(0, in.Name, in.Description, *in.IsPrivate, false, in.WorkspaceId)
 
 	// workspaceIdに対応するworkspaceが存在するか確認
 	if !models.IsExistWorkspaceById(ch.WorkspaceId) {
@@ -81,45 +76,38 @@ func AddUserInChannel(c *gin.Context) {
 		return
 	}
 
-	// urlからパラメータを取得
-	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	// bodyの情報を取得
+	in, err := controllerUtils.InputAndValidateAddUserInChannel(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+	// とりあえず管理権限はなし
+	cau := models.NewChannelsAndUses(in.ChannelId, in.UserId, false)
 
-	// bodyの情報を取得
-	var cau models.ChannelsAndUsers
-	if err := c.ShouldBindJSON(&cau); err != nil {
+	// channelを取得
+	ch, err := models.GetChannelById(cau.ChannelId)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-
-	// bodyにuserIdとchannelIdが含まれているか確認
-	if cau.ChannelId == 0 || cau.UserId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel_id or user_id"})
-		return
-	}
-
-	// とりあえず管理権限はなし
-	cau.IsAdmin = false
-
+	
 	// リクエストしたuserがworkspaceに参加してるかを確認
-	rwau := models.NewWorkspaceAndUsers(workspaceId, userId, 0)
+	rwau := models.NewWorkspaceAndUsers(ch.WorkspaceId, userId, 0)
 	if !rwau.IsExistWorkspaceAndUser() {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist request user in workspace"})
 		return
 	}
 
 	// 追加されるuserがworkspaceに参加しているかを確認
-	awau := models.NewWorkspaceAndUsers(workspaceId, cau.UserId, 0)
+	awau := models.NewWorkspaceAndUsers(ch.WorkspaceId, cau.UserId, 0)
 	if !awau.IsExistWorkspaceAndUser() {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist added user in workspace"})
 		return
 	}
 
 	// 対象のchannelがworkspace内に存在するかを確認
-	b, err := models.IsExistChannelByChannelIdAndWorkspaceId(cau.ChannelId, workspaceId)
+	b, err := models.IsExistChannelByChannelIdAndWorkspaceId(cau.ChannelId, ch.WorkspaceId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
