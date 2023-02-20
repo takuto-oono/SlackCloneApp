@@ -11,6 +11,9 @@ import (
 )
 
 func TestNewWorkspace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 1000; i++ {
 		id := i
 		name := "testNewWorkspaceName" + strconv.Itoa(i)
@@ -23,6 +26,9 @@ func TestNewWorkspace(t *testing.T) {
 }
 
 func TestCreateWorkspace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	// 正常な場合
 	numbersOfTests := 1
 	names := make([]string, numbersOfTests)
@@ -60,6 +66,9 @@ func TestCreateWorkspace(t *testing.T) {
 }
 
 func TestRenameWorkspaceName(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	w := NewWorkspace(3333, "old name", 3)
 	w.CreateWorkspace()
 	w.Name = "new name"
@@ -73,6 +82,9 @@ func TestRenameWorkspaceName(t *testing.T) {
 }
 
 func TestIsExistWorkspaceAndUser(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	w := NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
 	w.CreateWorkspace()
 	assert.Equal(t, true, IsExistWorkspaceById(w.ID))

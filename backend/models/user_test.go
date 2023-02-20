@@ -9,6 +9,9 @@ import (
 )
 
 func CreateTest(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	t.Run("1", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			u := NewUser(rand.Uint32(), "createModelUserTest1"+strconv.Itoa(i), "pass")
@@ -18,6 +21,9 @@ func CreateTest(t *testing.T) {
 }
 
 func IsExistUserSameUsernameAndPasswordTest(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	t.Run("1", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			u1 := NewUser(rand.Uint32(), "isExistUserSameUsernameAndPasswordTestUser1"+strconv.Itoa(i), "pass")
@@ -31,6 +37,9 @@ func IsExistUserSameUsernameAndPasswordTest(t *testing.T) {
 }
 
 func GetUserByNameAndPasswordTest(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	t.Run("1", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			id := rand.Uint32()

@@ -7,6 +7,9 @@ import (
 )
 
 func TestCreateChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	name := "testCreateChannelModelName"
 	description := "testCreateChannelModelDescription"
 	is_private := true
@@ -17,6 +20,9 @@ func TestCreateChannel(t *testing.T) {
 }
 
 func TestGetChannelById(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	name := "testGetChannelByIdName"
 	description := "testGetChannelByIdDescription"
 	is_private := true
@@ -34,6 +40,9 @@ func TestGetChannelById(t *testing.T) {
 }
 
 func TestDeleteChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	c := NewChannel(0, "testDeleteChannelName", "", true, false, 58430850380)
 	assert.Empty(t, c.Create())
 	channelId := c.ID

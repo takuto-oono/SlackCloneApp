@@ -7,6 +7,9 @@ import (
 )
 
 func TestCreateChannelAndUsers(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	channelId := 5553155345262
 	userId := uint32(452526)
 	isAdmin := true
@@ -26,6 +29,9 @@ func TestCreateChannelAndUsers(t *testing.T) {
 }
 
 func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	channelId := 532446463423234
 	userId := uint32(3535422)
 
@@ -37,6 +43,9 @@ func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 }
 
 func TestIsAdminUserInChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	cau := NewChannelsAndUses(532446463423234434, uint32(53663732), true)
 	assert.Empty(t, cau.Create())
 
@@ -49,6 +58,9 @@ func TestIsAdminUserInChannel(t *testing.T) {
 }
 
 func TestDeleteUserFromChannel(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	cau := NewChannelsAndUses(9479923, 646433, true)
 	assert.Empty(t, cau.Create())
 	assert.Empty(t, cau.Delete())
@@ -75,6 +87,9 @@ func TestDeleteUserFromChannel(t *testing.T) {
 }
 
 func TestDeleteCAUByChannelId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	channelId := 525325
 	userIds := make([]uint32, 20)
 	for i := 0; i < 20; i++ {

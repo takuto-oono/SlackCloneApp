@@ -44,6 +44,11 @@ type AddUserInChannelInput struct {
 	UserId    uint32 `json:"user_id"`
 }
 
+type SendMessageInput struct {
+	Text      string `json:"text"`
+	ChannelId int `json:"channel_id"`
+}
+
 func InputSignUpAndLogin(c *gin.Context) (SignUpAndLoginInput, error) {
 	var in SignUpAndLoginInput
 	if err := c.ShouldBindJSON(&in); err != nil {
@@ -143,6 +148,20 @@ func InputAndValidateAddUserInChannel(c *gin.Context) (AddUserInChannelInput, er
 	}
 	if in.UserId == 0 {
 		return in, fmt.Errorf("not found user_id")
+	}
+	return in, nil
+}
+
+func InputAndValidateSendMessage(c *gin.Context) (SendMessageInput, error) {
+	var in SendMessageInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		return in, err
+	}
+	if in.ChannelId == 0 {
+		return in, fmt.Errorf("not found channel_id")
+	}
+	if in.Text == "" {
+		return in, fmt.Errorf("not found text")
 	}
 	return in, nil
 }

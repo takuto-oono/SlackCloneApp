@@ -21,9 +21,7 @@ func createChannelTestFunc(name, description string, isPrivate *bool, jwtToken s
 	rr := httptest.NewRecorder()
 	ch := controllerUtils.CreateChannelInput{name, description, isPrivate, workspaceId}
 	jsonInput, _ := json.Marshal(ch)
-	var req *http.Request
-	var err error
-	req, err = http.NewRequest("POST", "/api/channel/create", bytes.NewBuffer(jsonInput))
+	req, err := http.NewRequest("POST", "/api/channel/create", bytes.NewBuffer(jsonInput))
 	if err != nil {
 		return rr
 	}
