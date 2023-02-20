@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"backend/controllerUtils"
 	"backend/models"
 )
 
@@ -19,9 +20,9 @@ var workspaceRouter = SetupRouter()
 
 func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	inputWorkspace := models.Workspace{
-		Name:           workspaceName,
-		PrimaryOwnerId: userId,
+	inputWorkspace := controllerUtils.CreateWorkspaceInput{
+		Name:          workspaceName,
+		RequestUserId: userId,
 	}
 	jsonInput, _ := json.Marshal(inputWorkspace)
 	req, err := http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
@@ -36,7 +37,7 @@ func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *htt
 
 func addUserWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	auwi := models.WorkspaceAndUsers{
+	auwi := controllerUtils.AddUserInWorkspaceInput {
 		WorkspaceId: workspaceId,
 		UserId:      userId,
 		RoleId:      roleId,
@@ -48,22 +49,21 @@ func addUserWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken s
 	return rr
 }
 
-func renameWorkSpaceNameTestFunc(workspaceId, workspacePrimaryOwnerId int, newWorkspaceName, jwtToken string) *httptest.ResponseRecorder {
-	rr := httptest.NewRecorder()
-	w := models.NewWorkspace(workspaceId, newWorkspaceName, uint32(workspacePrimaryOwnerId))
-	jsonInput, _ := json.Marshal(w)
-	req, _ := http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
-	req.Header.Add("Authorization", jwtToken)
-	workspaceRouter.ServeHTTP(rr, req)
-	return rr
-}
+// func renameWorkSpaceNameTestFunc(workspaceId, workspacePrimaryOwnerId int, newWorkspaceName, jwtToken string) *httptest.ResponseRecorder {
+// 	rr := httptest.NewRecorder()
+// 	w := models.NewWorkspace(workspaceId, newWorkspaceName, uint32(workspacePrimaryOwnerId))
+// 	jsonInput, _ := json.Marshal(w)
+// 	req, _ := http.NewRequest("POST", "/api/workspace/rename", bytes.NewBuffer(jsonInput))
+// 	req.Header.Add("Authorization", jwtToken)
+// 	workspaceRouter.ServeHTTP(rr, req)
+// 	return rr
+// }
 
-func deleteUserFromWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
+func deleteUserFromWorkspaceTestFunc(workspaceId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	jsonInput, _ := json.Marshal(models.WorkspaceAndUsers{
+	jsonInput, _ := json.Marshal(controllerUtils.DeleteUserFromWorkSpaceInput{
 		WorkspaceId: workspaceId,
 		UserId:      userId,
-		RoleId:      roleId,
 	})
 	req, _ := http.NewRequest("POST", "/api/workspace/delete_user", bytes.NewBuffer(jsonInput))
 	req.Header.Add("Authorization", jwtToken)
@@ -287,7 +287,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 
 		rr = addUserWorkspaceTestFunc(w.ID, 0, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"field empty\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"not found role_id\"}", rr.Body.String())
 	})
 
 	t.Run("3", func(t *testing.T) {
@@ -504,7 +504,7 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = ioutil.ReadAll(rr.Body)
 		wau := new(models.WorkspaceAndUsers)
@@ -545,17 +545,13 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, 0, olr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, 0, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"not found user_id\"}", rr.Body.String())
 
-		rr = deleteUserFromWorkspaceTestFunc(0, deleteUserRoleId, dlr.UserId, olr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(0, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
-
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, 0, dlr.UserId, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspaceId or userId or roleId\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"not found workspace_id\"}", rr.Body.String())
 	})
 
 	// 3
@@ -600,7 +596,7 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, rlr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"not permission\"}", rr.Body.String())
 	})
@@ -635,7 +631,7 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 2, rlr.UserId, olr.Token).Code)
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, 1, olr.UserId, rlr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, olr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"not delete primary owner\"}", rr.Body.String())
 	})
@@ -671,16 +667,12 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, deleteUserRoleId, 441553453, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspaceAndUser\"}", rr.Body.String())
-
-		rr = deleteUserFromWorkspaceTestFunc(5934759792, deleteUserRoleId, dlr.UserId, olr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(w.ID, 441553453, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
 
-		rr = deleteUserFromWorkspaceTestFunc(w.ID, 5, dlr.UserId, olr.Token)
+		rr = deleteUserFromWorkspaceTestFunc(5934759792, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspaceAndUser\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
 	})
 }

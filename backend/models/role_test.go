@@ -7,6 +7,9 @@ import (
 )
 
 func TestIsExist4Roles(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	roleNames := []string{
 		"Workspace Primary Owner",
 		"Workspace Owners",

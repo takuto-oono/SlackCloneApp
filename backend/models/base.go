@@ -102,4 +102,18 @@ func init() {
 		)
 	`, config.Config.ChannelsAndUserTableName)
 	DbConnection.Exec(cmd)
+
+	// create messages table
+	cmd = fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s 
+		(
+			id INT PRIMARY KEY NOT NULL,
+			text STRING NOT NULL,
+			date DATE NOT NULL,
+			channel_id INT NOT NULL,
+			user_id INT NOT NULL
+		)
+	`, config.Config.MessagesTableName)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 }

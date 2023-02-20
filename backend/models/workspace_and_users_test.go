@@ -7,6 +7,9 @@ import (
 )
 
 func TestNewWorkspaceAndUsers(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 10; i++ {
 		workspaceId := i + 1
 		for j := 0; j < 100; j++ {
@@ -21,6 +24,9 @@ func TestNewWorkspaceAndUsers(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 10; i++ {
 		workspaceId := i + 1
 		for j := 0; j < 100; j++ {
@@ -36,6 +42,9 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetWorkspaceAndUserByWorkspaceIdAndUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 10; i++ {
 		workspaceId := i + 1 + 100
 		for j := 0; j < 100; j++ {
@@ -56,6 +65,9 @@ func TestGetWorkspaceAndUserByWorkspaceIdAndUserId(t *testing.T) {
 }
 
 func TestDeleteWorkspaceAndUser(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 10; i++ {
 		workspaceId := i + 200
 		for j := 0; j < 100; j++ {
@@ -76,6 +88,9 @@ func TestDeleteWorkspaceAndUser(t *testing.T) {
 }
 
 func TestGetRoleIdByWorkspaceIdAndUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	wau := NewWorkspaceAndUsers(37598379769, uint32(793457957), 3)
 	wau.Create()
 	roleId, err := GetRoleIdByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)

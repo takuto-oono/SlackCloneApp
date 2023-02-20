@@ -4,6 +4,14 @@ import (
 	"backend/models"
 )
 
+func HasPermissionAddUserInWorkspace(userId uint32, workspaceId int) bool {
+	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+	if err != nil {
+		return false
+	}
+	return wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3
+}
+
 func HasPermissionRenamingWorkspaceName(workspaceId int, userId uint32) (bool, error) {
 	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
 	if err != nil {
