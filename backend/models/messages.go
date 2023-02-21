@@ -53,3 +53,28 @@ func (m *Message) Create() error {
 	_, err := DbConnection.Exec(cmd, m.ID, m.Text, m.Date, m.ChannelId, m.UserId)
 	return err
 }
+
+func GetMessagesByChannelId(channelId int) ([]Message, error) {
+	res := make([]Message, 0)
+	cmd := fmt.Sprintf("SELECT id, text, date, channel_id, user_id FROM %s WHERE channel_id = ? ORDER BY date DESC", config.Config.MessagesTableName)
+	rows, err := DbConnection.Query(cmd, channelId)
+	if err != nil {
+		return res, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var m Message
+		err := rows.Scan(
+			&m.ID,
+			&m.Text,
+			&m.Date,
+			&m.ChannelId,
+			&m.UserId,
+		)
+		if err != nil {
+			return res, err
+		}
+		res = append(res, m)
+	}
+	return res, nil
+}

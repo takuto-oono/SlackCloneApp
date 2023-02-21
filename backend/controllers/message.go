@@ -7,6 +7,7 @@ import (
 
 	"backend/controllerUtils"
 	"backend/models"
+	"strconv"
 )
 
 func SendMessage(c *gin.Context) {
@@ -46,4 +47,34 @@ func SendMessage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, m)
+}
+
+func GetAllMessagesFromChannel(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// path parameterからchannel_idを取得する
+	channelId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// channelにuserが所属していることを確認
+	if b, err := controllerUtils.IsExistCAUByChannelIdAndUserId(channelId, userId); !b || err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist user in channel"})
+		return
+	}
+
+	messages, err := models.GetMessagesByChannelId(channelId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, messages)
 }

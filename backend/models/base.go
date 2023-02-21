@@ -109,7 +109,7 @@ func init() {
 		(
 			id INT PRIMARY KEY NOT NULL,
 			text STRING NOT NULL,
-			date DATE NOT NULL,
+			date STRING NOT NULL,
 			channel_id INT NOT NULL,
 			user_id INT NOT NULL
 		)
