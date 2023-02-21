@@ -1,4 +1,5 @@
 import React from 'react'
+import { login } from 'pages/fetchAPI/login'
 
 // Propsインタフェース
 interface PropsInterface {
@@ -23,23 +24,22 @@ class LoginForm extends React.Component<PropsInterface, StateInterface> {
     this.onClick_Submit = this.onClick_Submit.bind(this);
   }
 
+  // フォーム変更：名前
   private onChange_Name(event:any) {
     this.setState({name: event.target.value});
   }
- 
-  // フォーム変更：本文
+
+  // フォーム変更：パスワード
   private onChange_Password(event:any) {
     this.setState({ password: event.target.value });
-    
   }
 
-  
-  // クリック：登録
-  private onClick_Submit() {
-    alert(this.state.name + " " + this.state.password);
+  // クリック：ログイン
+  private async onClick_Submit() {
+    let user = { name: this.state.name, password: this.state.password }
+    login(user)
   }
 
-  
 
   render() {
     return (
@@ -53,7 +53,6 @@ class LoginForm extends React.Component<PropsInterface, StateInterface> {
           <input type="password" value={this.state.password} onChange={(e) => this.onChange_Password(e)} />
         </label>
         <button onClick={this.onClick_Submit}>ログイン</button>
-        
       </div>
     )
   }
