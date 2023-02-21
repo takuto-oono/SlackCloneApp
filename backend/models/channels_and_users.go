@@ -7,9 +7,9 @@ import (
 )
 
 type ChannelsAndUsers struct {
-	ChannelId int
-	UserId    uint32
-	IsAdmin   bool
+	ChannelId int    `json:"channel_id"`
+	UserId    uint32 `json:"user_id"`
+	IsAdmin   bool   `json:"is_admin"`
 }
 
 func NewChannelsAndUses(channelId int, userId uint32, isAdmin bool) *ChannelsAndUsers {
@@ -24,6 +24,16 @@ func (cau *ChannelsAndUsers) Create() error {
 	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, user_id, is_admin) VALUES (?, ?, ?)", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId, cau.IsAdmin)
 	return err
+}
+
+func GetCAUByChannelIdAndUserId(channelId int, userId uint32) (ChannelsAndUsers, error) {
+	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
+	row := DbConnection.QueryRow(cmd, channelId, userId)
+	var cau ChannelsAndUsers
+	if err := row.Scan(&cau.ChannelId, &cau.UserId, &cau.IsAdmin); err != nil {
+		return ChannelsAndUsers{}, err
+	}
+	return cau, nil
 }
 
 func IsExistCAUByChannelIdAndUserId(channelId int, userId uint32) bool {

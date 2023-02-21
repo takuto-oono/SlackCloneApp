@@ -33,6 +33,12 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
+	// channelにuserが参加しているかを確認
+	if b, err := controllerUtils.IsExistCAUByChannelIdAndUserId(m.ChannelId, userId); !b || err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist user in channel"})
+		return
+	}
+
 	// message情報をDBに登録
 	if err := m.Create(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

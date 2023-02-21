@@ -28,6 +28,26 @@ func TestCreateChannelAndUsers(t *testing.T) {
 	assert.Empty(t, cau.Create())
 }
 
+func TestGetCAUByChannelIdAndUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	
+	channelId := 7592792472623
+	userId := uint32(137201051)
+
+	cau := NewChannelsAndUses(channelId, userId, false)
+	assert.Empty(t, cau.Create())
+
+	res, err := GetCAUByChannelIdAndUserId(channelId, userId)
+	assert.Empty(t, err)
+	assert.Equal(t, *cau, res)
+
+	_, err = GetCAUByChannelIdAndUserId(-1, userId)
+	assert.NotEmpty(t, err)		
+}
+
+
 func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
