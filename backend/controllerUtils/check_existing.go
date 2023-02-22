@@ -1,6 +1,8 @@
 package controllerUtils
 
 import (
+	"fmt"
+
 	"backend/models"
 )
 
@@ -22,4 +24,13 @@ func IsExistCAUByChannelIdAndUserId(channelId int, userId uint32) (bool, error) 
 		return false, err
 	}
 	return cau.ChannelId == channelId && cau.UserId == userId, nil
+}
+
+func IsExistUserSameUsernameAndPassword(userName, password string) bool {
+	u, err := models.GetUserByNameAndPassword(userName, password)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return u.Name == userName && u.PassWord == password
 }
