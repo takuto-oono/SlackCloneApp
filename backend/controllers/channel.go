@@ -27,7 +27,7 @@ func CreateChannel(c *gin.Context) {
 	ch := models.NewChannel(0, in.Name, in.Description, *in.IsPrivate, false, in.WorkspaceId)
 
 	// workspaceIdに対応するworkspaceが存在するか確認
-	if !models.IsExistWorkspaceById(ch.WorkspaceId) {
+	if !controllerUtils.IsExistWorkspaceById(ch.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace"})
 		return
 	}

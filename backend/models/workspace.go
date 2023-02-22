@@ -42,26 +42,12 @@ func (w *Workspace) CreateWorkspace() error {
 	return err
 }
 
-func GetWorkspaceByName(name string) (Workspace, error) {
-	if name == "" {
-		return Workspace{}, fmt.Errorf("not found workspace name")
-	}
-	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE name = ?", config.Config.WorkspaceTableName)
-	row := DbConnection.QueryRow(cmd, name)
+func GetWorkspaceById(id int) (Workspace, error) {
 	var w Workspace
+	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE id = ?", config.Config.WorkspaceTableName)
+	row := DbConnection.QueryRow(cmd, id)
 	err := row.Scan(&w.ID, &w.Name, &w.PrimaryOwnerId)
-	if err != nil {
-		return Workspace{}, err
-	}
-
-	if w.ID == 0 || w.Name == "" || w.PrimaryOwnerId == 0 {
-		return Workspace{}, fmt.Errorf("find empty fields")
-	}
-
-	if w.Name != name {
-		return Workspace{}, fmt.Errorf("find wrong workspace")
-	}
-	return w, nil
+	return w, err
 }
 
 func (w *Workspace) RenameWorkspaceName() error {
@@ -71,18 +57,4 @@ func (w *Workspace) RenameWorkspaceName() error {
 	cmd := fmt.Sprintf("UPDATE %s SET name = ? WHERE id = ?", config.Config.WorkspaceTableName)
 	_, err := DbConnection.Exec(cmd, w.Name, w.ID)
 	return err
-}
-
-func IsExistWorkspaceById(workspaceId int) bool {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE id = ?", config.Config.WorkspaceTableName)
-	rows, err := DbConnection.Query(cmd, workspaceId)
-	if err != nil {
-		return false
-	}
-	defer rows.Scan()
-	cnt := 0
-	for rows.Next() {
-		cnt += 1
-	}
-	return cnt == 1
 }

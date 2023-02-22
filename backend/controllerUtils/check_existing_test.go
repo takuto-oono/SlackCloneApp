@@ -45,5 +45,13 @@ func TestIsExistUserSameUsernameAndPassword(t *testing.T) {
 		assert.Equal(t, false, IsExistUserSameUsernameAndPassword(name, "wrong pass"))
 		assert.Equal(t, false, IsExistUserSameUsernameAndPassword(name+" wrong name", "pass"))
 	}
-
+}
+func TestIsExistWorkspaceAndUser(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	w := models.NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
+	w.CreateWorkspace()
+	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
+	assert.Equal(t, false, IsExistWorkspaceById(-1))
 }

@@ -34,3 +34,11 @@ func IsExistUserSameUsernameAndPassword(userName, password string) bool {
 	}
 	return u.Name == userName && u.PassWord == password
 }
+
+func IsExistWorkspaceById(id int) bool {
+	w, err := models.GetWorkspaceById(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return w.ID == id
+}
