@@ -27,7 +27,7 @@ func CreateChannel(c *gin.Context) {
 	ch := models.NewChannel(0, in.Name, in.Description, *in.IsPrivate, false, in.WorkspaceId)
 
 	// workspaceIdに対応するworkspaceが存在するか確認
-	if !models.IsExistWorkspaceById(ch.WorkspaceId) {
+	if !controllerUtils.IsExistWorkspaceById(ch.WorkspaceId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace"})
 		return
 	}
@@ -44,8 +44,7 @@ func CreateChannel(c *gin.Context) {
 	}
 
 	// userが対象のworkspaceに参加しているか確認
-	wau := models.NewWorkspaceAndUsers(ch.WorkspaceId, userId, 0)
-	if !wau.IsExistWorkspaceAndUser() {
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found user in workspace"})
 		return
 	}
@@ -93,15 +92,13 @@ func AddUserInChannel(c *gin.Context) {
 	}
 	
 	// リクエストしたuserがworkspaceに参加してるかを確認
-	rwau := models.NewWorkspaceAndUsers(ch.WorkspaceId, userId, 0)
-	if !rwau.IsExistWorkspaceAndUser() {
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist request user in workspace"})
 		return
 	}
 
 	// 追加されるuserがworkspaceに参加しているかを確認
-	awau := models.NewWorkspaceAndUsers(ch.WorkspaceId, cau.UserId, 0)
-	if !awau.IsExistWorkspaceAndUser() {
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, cau.UserId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not exist added user in workspace"})
 		return
 	}
@@ -167,15 +164,13 @@ func DeleteUserFromChannel(c *gin.Context) {
 	}
 
 	// requestしたuserがworkspaceにいることを確認
-	rwau := models.NewWorkspaceAndUsers(workspaceId, userId, 0)
-	if !rwau.IsExistWorkspaceAndUser() {
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found request user in workspace"})
 		return
 	}
 
 	// deleteされるuserがworkspaceにいることを確認
-	wau := models.NewWorkspaceAndUsers(workspaceId, cau.UserId, 0)
-	if !wau.IsExistWorkspaceAndUser() {
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, cau.UserId) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "not found user in workspace"})
 		return
 	}

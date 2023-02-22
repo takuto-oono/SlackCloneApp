@@ -9,6 +9,9 @@ import (
 )
 
 func TestGetUserIdFromToken(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 1000; i++ {
 		userId := rand.Uint32()
 		jwtToken, _ := GenerateToken(userId)
@@ -20,6 +23,9 @@ func TestGetUserIdFromToken(t *testing.T) {
 }
 
 func TestGenerateJWTToken(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for i := 0; i < 1000; i++ {
 		token, err := GenerateToken(rand.Uint32())
 		assert.Empty(t, err)

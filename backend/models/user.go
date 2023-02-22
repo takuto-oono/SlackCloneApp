@@ -26,21 +26,6 @@ func (user *User) Create() error {
 	return err
 }
 
-func GetUserByName(name string) (User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = ?", config.Config.UserTableName)
-	row := DbConnection.QueryRow(cmd, name)
-	var user User
-	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
-	if err != nil {
-		return User{}, err
-	}
-	if user.Name == "" || user.PassWord == "" {
-		err = fmt.Errorf("not found name = %s", name)
-		return User{}, err
-	}
-	return user, nil
-}
-
 func GetUserById(id uint32) (User, error) {
 	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE id = ?", config.Config.UserTableName)
 	row := DbConnection.QueryRow(cmd, id)
@@ -56,22 +41,10 @@ func GetUserById(id uint32) (User, error) {
 	return user, nil
 }
 
-func (u *User) IsExistUserSameUsernameAndPassword() (bool, error) {
+func GetUserByNameAndPassword(username, password string) (User, error) {
 	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = ? AND password = ?", config.Config.UserTableName)
-	rows, err := DbConnection.Query(cmd, u.Name, u.PassWord)
-	if err != nil {
-		return false, err
-	}
-	defer rows.Close()
-	cnt := 0
-	for rows.Next() {
-		cnt += 1
-	}
-	return cnt != 0, nil
-}
-
-func (u *User) GetUserByNameAndPassword() error {
-	cmd := fmt.Sprintf("SELECT id FROM %s WHERE name = ? AND password = ?", config.Config.UserTableName)
-	row := DbConnection.QueryRow(cmd, u.Name, u.PassWord)
-	return row.Scan(&u.ID)
+	row := DbConnection.QueryRow(cmd, username, password)
+	var u User
+	err := row.Scan(&u.ID, &u.Name, &u.PassWord)
+	return u, err
 }

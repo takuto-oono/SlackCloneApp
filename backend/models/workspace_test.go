@@ -74,19 +74,10 @@ func TestRenameWorkspaceName(t *testing.T) {
 	w.Name = "new name"
 	err := w.RenameWorkspaceName()
 	assert.Empty(t, err)
-	w2, err := GetWorkspaceByName("new name")
+	w2, err := GetWorkspaceById(w.ID)
 	assert.Empty(t, err)
 	assert.Equal(t, w2.ID, w.ID)
 	assert.Equal(t, w2.Name, w.Name)
 	assert.Equal(t, w2.PrimaryOwnerId, w.PrimaryOwnerId)
 }
 
-func TestIsExistWorkspaceAndUser(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	w := NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
-	w.CreateWorkspace()
-	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
-	assert.Equal(t, false, IsExistWorkspaceById(-1))
-}
