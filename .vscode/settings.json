@@ -6,6 +6,7 @@
         "gonic",
         "mattn",
         "rwau",
-        "structs"
+        "structs",
+        "waus"
     ]
 }
