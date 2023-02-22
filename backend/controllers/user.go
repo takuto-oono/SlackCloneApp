@@ -25,7 +25,7 @@ func SignUp(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "username pr password is blank"})
 	// 	return
 	// }
-	
+
 	ui, err := controllerUtils.InputSignUpAndLogin(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

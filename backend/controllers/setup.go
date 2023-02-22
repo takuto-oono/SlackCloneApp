@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 
 	message := api.Group("/message")
 	message.POST("/send", SendMessage)
-	message.GET("/get_from_channel/:channel_id")
+	message.GET("/get_from_channel/:channel_id", GetAllMessagesFromChannel)
 
 	return r
 }

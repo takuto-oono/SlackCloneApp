@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -18,7 +17,7 @@ func init() {
 	var err error
 	DbConnection, err = sql.Open(driver, dbName)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
 	}
 
 	// create users table
@@ -88,8 +87,7 @@ func init() {
 			workspace_id INT NOT NULL
 		)
 	`, config.Config.ChannelsTableName)
-	_, err = DbConnection.Exec(cmd)
-	fmt.Println(err)
+	DbConnection.Exec(cmd)
 
 	// create channels_and_users table
 	cmd = fmt.Sprintf(`
@@ -114,6 +112,5 @@ func init() {
 			user_id INT NOT NULL
 		)
 	`, config.Config.MessagesTableName)
-	_, err = DbConnection.Exec(cmd)
-	fmt.Println(err)
+	DbConnection.Exec(cmd)
 }

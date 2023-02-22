@@ -58,7 +58,7 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 	}
 
 	// path parameterからchannel_idを取得する
-	channelId, err := strconv.Atoi(c.Param("workspace_id"))
+	channelId, err := strconv.Atoi(c.Param("channel_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -70,6 +70,7 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 		return
 	}
 
+	// DBからデータを取得
 	messages, err := models.GetMessagesByChannelId(channelId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
