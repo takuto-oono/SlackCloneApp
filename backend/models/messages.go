@@ -1,42 +1,46 @@
 package models
 
 import (
+	"fmt"
+
 	"backend/config"
 	"backend/utils"
-	"fmt"
 )
-
 
 type Message struct {
 	ID        int    `json:"id"`
 	Text      string `json:"text"`
-	Date      string   `json:"date"`
+	Date      string `json:"date"`
 	ChannelId int    `json:"channel_id"`
 	UserId    uint32 `json:"user_id"`
 }
 
 func NewMessage(text string, channelId int, userId uint32) *Message {
-	return &Message {
-		ID: 0,
-		Text: text,
-		Date: "",
+	return &Message{
+		ID:        0,
+		Text:      text,
+		Date:      "",
 		ChannelId: channelId,
-		UserId: userId,
+		UserId:    userId,
 	}
 }
 
 func (m *Message) SetID() error {
-	cmd := fmt.Sprintf("SELECT * FROM %s", config.Config.MessagesTableName)
+	cmd := fmt.Sprintf("SELECT id FROM %s", config.Config.MessagesTableName)
 	rows, err := DbConnection.Query(cmd)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	cnt := 0
+	maxId := 0
 	for rows.Next() {
-		cnt ++
+		var id int
+		rows.Scan(&id)
+		if id > maxId {
+			maxId = id
+		}
 	}
-	m.ID = cnt + 1
+	m.ID = maxId + 1
 	return nil
 }
 
