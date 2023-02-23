@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -32,7 +33,7 @@ func CreateWorkspace(c *gin.Context) {
 	w := models.NewWorkspace(0, in.Name, in.RequestUserId)
 
 	// dbに保存
-	if err := w.CreateWorkspace(); err != nil {
+	if err := w.Create(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}

@@ -1,10 +1,11 @@
 package models
 
 import (
-	"backend/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"backend/utils"
 )
 
 func TestCreateMessage(t *testing.T) {
@@ -57,7 +58,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 			assert.Equal(t, channelId, m.ChannelId)
 			assert.Equal(t, userId, m.UserId)
 			assert.Equal(t, texts[0], m.Text)
-		}	
+		}
 	})
 
 	t.Run("2 messageが存在しない場合", func(t *testing.T) {

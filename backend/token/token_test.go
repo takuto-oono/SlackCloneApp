@@ -1,7 +1,6 @@
 package token
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -17,7 +16,6 @@ func TestGetUserIdFromToken(t *testing.T) {
 		jwtToken, _ := GenerateToken(userId)
 		returnUserId, err := GetUserIdFromToken(jwtToken)
 		assert.Empty(t, err)
-		fmt.Println(returnUserId, userId)
 		assert.Equal(t, returnUserId, userId)
 	}
 }
