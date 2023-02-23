@@ -20,21 +20,31 @@ func NewWorkspace(id int, name string, primaryOwnerId uint32) *Workspace {
 	}
 }
 
-func (w *Workspace) CreateWorkspace() error {
-	cmd := fmt.Sprintf("SELECT * FROM %s", config.Config.WorkspaceTableName)
+func (w *Workspace) SetId() error {
+	cmd := fmt.Sprintf("SELECT id FROM %s", config.Config.WorkspaceTableName)
 	rows, err := DbConnection.Query(cmd)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	cnt := 0
+	maxId := 0
 	for rows.Next() {
-		cnt ++
+		var id int
+		rows.Scan(&id)
+		if id > maxId {
+			maxId = id
+		}
 	}
-	w.ID = cnt + 1
+	w.ID = maxId + 1
+	return nil
+}
 
-	cmd = fmt.Sprintf("INSERT INTO %s (id, name, workspace_primary_owner_id) VALUES (?, ?, ?)", config.Config.WorkspaceTableName)
-	_, err = DbConnection.Exec(cmd, w.ID, w.Name, w.PrimaryOwnerId)
+func (w *Workspace) Create() error {
+	if err := w.SetId(); err != nil {
+		return err
+	}
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name, workspace_primary_owner_id) VALUES (?, ?, ?)", config.Config.WorkspaceTableName)
+	_, err := DbConnection.Exec(cmd, w.ID, w.Name, w.PrimaryOwnerId)
 	if err != nil {
 		fmt.Println(err)
 		return err

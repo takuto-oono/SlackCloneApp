@@ -1,12 +1,13 @@
 package controllerUtils
 
 import (
-	"backend/models"
 	"math/rand"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"backend/models"
 )
 
 func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
@@ -52,7 +53,7 @@ func TestIsExistWorkspaceAndUser(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	w := models.NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
-	w.CreateWorkspace()
+	w.Create()
 	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
 	assert.Equal(t, false, IsExistWorkspaceById(-1))
 }
@@ -63,8 +64,8 @@ func TestIsExistWAUByWorkspaceIdAndUserId(t *testing.T) {
 	}
 
 	waus := make([]models.WorkspaceAndUsers, 10)
-	for i := 0; i < 10; i ++ {
-		waus[i] = *models.NewWorkspaceAndUsers(int(rand.Uint32()), rand.Uint32(), rand.Int() % 4 + 1)
+	for i := 0; i < 10; i++ {
+		waus[i] = *models.NewWorkspaceAndUsers(int(rand.Uint32()), rand.Uint32(), rand.Int()%4+1)
 	}
 	for _, wau := range waus {
 		assert.Empty(t, wau.Create())

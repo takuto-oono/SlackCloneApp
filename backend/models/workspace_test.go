@@ -40,7 +40,7 @@ func TestCreateWorkspace(t *testing.T) {
 
 	for i := 0; i < numbersOfTests; i++ {
 		w := NewWorkspace(0, names[i], primaryOwnerIds[i])
-		err := w.CreateWorkspace()
+		err := w.Create()
 		assert.Empty(t, err)
 	}
 
@@ -58,10 +58,10 @@ func TestCreateWorkspace(t *testing.T) {
 	// workspace nameが既に存在する場合 error
 	name := "testCreateWorkspaceDuplicate"
 	w := NewWorkspace(0, name, uint32(2))
-	err := w.CreateWorkspace()
+	err := w.Create()
 	assert.Empty(t, err)
 	w2 := NewWorkspace(0, name, uint32(1))
-	err = w2.CreateWorkspace()
+	err = w2.Create()
 	assert.NotEmpty(t, err)
 }
 
@@ -70,7 +70,7 @@ func TestRenameWorkspaceName(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	w := NewWorkspace(3333, "old name", 3)
-	w.CreateWorkspace()
+	w.Create()
 	w.Name = "new name"
 	err := w.RenameWorkspaceName()
 	assert.Empty(t, err)

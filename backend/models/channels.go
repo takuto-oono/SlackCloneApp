@@ -26,21 +26,31 @@ func NewChannel(id int, name, description string, isPrivate, isArchive bool, wor
 	}
 }
 
-func (c *Channel) Create() error {
-	cmd := fmt.Sprintf("SELECT * FROM %s", config.Config.ChannelsTableName)
+func (c *Channel) SetId() error {
+	cmd := fmt.Sprintf("SELECT id FROM %s", config.Config.ChannelsTableName)
 	rows, err := DbConnection.Query(cmd)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	cnt := 0
+	maxId := 0
 	for rows.Next() {
-		cnt++
+		var id int
+		rows.Scan(&id)
+		if id > maxId {
+			maxId = id
+		}
 	}
-	c.ID = cnt + 1
+	c.ID = maxId + 1
+	return nil
+}
 
-	cmd = fmt.Sprintf("INSERT INTO %s (id, name, description, is_private, is_archive, workspace_id) VALUES (?, ?, ?, ?, ?, ?)", config.Config.ChannelsTableName)
-	_, err = DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
+func (c *Channel) Create() error {
+	if err := c.SetId(); err != nil {
+		return err
+	}
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name, description, is_private, is_archive, workspace_id) VALUES (?, ?, ?, ?, ?, ?)", config.Config.ChannelsTableName)
+	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
 	return err
 }
 
