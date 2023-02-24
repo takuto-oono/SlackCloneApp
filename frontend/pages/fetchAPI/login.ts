@@ -3,9 +3,15 @@ export interface User {
     password: string;
 }
 
+export interface currentUser {
+  token: string;
+  user_id: string;
+  username: string;
+}
+
 const baseUrl = 'http://localhost:8080/api/user/'
 
-export async function login(user: User): Promise<User> {
+export async function login(user: User): Promise<currentUser> {
     const url = baseUrl + 'login'
 
     try {
@@ -19,16 +25,27 @@ export async function login(user: User): Promise<User> {
                 password: user.password,
             })
         })
-        console.log(res)
-        const currentuser = await res.json()
+      console.log(res)
+      const tempUser = await res.json()
+
+      return new Promise((resolve) => {
+        const currentuser: currentUser = {
+          token: tempUser.token,
+          user_id: tempUser.user_id,
+          username: tempUser.username
+        };
         console.log(currentuser)
-        // Dom
-        const Token = currentuser.token;
-        console.log(Token)
-        alert(Token)
+        resolve(currentuser);
+      });
+      
 
     } catch (err) {
         console.log(err)
-    }
-    return user
+  }
+  const currentuser = {
+    token: "no_token",
+    user_id: "no_user_id",
+    username: "no_username"
+  }
+  return currentuser
 }

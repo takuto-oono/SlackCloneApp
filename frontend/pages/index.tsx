@@ -1,6 +1,8 @@
 // import TestAPI1 from "./api/test_api_1";
 // import { User, getUsers, getUserById, postUser, updateUser, deleteUser, } from "./fetchAPI/user";
+import React from "react";
 import LoginForm from "./component/login_form";
+import { CookiesProvider } from "react-cookie";
 // import testAPI1 from "./api/test_api_1";
 export default function Home() {
 
@@ -13,10 +15,14 @@ export default function Home() {
   // let userRes = postUser(user)
   // console.log(userRes)
   return (
-    <main>
-      <h1>hello nextjs</h1>
-      <h2>login</h2>
-      < LoginForm />
-    </main>
+    <CookiesProvider>
+      <main>
+        <h1>hello nextjs</h1>
+        <h2>login</h2>
+          < LoginForm />
+      </main>
+    </CookiesProvider>
   )
 }
+
+
