@@ -29,11 +29,11 @@ function Cookie_test() {
   return (
     <div className="App">
         <label>名前
-          <input type="text" value={ name } name="name" onChange={(e) => nameChange(e)} />/ 
-        </label>
+          <input type="text" value={ name } name="name" onChange={(e) => nameChange(e)} />
+        </label><br />
         <label>パスワード
-          <input type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} />/ 
-        </label>
+          <input type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} />
+        </label><br />
         <button onClick={handleSubmit} >ログイン</button>
         <button onClick={handleDelete}>ログアウト</button>
     </div>

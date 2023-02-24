@@ -9,10 +9,10 @@ export interface currentUser {
   username: string;
 }
 
-const baseUrl = 'http://localhost:8080/api/user/'
+const baseUrl = 'http://localhost:8080/api/user/';
 
 export async function login(user: User): Promise<currentUser> {
-    const url = baseUrl + 'login'
+  const url = baseUrl + 'login';
 
     try {
         const res = await fetch(url, {
@@ -25,8 +25,8 @@ export async function login(user: User): Promise<currentUser> {
                 password: user.password,
             })
         })
-      console.log(res)
-      const tempUser = await res.json()
+      console.log(res);
+      const tempUser = await res.json();
 
       return new Promise((resolve) => {
         const currentuser: currentUser = {
@@ -34,18 +34,18 @@ export async function login(user: User): Promise<currentUser> {
           user_id: tempUser.user_id,
           username: tempUser.username
         };
-        console.log(currentuser)
+        console.log(currentuser);
         resolve(currentuser);
       });
       
 
     } catch (err) {
-        console.log(err)
+      console.log(err);
   }
   const currentuser = {
     token: "no_token",
     user_id: "no_user_id",
     username: "no_username"
   }
-  return currentuser
+  return currentuser;
 }
