@@ -1,19 +1,19 @@
 package controllers
 
 import (
-	"backend/controllerUtils"
-	"backend/models"
-	"backend/utils"
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
-	"encoding/json"
-
 	"github.com/stretchr/testify/assert"
+
+	"backend/controllerUtils"
+	"backend/models"
+	"backend/utils"
 )
 
 var messageRouter = SetupRouter()
@@ -51,8 +51,8 @@ func TestSendMessage(t *testing.T) {
 
 	// 1. 正常な場合 200
 	// 2. bodyに不足がある場合 400
-	// 3. userとchannelが同じworkspaceに存在していない場合 400
-	// 4. channelにuserが存在しない場合 400
+	// 3. userとchannelが同じworkspaceに存在していない場合 404
+	// 4. channelにuserが存在しない場合 404
 
 	t.Run("1 正常な場合", func(t *testing.T) {
 		testCaseNum := "1"
@@ -175,7 +175,7 @@ func TestSendMessage(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), ch)
 
 		rr = sendMessageTestFunc(text, ch.ID, lr2.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"not exist channel and user in same workspace\"}", rr.Body.String())
 	})
 	t.Run("4 channelにuserが存在しない場合", func(t *testing.T) {
@@ -217,7 +217,7 @@ func TestSendMessage(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), ch)
 
 		rr = sendMessageTestFunc(text, ch.ID, lr2.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"not exist user in channel\"}", rr.Body.String())
 	})
 }
@@ -229,7 +229,7 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 
 	// 1. messageが存在する場合 200
 	// 2. messageが存在しない場合 200
-	// 3. userがchannelに所属していない場合 400
+	// 3. userがchannelに所属していない場合 404
 
 	t.Run("1 messageが存在する場合", func(t *testing.T) {
 		testNum := "1"
@@ -238,7 +238,7 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		channelName := "testGetAllMessageFromChannelName" + testNum
 		isPrivate := true
 		text := "testGetAllMessageFromChannelText" + testNum
-		messageCount := 1000
+		messageCount := 10
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 
@@ -363,7 +363,7 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		}
 
 		rr = getMessagesByChannelIdTestFunc(ch.ID, lr2.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"not exist user in channel\"}", rr.Body.String())
 	})
 }

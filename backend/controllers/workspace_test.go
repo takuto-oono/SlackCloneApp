@@ -214,10 +214,11 @@ func TestAddUserInWorkspace(t *testing.T) {
 	}
 	// 1. 正常な場合 200
 	// 2. requestのbodyの情報に不足がある場合 400
-	// 3. 存在しないworkspaceIdだった場合 400
-	// 4. requestしたユーザーがrole = 1 or role = 2 or role = 3でない場合 400
+	// 3. 存在しないworkspaceIdだった場合 404
+	// 4. requestしたユーザーがrole = 1 or role = 2 or role = 3でない場合 403
 	// 5. 追加されるユーザーがrole = 1の場合 400
-	// 6. 既に登録されているユーザーを追加する場合 400
+	// 6. 既に登録されているユーザーを追加する場合 409
+	// テスト6は現状500を返している
 
 	// 1
 	t.Run("1", func(t *testing.T) {
@@ -319,7 +320,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), w)
 
 		rr = addUserWorkspaceTestFunc(10000000000000000, addUserRoleId, alr.UserId, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"not found workspace\"}", rr.Body.String())
 	})
 
@@ -370,7 +371,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		assert.Equal(t, addUserRoleId, wau.RoleId)
 
 		rr = addUserWorkspaceTestFunc(w.ID, addUserRoleId, alr.UserId, rlr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"Unauthorized add user in workspace\"}", rr.Body.String())
 
 	})
@@ -446,7 +447,8 @@ func TestAddUserInWorkspace(t *testing.T) {
 		assert.Equal(t, addUserRoleId, wau.RoleId)
 
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		// TODO 409 errorにする
 		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
 
 	})
@@ -455,10 +457,10 @@ func TestAddUserInWorkspace(t *testing.T) {
 func TestRenameWorkspaceName(t *testing.T) {
 	// 1. 正常時 200
 	// 2. headerに認証情報がない場合 400
-	// 3. 認証が正常にできない場合 400
-	// 4. 認証したユーザーがworkspaceに参加していない場合 400
-	// 5. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれか出ない場合 400
-	// 6. 変更したいNameがすでに使用されていた場合 400
+	// 3. 認証が正常にできない場合 401
+	// 4. 認証したユーザーがworkspaceに参加していない場合 404
+	// 5. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれか出ない場合 403
+	// 6. 変更したいNameがすでに使用されていた場合 409
 
 }
 
@@ -469,9 +471,9 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	// 1. 正常時 200
 	// 2. bodyにworkspaceId, userId, roleIdのいずれかが含まれていない場合 400
-	// 3. requestしたuserのrole = 4の場合
+	// 3. requestしたuserのrole = 4の場合 403
 	// 4. 削除されるユーザーのrole = 1の場合 400
-	// 5. 該当するUserがいない場合 400
+	// 5. 該当するUserがいない場合 404
 
 	// 1
 	t.Run("1", func(t *testing.T) {
@@ -597,7 +599,7 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
 		rr = deleteUserFromWorkspaceTestFunc(w.ID, dlr.UserId, rlr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"not permission\"}", rr.Body.String())
 	})
 
@@ -668,11 +670,11 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, deleteUserRoleId, dlr.UserId, olr.Token).Code)
 
 		rr = deleteUserFromWorkspaceTestFunc(w.ID, 441553453, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
 
 		rr = deleteUserFromWorkspaceTestFunc(5934759792, dlr.UserId, olr.Token)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
 	})
 }

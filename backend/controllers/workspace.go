@@ -25,7 +25,7 @@ func CreateWorkspace(c *gin.Context) {
 	}
 	// requestをしたuserとbodyのprimaryOwnerIdが等しいか確認
 	if in.RequestUserId != primaryOwnerId {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "not equal request user and primary owner id"})
 		return
 	}
 
@@ -34,7 +34,7 @@ func CreateWorkspace(c *gin.Context) {
 
 	// dbに保存
 	if err := w.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -43,14 +43,14 @@ func CreateWorkspace(c *gin.Context) {
 	err = wau.Create()
 	if err != nil {
 		// TODO deleteWorkspaceを実行する
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	// general channelを作成する
 	ch := models.NewChannel(0, "general", "all users join", false, false, w.ID)
 	if err := ch.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
 		return
@@ -59,7 +59,7 @@ func CreateWorkspace(c *gin.Context) {
 	// general channelにuserを追加する
 	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
 	if err := cau.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		// TODO deleteWorkspaceを実行する
 		// TODO deleteWorkspaceAndUsersを実行する
 		// TODO delete general channel
@@ -95,20 +95,20 @@ func AddUserInWorkspace(c *gin.Context) {
 
 	// workspaceが存在するか確認
 	if !controllerUtils.IsExistWorkspaceById(wau.WorkspaceId) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "not found workspace"})
 		return
 	}
 
 	// userIdがそのworkspaceで追加する権限を持っているかを判定(roleId == 1 or roleId == 2 or roleId == 3)
 	if !controllerUtils.HasPermissionAddUserInWorkspace(userId, wau.WorkspaceId) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Unauthorized add user in workspace"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "Unauthorized add user in workspace"})
 		return
 	}
 
 	// dbに保存する
 	err = wau.Create()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, wau)
@@ -140,17 +140,17 @@ func RenameWorkspaceName(c *gin.Context) {
 	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
 	b, err := controllerUtils.HasPermissionRenamingWorkspaceName(w.ID, userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	if !b {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "no permission renaming name of workspace"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "no permission renaming name of workspace"})
 		return
 	}
 
 	// データベースをupdate
 	if err := w.RenameWorkspaceName(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -171,20 +171,22 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
+
+	// 削除されるuserがワークスペースに存在するかを確認
 	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(in.WorkspaceId, in.UserId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
 
 	// requestしたuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかチェック
 	b, err := controllerUtils.HasPermissionDeletingUserFromWorkspace(wau.WorkspaceId, userId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	if !b {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not permission"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "not permission"})
 		return
 	}
 
@@ -195,7 +197,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 
 	if err := wau.DeleteWorkspaceAndUser(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, wau)
