@@ -59,7 +59,7 @@ func TestLogin(t *testing.T) {
 	// 1 正常な場合 200
 	// 2 usernameが同一のuserをpasswordで区別できているか 200
 	// 3 usernameかpasswordのどちらかがbodyに含まれていない場合 400
-	// 4 usernameとpasswordが一致するユーザーが存在しない場合 400
+	// 4 usernameとpasswordが一致するユーザーが存在しない場合 401
 
 	// 1
 	t.Run("1", func(t *testing.T) {
@@ -155,11 +155,11 @@ func TestLogin(t *testing.T) {
 		}
 		for i, name := range names {
 			if i%3 == 0 {
-				assert.Equal(t, http.StatusBadRequest, loginTestFunc(name, "wrongPass").Code)
+				assert.Equal(t, http.StatusUnauthorized, loginTestFunc(name, "wrongPass").Code)
 			} else if i%3 == 1 {
-				assert.Equal(t, http.StatusBadRequest, loginTestFunc(name, "wrongPass").Code)
+				assert.Equal(t, http.StatusUnauthorized, loginTestFunc(name, "wrongPass").Code)
 			} else {
-				assert.Equal(t, http.StatusBadRequest, loginTestFunc(name, "pass").Code)
+				assert.Equal(t, http.StatusUnauthorized, loginTestFunc(name, "pass").Code)
 			}
 		}
 	})
@@ -173,7 +173,7 @@ func TestSignUp(t *testing.T) {
 	// 1 普通の場合 200
 	// 2 usernameがuniqueでない場合 200
 	// 3 usernameかpasswordがbodyに含まれていない場合 400
-	// 4 usernameとpasswordが同一のuserが既に存在している場合 400
+	// 4 usernameとpasswordが同一のuserが既に存在している場合 409
 
 	// 1
 	t.Run("1", func(t *testing.T) {
@@ -218,7 +218,7 @@ func TestSignUp(t *testing.T) {
 		rr := signUpTestFunc(username, password)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		rr = signUpTestFunc(username, password)
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusConflict, rr.Code)
 		assert.Equal(t, "{\"message\":\"already exist same username and password\"}", rr.Body.String())
 	})
 }

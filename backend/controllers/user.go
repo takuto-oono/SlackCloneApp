@@ -37,13 +37,13 @@ func SignUp(c *gin.Context) {
 
 	// 既に同じuserNameとpasswordの組み合わせのユーザーが存在しないかを確認
 	if controllerUtils.IsExistUserSameUsernameAndPassword(u.Name, u.PassWord) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "already exist same username and password"})
+		c.JSON(http.StatusConflict, gin.H{"message": "already exist same username and password"})
 		return
 	}
 
 	// dbに登録
 	if err := u.Create(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -63,14 +63,14 @@ func Login(c *gin.Context) {
 	// usernameとpasswordからIDを特定
 	u, err := models.GetUserByNameAndPassword(input.Name, input.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
 	// jwtTokenを作成
 	token, err := token.GenerateToken(u.ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
