@@ -65,7 +65,7 @@ func deleteUserFromWorkspaceTestFunc(workspaceId int, userId uint32, jwtToken st
 		WorkspaceId: workspaceId,
 		UserId:      userId,
 	})
-	req, _ := http.NewRequest("POST", "/api/workspace/delete_user", bytes.NewBuffer(jsonInput))
+	req, _ := http.NewRequest("DELETE", "/api/workspace/delete_user", bytes.NewBuffer(jsonInput))
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
 	return rr
