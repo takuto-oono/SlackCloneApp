@@ -30,13 +30,13 @@ func SendMessage(c *gin.Context) {
 
 	// userとchannelが同じworkspaceに存在しているかを確認
 	if b, err := controllerUtils.IsExistChannelAndUserInSameWorkspace(m.ChannelId, userId); !b || err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist channel and user in same workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "channel and user not found in same workspace"})
 		return
 	}
 
 	// channelにuserが参加しているかを確認
 	if b, err := controllerUtils.IsExistCAUByChannelIdAndUserId(m.ChannelId, userId); !b || err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist user in channel"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in channel"})
 		return
 	}
 
@@ -66,7 +66,7 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 
 	// channelにuserが所属していることを確認
 	if b, err := controllerUtils.IsExistCAUByChannelIdAndUserId(channelId, userId); !b || err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist user in channel"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in channel"})
 		return
 	}
 

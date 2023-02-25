@@ -124,14 +124,14 @@ func TestCreateChannel(t *testing.T) {
 
 		rr = createChannelTestFunc("", description, &isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found name\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"name not found\"}", rr.Body.String())
 
 		rr = createChannelTestFunc(channelName, description, nil, lr.Token, w.ID)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found is_private\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"is_private not found\"}", rr.Body.String())
 		rr = createChannelTestFunc("", description, &isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found name\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"name not found\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
@@ -165,7 +165,7 @@ func TestCreateChannel(t *testing.T) {
 
 		rr = createChannelTestFunc(channelName, description, &isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user not found in workspace\"}", rr.Body.String())
 	})
 
 	t.Run("5", func(t *testing.T) {
@@ -293,11 +293,11 @@ func TestAddUserInChannel(t *testing.T) {
 
 		rr = addUserInChannelTestFunc(0, alr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"channel_id not found\"}", rr.Body.String())
 
 		rr = addUserInChannelTestFunc(c.ID, 0, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user_id not found\"}", rr.Body.String())
 	})
 
 	t.Run("3", func(t *testing.T) {
@@ -346,7 +346,7 @@ func TestAddUserInChannel(t *testing.T) {
 
 		rr = addUserInChannelTestFunc(c.ID, alr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not exist request user in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 
 	})
 
@@ -386,7 +386,7 @@ func TestAddUserInChannel(t *testing.T) {
 
 		rr = addUserInChannelTestFunc(c.ID, alr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not exist added user in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"added user not found in workspace\"}", rr.Body.String())
 	})
 
 	t.Run("6", func(t *testing.T) {
@@ -640,10 +640,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(0, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user_id or channel_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user_id or channel_id not found\"}", rr.Body.String())
 		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, 0, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user_id or channel_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user_id or channel_id not found\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
@@ -682,7 +682,7 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user not found in workspace\"}", rr.Body.String())
 	})
 
 	t.Run("5", func(t *testing.T) {
@@ -733,7 +733,7 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found request user in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 	})
 
 	t.Run("6", func(t *testing.T) {
@@ -824,7 +824,7 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel in workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"channel not found in workspace\"}", rr.Body.String())
 	})
 
 	t.Run("8", func(t *testing.T) {
@@ -911,7 +911,7 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(c.ID, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user in channel\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user not found in channel\"}", rr.Body.String())
 	})
 
 	t.Run("10", func(t *testing.T) {
@@ -1124,11 +1124,11 @@ func TestDeleteChannel(t *testing.T) {
 
 		rr = deleteChannelTestFunc(0, w.ID, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel_id or workspace_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"channel_id or workspace_id not found\"}", rr.Body.String())
 
 		rr = deleteChannelTestFunc(c.ID, 0, rlr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found channel_id or workspace_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"channel_id or workspace_id not found\"}", rr.Body.String())
 	})
 
 	t.Run("3", func(t *testing.T) {

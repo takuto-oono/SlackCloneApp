@@ -28,7 +28,7 @@ func CreateChannel(c *gin.Context) {
 
 	// workspaceIdに対応するworkspaceが存在するか確認
 	if !controllerUtils.IsExistWorkspaceById(ch.WorkspaceId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "workspace not found"})
 		return
 	}
 
@@ -45,7 +45,7 @@ func CreateChannel(c *gin.Context) {
 
 	// userが対象のworkspaceに参加しているか確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, userId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found user in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
 		return
 	}
 
@@ -93,13 +93,13 @@ func AddUserInChannel(c *gin.Context) {
 
 	// リクエストしたuserがworkspaceに参加してるかを確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, userId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist request user in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "request user not found in workspace"})
 		return
 	}
 
 	// 追加されるuserがworkspaceに参加しているかを確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(ch.WorkspaceId, cau.UserId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist added user in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "added user not found in workspace"})
 		return
 	}
 
@@ -110,7 +110,7 @@ func AddUserInChannel(c *gin.Context) {
 		return
 	}
 	if !b {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not exist channel in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "channel not found in workspace"})
 		return
 	}
 
@@ -159,19 +159,19 @@ func DeleteUserFromChannel(c *gin.Context) {
 
 	// bodyに必要な情報があるかを確認
 	if cau.UserId == 0 || cau.ChannelId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found user_id or channel_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "user_id or channel_id not found"})
 		return
 	}
 
 	// requestしたuserがworkspaceにいることを確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found request user in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "request user not found in workspace"})
 		return
 	}
 
 	// deleteされるuserがworkspaceにいることを確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, cau.UserId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found user in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
 		return
 	}
 
@@ -184,7 +184,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 
 	// channelがworkspaceに存在することを確認
 	if ch.WorkspaceId != workspaceId {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found channel in workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "channel not found in workspace"})
 		return
 	}
 
@@ -202,7 +202,7 @@ func DeleteUserFromChannel(c *gin.Context) {
 
 	// deleteされるuserがchannelに存在することを確認
 	if !models.IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found user in channel"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in channel"})
 		return
 	}
 
@@ -238,7 +238,7 @@ func DeleteChannel(c *gin.Context) {
 
 	// bodyの情報に不足がないか確認
 	if ch.ID == 0 || ch.WorkspaceId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not found channel_id or workspace_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "channel_id or workspace_id not found"})
 		return
 	}
 

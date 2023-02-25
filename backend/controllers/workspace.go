@@ -95,7 +95,7 @@ func AddUserInWorkspace(c *gin.Context) {
 
 	// workspaceが存在するか確認
 	if !controllerUtils.IsExistWorkspaceById(wau.WorkspaceId) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "not found workspace"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "workspace not found"})
 		return
 	}
 

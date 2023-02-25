@@ -288,7 +288,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 
 		rr = addUserWorkspaceTestFunc(w.ID, 0, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found role_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"role_id not found\"}", rr.Body.String())
 	})
 
 	t.Run("3", func(t *testing.T) {
@@ -321,7 +321,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 
 		rr = addUserWorkspaceTestFunc(10000000000000000, addUserRoleId, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspace\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"workspace not found\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
@@ -549,11 +549,11 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		rr = deleteUserFromWorkspaceTestFunc(w.ID, 0, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found user_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"user_id not found\"}", rr.Body.String())
 
 		rr = deleteUserFromWorkspaceTestFunc(0, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"not found workspace_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"workspace_id not found\"}", rr.Body.String())
 	})
 
 	// 3

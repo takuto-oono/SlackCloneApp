@@ -55,7 +55,7 @@ func InputSignUpAndLogin(c *gin.Context) (SignUpAndLoginInput, error) {
 		return in, err
 	}
 	if in.Name == "" || in.Password == "" {
-		return in, fmt.Errorf("not found name or password")
+		return in, fmt.Errorf("name or password not found")
 	}
 	return in, nil
 }
@@ -66,10 +66,10 @@ func InputAndValidateCreateWorkspace(c *gin.Context) (CreateWorkspaceInput, erro
 		return in, err
 	}
 	if in.Name == "" {
-		return in, fmt.Errorf("not found name")
+		return in, fmt.Errorf("name not found")
 	}
 	if in.RequestUserId == 0 {
-		return in, fmt.Errorf("not found user_id")
+		return in, fmt.Errorf("user_id not found")
 	}
 	return in, nil
 }
@@ -80,15 +80,15 @@ func InputAndValidateAddUserInWorkspace(c *gin.Context) (AddUserInWorkspaceInput
 		return in, err
 	}
 	if in.WorkspaceId == 0 {
-		return in, fmt.Errorf("not found workspace_id")
+		return in, fmt.Errorf("workspace_id not found")
 	}
 
 	if in.UserId == 0 {
-		return in, fmt.Errorf("not found user_id")
+		return in, fmt.Errorf("user_id not found")
 	}
 
 	if in.RoleId == 0 {
-		return in, fmt.Errorf("not found role_id")
+		return in, fmt.Errorf("role_id not found")
 	}
 	return in, nil
 }
@@ -99,10 +99,10 @@ func InputAndValidateRenameWorkspace(c *gin.Context) (RenameWorkspaceNameInput, 
 		return in, err
 	}
 	if in.UserId == 0 {
-		return in, fmt.Errorf("not found user_id")
+		return in, fmt.Errorf("user_id not found")
 	}
 	if in.WorkspaceName == "" {
-		return in, fmt.Errorf("not found workspace_name")
+		return in, fmt.Errorf("workspace_name not found")
 	}
 	return in, nil
 }
@@ -113,10 +113,10 @@ func InputAndValidateDeleteUserFromWorkspace(c *gin.Context) (DeleteUserFromWork
 		return in, err
 	}
 	if in.WorkspaceId == 0 {
-		return in, fmt.Errorf("not found workspace_id")
+		return in, fmt.Errorf("workspace_id not found")
 	}
 	if in.UserId == 0 {
-		return in, fmt.Errorf("not found user_id")
+		return in, fmt.Errorf("user_id not found")
 	}
 	return in, nil
 }
@@ -127,13 +127,13 @@ func InputAndValidateCreateChannel(c *gin.Context) (CreateChannelInput, error) {
 		return in, err
 	}
 	if in.WorkspaceId == 0 {
-		return in, fmt.Errorf("not found workspace_id")
+		return in, fmt.Errorf("workspace_id not found")
 	}
 	if in.Name == "" {
-		return in, fmt.Errorf("not found name")
+		return in, fmt.Errorf("name not found")
 	}
 	if in.IsPrivate == nil {
-		return in, fmt.Errorf("not found is_private")
+		return in, fmt.Errorf("is_private not found")
 	}
 	return in, nil
 }
@@ -144,10 +144,10 @@ func InputAndValidateAddUserInChannel(c *gin.Context) (AddUserInChannelInput, er
 		return in, err
 	}
 	if in.ChannelId == 0 {
-		return in, fmt.Errorf("not found channel_id")
+		return in, fmt.Errorf("channel_id not found")
 	}
 	if in.UserId == 0 {
-		return in, fmt.Errorf("not found user_id")
+		return in, fmt.Errorf("user_id not found")
 	}
 	return in, nil
 }
@@ -158,10 +158,10 @@ func InputAndValidateSendMessage(c *gin.Context) (SendMessageInput, error) {
 		return in, err
 	}
 	if in.ChannelId == 0 {
-		return in, fmt.Errorf("not found channel_id")
+		return in, fmt.Errorf("channel_id not found")
 	}
 	if in.Text == "" {
-		return in, fmt.Errorf("not found text")
+		return in, fmt.Errorf("text not found")
 	}
 	return in, nil
 }
