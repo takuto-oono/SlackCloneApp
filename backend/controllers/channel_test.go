@@ -43,7 +43,7 @@ func deleteUserFromChannelTestFunc(channelId, workspaceId int, userId uint32, jw
 	rr := httptest.NewRecorder()
 	cau := models.NewChannelsAndUses(channelId, userId, false)
 	jsonInput, _ := json.Marshal(cau)
-	req, _ := http.NewRequest("POST", "/api/channel/delete_user/"+strconv.Itoa(workspaceId), bytes.NewBuffer(jsonInput))
+	req, _ := http.NewRequest("DELETE", "/api/channel/delete_user/"+strconv.Itoa(workspaceId), bytes.NewBuffer(jsonInput))
 	req.Header.Set("Authorization", jwtToken)
 	channelRouter.ServeHTTP(rr, req)
 	return rr
@@ -53,7 +53,7 @@ func deleteChannelTestFunc(channelId, workspaceId int, jwtToken string) *httptes
 	rr := httptest.NewRecorder()
 	ch := models.NewChannel(channelId, "", "", false, false, workspaceId)
 	jsonInput, _ := json.Marshal(ch)
-	req, _ := http.NewRequest("POST", "/api/channel/delete", bytes.NewBuffer(jsonInput))
+	req, _ := http.NewRequest("DELETE", "/api/channel/delete", bytes.NewBuffer(jsonInput))
 	req.Header.Set("Authorization", jwtToken)
 	channelRouter.ServeHTTP(rr, req)
 	return rr
