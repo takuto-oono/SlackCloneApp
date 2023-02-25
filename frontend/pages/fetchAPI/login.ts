@@ -13,7 +13,11 @@ const baseUrl = 'http://localhost:8080/api/user/';
 
 export async function login(user: User): Promise<currentUser> {
   const url = baseUrl + 'login';
-
+  const currentuser = {
+    token: "",
+    user_id: "",
+    username: ""
+  }
     try {
         const res = await fetch(url, {
             method: 'POST',
@@ -37,15 +41,11 @@ export async function login(user: User): Promise<currentUser> {
         console.log(currentuser);
         resolve(currentuser);
       });
-      
+
 
     } catch (err) {
       console.log(err);
   }
-  const currentuser = {
-    token: "no_token",
-    user_id: "no_user_id",
-    username: "no_username"
-  }
+
   return currentuser;
 }
