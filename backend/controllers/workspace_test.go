@@ -73,7 +73,7 @@ func deleteUserFromWorkspaceTestFunc(workspaceId int, userId uint32, jwtToken st
 
 func getWorkspacesByUserIdTestFunc(userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/workspace/get_workspaces", nil)
+	req, _ := http.NewRequest("GET", "/api/workspace/get_by_user", nil)
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
 	return rr
