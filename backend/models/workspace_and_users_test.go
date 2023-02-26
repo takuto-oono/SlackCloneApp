@@ -1,6 +1,7 @@
 package models
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -99,4 +100,34 @@ func TestGetRoleIdByWorkspaceIdAndUserId(t *testing.T) {
 
 	_, err = GetRoleIdByWorkspaceIdAndUserId(-1, wau.UserId)
 	assert.NotEmpty(t, err)
+}
+
+func TestGetWAUsByUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		testCases := 10
+		userId := rand.Uint32()
+		workspaceIds := make([]int, testCases)
+		for i := 0; i < testCases; i++ {
+			wau := NewWorkspaceAndUsers(int(rand.Uint64()), userId, rand.Int()%4+1)
+			assert.Empty(t, wau.Create())
+			workspaceIds[i] = wau.WorkspaceId
+		}
+		res, err := GetWAUsByUserId(userId)
+		assert.Empty(t, err)
+		assert.Equal(t, testCases, len(res))
+		for _, wau := range res {
+			assert.Equal(t, userId, wau.UserId)
+			assert.Contains(t, workspaceIds, wau.WorkspaceId)
+			assert.NotEqual(t, 0, wau.RoleId)
+		}
+	})
+	t.Run("2 データが存在しない場合", func(t *testing.T) {
+		res, err := GetWAUsByUserId(rand.Uint32())
+		assert.Empty(t, err)
+		assert.Equal(t, 0, len(res))
+	})
 }
