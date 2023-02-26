@@ -41,7 +41,7 @@ func loadConfigFile() (*ini.File, error) {
 }
 
 func init() {
-	// slack
+	// slack2
 	cfg, err := loadConfigFile()
 	if err != nil {
 		fmt.Printf("Failed to read file: %v", err)
