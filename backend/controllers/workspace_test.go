@@ -37,7 +37,7 @@ func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *htt
 
 func addUserWorkspaceTestFunc(workspaceId, roleId int, userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	auwi := controllerUtils.AddUserInWorkspaceInput {
+	auwi := controllerUtils.AddUserInWorkspaceInput{
 		WorkspaceId: workspaceId,
 		UserId:      userId,
 		RoleId:      roleId,
@@ -66,6 +66,14 @@ func deleteUserFromWorkspaceTestFunc(workspaceId int, userId uint32, jwtToken st
 		UserId:      userId,
 	})
 	req, _ := http.NewRequest("DELETE", "/api/workspace/delete_user", bytes.NewBuffer(jsonInput))
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	return rr
+}
+
+func getWorkspacesByUserIdTestFunc(userId uint32, jwtToken string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/workspace/get_by_user", nil)
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
 	return rr
@@ -676,5 +684,82 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 		rr = deleteUserFromWorkspaceTestFunc(5934759792, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+	})
+}
+
+func TestGetWorkspacesById(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. workspaceが存在する場合 200
+	// 2. workspaceが存在しない場合 200
+
+	t.Run("1 workspaceが存在する場合", func(t *testing.T) {
+		testNum := "1"
+		workspaceCount := 10
+		userName := "testGetWorkspaceByIdUserName" + testNum
+		workspaceNames := make([]string, workspaceCount)
+		workspaces := make([]models.Workspace, workspaceCount)
+		for i := 0; i < workspaceCount; i++ {
+			workspaceNames[i] = "testGetWorkspaceByIdWorkspaceName" + testNum + "." + strconv.Itoa(i)
+		}
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		for i, workspaceName := range workspaceNames {
+			rr := createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			w := new(models.Workspace)
+			json.Unmarshal(([]byte)(byteArray), w)
+			workspaces[i] = *w
+
+		}
+
+		rr = getWorkspacesByUserIdTestFunc(lr.UserId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		ws := make([]models.Workspace, workspaceCount)
+		json.Unmarshal(([]byte)(byteArray), &ws)
+
+		for _, w := range ws {
+			assert.Contains(t, workspaces, w)
+		}
+
+		for i := 0; i < workspaceCount; i++ {
+			for j := i + 1; j < workspaceCount; j++ {
+				assert.NotEqual(t, ws[i], ws[j])
+			}
+		}
+	})
+
+	t.Run("2 workspaceが存在しない場合", func(t *testing.T) {
+		testNum := "2"
+		userName := "testGetWorkspaceByIdUserName" + testNum
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = getWorkspacesByUserIdTestFunc(lr.UserId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		ws := make([]models.Workspace, 5)
+		json.Unmarshal(([]byte)(byteArray), &ws)
+		assert.Equal(t, 0, len(ws))
+
 	})
 }

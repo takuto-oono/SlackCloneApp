@@ -50,3 +50,21 @@ func GetRoleIdByWorkspaceIdAndUserId(workspaceId int, userId uint32) (int, error
 	err := row.Scan(&roleId)
 	return roleId, err
 }
+
+func GetWAUsByUserId(userId uint32) ([]WorkspaceAndUsers, error) {
+	res := make([]WorkspaceAndUsers, 0)
+	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE user_id = ?", config.Config.WorkspaceAndUserTableName)
+	rows, err := DbConnection.Query(cmd, userId)
+	if err != nil {
+		return res, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var wau WorkspaceAndUsers
+		if err := rows.Scan(&wau.WorkspaceId, &wau.UserId, &wau.RoleId); err != nil {
+			return res, err
+		}
+		res = append(res, wau)
+	}
+	return res, nil
+}

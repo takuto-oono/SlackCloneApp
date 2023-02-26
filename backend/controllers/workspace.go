@@ -202,3 +202,19 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, wau)
 }
+
+func GetWorkspacesByUserId(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// workspace structの配列を取得する
+	workspaces, err := controllerUtils.GetWorkspacesByUserId(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	}
+	c.JSON(http.StatusOK, workspaces)
+}
