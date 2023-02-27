@@ -277,3 +277,28 @@ func DeleteChannel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ch)
 }
+
+func GetChannelsByUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからworkspace_idを取得
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// channelの配列を取得
+	chs, err := controllerUtils.GetChannelsByUserIdAndWorkspaceId(userId, workspaceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, chs)
+}

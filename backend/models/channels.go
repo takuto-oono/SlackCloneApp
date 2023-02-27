@@ -108,3 +108,21 @@ func (c *Channel) GetChannelByIdAndWorkspaceId() error {
 	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive)
 	return err
 }
+
+func GetChannelsByWorkspaceId(workspaceId int) ([]Channel, error) {
+	channels := make([]Channel, 0)
+	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE workspace_id = ?", config.Config.ChannelsTableName)
+	rows, err := DbConnection.Query(cmd, workspaceId)
+	if err != nil {
+		return channels, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var ch Channel
+		if err := rows.Scan(&ch.ID, &ch.Name, &ch.Description, &ch.IsPrivate, &ch.IsArchive, &ch.WorkspaceId); err != nil {
+			return channels, err
+		}
+		channels = append(channels, ch)
+	}
+	return channels, nil
+}
