@@ -61,7 +61,7 @@ func deleteChannelTestFunc(channelId, workspaceId int, jwtToken string) *httptes
 
 func getChannelsByUserTestFunc(workspaceId int, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/channel/get_user_belongs_in_workspace/"+strconv.Itoa(workspaceId), nil)
+	req, _ := http.NewRequest("GET", "/api/channel/get_by_user_and_workspace/"+strconv.Itoa(workspaceId), nil)
 	req.Header.Set("Authorization", jwtToken)
 	channelRouter.ServeHTTP(rr, req)
 	return rr
