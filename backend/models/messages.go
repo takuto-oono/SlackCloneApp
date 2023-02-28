@@ -53,14 +53,14 @@ func (m *Message) Create() error {
 		return err
 	}
 	m.SetDate()
-	cmd := fmt.Sprintf("INSERT INTO %s (id, text, date, channel_id, user_id) VALUES (?, ?, ?, ?, ?)", config.Config.MessagesTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (id, text, date, channel_id, user_id) VALUES ($1, $2, $3, $4, $5)", config.Config.MessagesTableName)
 	_, err := DbConnection.Exec(cmd, m.ID, m.Text, m.Date, m.ChannelId, m.UserId)
 	return err
 }
 
 func GetMessagesByChannelId(channelId int) ([]Message, error) {
 	res := make([]Message, 0)
-	cmd := fmt.Sprintf("SELECT id, text, date, channel_id, user_id FROM %s WHERE channel_id = ? ORDER BY date DESC", config.Config.MessagesTableName)
+	cmd := fmt.Sprintf("SELECT id, text, date, channel_id, user_id FROM %s WHERE channel_id = $1 ORDER BY date DESC", config.Config.MessagesTableName)
 	rows, err := DbConnection.Query(cmd, channelId)
 	if err != nil {
 		return res, err

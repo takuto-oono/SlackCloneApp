@@ -43,7 +43,7 @@ func (w *Workspace) Create() error {
 	if err := w.SetId(); err != nil {
 		return err
 	}
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name, workspace_primary_owner_id) VALUES (?, ?, ?)", config.Config.WorkspaceTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name, workspace_primary_owner_id) VALUES ($1, $2, $3)", config.Config.WorkspaceTableName)
 	_, err := DbConnection.Exec(cmd, w.ID, w.Name, w.PrimaryOwnerId)
 	if err != nil {
 		fmt.Println(err)
@@ -54,7 +54,7 @@ func (w *Workspace) Create() error {
 
 func GetWorkspaceById(id int) (Workspace, error) {
 	var w Workspace
-	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE id = ?", config.Config.WorkspaceTableName)
+	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE id = $1", config.Config.WorkspaceTableName)
 	row := DbConnection.QueryRow(cmd, id)
 	err := row.Scan(&w.ID, &w.Name, &w.PrimaryOwnerId)
 	return w, err
@@ -64,7 +64,7 @@ func (w *Workspace) RenameWorkspaceName() error {
 	if w.ID == 0 || w.Name == "" {
 		return fmt.Errorf("id or newName is empty")
 	}
-	cmd := fmt.Sprintf("UPDATE %s SET name = ? WHERE id = ?", config.Config.WorkspaceTableName)
+	cmd := fmt.Sprintf("UPDATE %s SET name = $1 WHERE id = $2", config.Config.WorkspaceTableName)
 	_, err := DbConnection.Exec(cmd, w.Name, w.ID)
 	return err
 }

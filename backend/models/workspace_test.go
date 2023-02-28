@@ -44,7 +44,7 @@ func TestCreateWorkspace(t *testing.T) {
 		assert.Empty(t, err)
 	}
 
-	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE name = ?", config.Config.WorkspaceTableName)
+	cmd := fmt.Sprintf("SELECT id, name, workspace_primary_owner_id FROM %s WHERE name = $1", config.Config.WorkspaceTableName)
 	for i := 0; i < numbersOfTests; i++ {
 		row := DbConnection.QueryRow(cmd, names[i])
 		var w Workspace
