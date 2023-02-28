@@ -14,7 +14,7 @@ func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 	// bodyの情報を取得
@@ -73,7 +73,7 @@ func AddUserInWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -118,7 +118,7 @@ func RenameWorkspaceName(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -161,7 +161,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 

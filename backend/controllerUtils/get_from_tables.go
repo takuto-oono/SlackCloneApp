@@ -31,6 +31,35 @@ func GetWorkspacesByUserId(userId uint32) ([]models.Workspace, error) {
 	return workspaces, err
 }
 
+func GetChannelsByUserIdAndWorkspaceId(userId uint32, workspaceId int) ([]models.Channel, error) {
+	// 指定されたworkspaceの中からuserが所属しているchannelのstructを配列にして返す
+
+	res := make([]models.Channel, 0)
+
+	// 指定されたworkspaceに存在するすべてのchannelを取得(userが所属していないchannelも含まれている)
+	chs, err := models.GetChannelsByWorkspaceId(workspaceId)
+	if err != nil {
+		return res, err
+	}
+
+	// 指定されたuserが所属しているChannelAndUsersをすべて取得(他のworkspaceの物も含まれている)
+	caus, err := models.GetCAUsByUserId(userId)
+	if err != nil {
+		return res, err
+	}
+
+	// workspaceに存在するchannelとuserが所属しているchannelで同じものがあればスライスに追加する
+	for _, ch := range chs {
+		for _, cau := range caus {
+			if ch.ID == cau.ChannelId {
+				res = append(res, ch)
+				break
+			}
+		}
+	}
+	return res, nil
+}
+
 func GetUserInWorkspace(workspaceId int) ([]UserInfoInWorkspace, error) {
 	// workspace内のuserの情報を配列にして返す
 	// userぞれぞれの情報は返り値のstructを参照
