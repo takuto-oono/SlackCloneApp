@@ -35,6 +35,7 @@ func SetupRouter() *gin.Engine {
 	workspace.PATCH("/rename/:workspace_id", RenameWorkspaceName)
 	workspace.DELETE("/delete_user", DeleteUserFromWorkSpace)
 	workspace.GET("/get_by_user", GetWorkspacesByUserId)
+	workspace.GET("/get_users/:workspace_id", GetUsersInWorkspace)
 
 	channel := api.Group("/channel")
 	channel.POST("/create", CreateChannel)

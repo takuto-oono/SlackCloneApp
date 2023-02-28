@@ -218,3 +218,28 @@ func GetWorkspacesByUserId(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, workspaces)
 }
+
+func GetUsersInWorkspace(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// requestしたuserがworkspaceに存在しているか確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
+		c.JSON(http.)
+
+	}
+	
+
+
+
+
+}

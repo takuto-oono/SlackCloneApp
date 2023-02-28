@@ -2,6 +2,12 @@ package controllerUtils
 
 import "backend/models"
 
+type UserInfoInWorkspace struct {
+	ID     uint32 `json:"id"`
+	Name   string `json:"name"`
+	RoleId int    `json:"role_id"`
+}
+
 func GetWorkspacesByUserId(userId uint32) ([]models.Workspace, error) {
 	// 引数で指定したuserIdのuserが所属しているworkspaceのstructを配列にして返す
 
@@ -23,4 +29,10 @@ func GetWorkspacesByUserId(userId uint32) ([]models.Workspace, error) {
 		workspaces = append(workspaces, workspace)
 	}
 	return workspaces, err
+}
+
+func GetUserInWorkspaceUser(workspaceId int) ([]UserInfoInWorkspace, error) {
+	// workspace内のuserの情報を配列にして返す
+	// userぞれぞれの情報は返り値のstructを参照
+	// アクセスしたuser
 }
