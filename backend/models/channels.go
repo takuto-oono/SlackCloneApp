@@ -49,13 +49,13 @@ func (c *Channel) Create() error {
 	if err := c.SetId(); err != nil {
 		return err
 	}
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name, description, is_private, is_archive, workspace_id) VALUES (?, ?, ?, ?, ?, ?)", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name, description, is_private, is_archive, workspace_id) VALUES ($1, $2, $3, $4, $5, $6)", config.Config.ChannelsTableName)
 	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
 	return err
 }
 
 func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, error) {
-	cmd := fmt.Sprintf("SELECT name FROM %s WHERE workspace_id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("SELECT name FROM %s WHERE workspace_id = $1", config.Config.ChannelsTableName)
 	rows, err := DbConnection.Query(cmd, c.WorkspaceId)
 	if err != nil {
 		return false, err
@@ -75,7 +75,7 @@ func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, erro
 }
 
 func GetChannelById(channelId int) (Channel, error) {
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE id = $1", config.Config.ChannelsTableName)
 	row := DbConnection.QueryRow(cmd, channelId)
 	var c Channel
 	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive, &c.WorkspaceId)
@@ -83,13 +83,13 @@ func GetChannelById(channelId int) (Channel, error) {
 }
 
 func (c *Channel) Delete() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = ? AND name = ? AND description = ? AND is_private = ? AND is_archive = ? AND workspace_id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND name = $2 AND description = $3 AND is_private = $4 AND is_archive = $5 AND workspace_id = $6", config.Config.ChannelsTableName)
 	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
 	return err
 }
 
 func IsExistChannelByChannelIdAndWorkspaceId(channelId, workspaceId int) (bool, error) {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE id = ? AND workspace_id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND workspace_id = $2", config.Config.ChannelsTableName)
 	rows, err := DbConnection.Query(cmd, channelId, workspaceId)
 	if err != nil {
 		return false, err
@@ -103,7 +103,7 @@ func IsExistChannelByChannelIdAndWorkspaceId(channelId, workspaceId int) (bool, 
 }
 
 func (c *Channel) GetChannelByIdAndWorkspaceId() error {
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive FROM %s WHERE id = ? AND workspace_id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive FROM %s WHERE id = $1 AND workspace_id = $2", config.Config.ChannelsTableName)
 	row := DbConnection.QueryRow(cmd, c.ID, c.WorkspaceId)
 	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive)
 	return err

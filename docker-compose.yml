@@ -36,4 +36,15 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+  backend_flask:
+    build:
+      context: backend_flask
+      dockerfile: backend_flask.Dockerfile
+    command: python3 backend_flask/main.py
+    volumes:
+      - ./backend_flask:/backend_flask
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
 

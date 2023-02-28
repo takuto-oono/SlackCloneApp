@@ -21,13 +21,13 @@ func NewChannelsAndUses(channelId int, userId uint32, isAdmin bool) *ChannelsAnd
 }
 
 func (cau *ChannelsAndUsers) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, user_id, is_admin) VALUES (?, ?, ?)", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, user_id, is_admin) VALUES ($1, $2, $3)", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId, cau.IsAdmin)
 	return err
 }
 
 func GetCAUByChannelIdAndUserId(channelId int, userId uint32) (ChannelsAndUsers, error) {
-	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
 	row := DbConnection.QueryRow(cmd, channelId, userId)
 	var cau ChannelsAndUsers
 	if err := row.Scan(&cau.ChannelId, &cau.UserId, &cau.IsAdmin); err != nil {
@@ -37,7 +37,7 @@ func GetCAUByChannelIdAndUserId(channelId int, userId uint32) (ChannelsAndUsers,
 }
 
 func IsExistCAUByChannelIdAndUserId(channelId int, userId uint32) bool {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
 	rows, err := DbConnection.Query(cmd, channelId, userId)
 	if err != nil {
 		return false
@@ -51,7 +51,7 @@ func IsExistCAUByChannelIdAndUserId(channelId int, userId uint32) bool {
 }
 
 func IsAdminUserInChannel(channelId int, userId uint32) bool {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = ? AND user_id = ? AND is_admin = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = $1 AND user_id = $2 AND is_admin = $3", config.Config.ChannelsAndUserTableName)
 	rows, err := DbConnection.Query(cmd, channelId, userId, true)
 	if err != nil {
 		return false
@@ -65,13 +65,13 @@ func IsAdminUserInChannel(channelId int, userId uint32) bool {
 }
 
 func (cau *ChannelsAndUsers) Delete() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ? AND user_id = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId)
 	return err
 }
 
 func DeleteCAUByChannelId(channelId int) error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = $1", config.Config.ChannelsAndUserTableName)
 	_, err := DbConnection.Exec(cmd, channelId)
 	return err
 }

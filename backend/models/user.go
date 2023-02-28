@@ -17,7 +17,7 @@ func NewUser(id uint32, name, password string) *User {
 }
 
 func (user *User) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name, password) VALUES ($1, $2, $3)", config.Config.UserTableName)
+	cmd := fmt.Sprintf(`INSERT INTO %s (id, name, password) VALUES ($1, $2, $3)`, config.Config.UserTableName)
 	_, err := DbConnection.Exec(cmd, user.ID, user.Name, user.PassWord)
 	if err != nil {
 		fmt.Println(err)
@@ -27,7 +27,7 @@ func (user *User) Create() error {
 }
 
 func GetUserById(id uint32) (User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE id = ?", config.Config.UserTableName)
+	cmd := fmt.Sprintf(`SELECT id, name, password FROM %s WHERE id = $1`, config.Config.UserTableName)
 	row := DbConnection.QueryRow(cmd, id)
 	var user User
 	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
