@@ -48,3 +48,21 @@ func GetUserByNameAndPassword(username, password string) (User, error) {
 	err := row.Scan(&u.ID, &u.Name, &u.PassWord)
 	return u, err
 }
+
+func GetUsers() ([]User, error) {
+	users := make([]User, 0)
+	cmd := fmt.Sprintf("SELECT id, name FROM %s", config.Config.UserTableName)
+	rows, err := DbConnection.Query(cmd)
+	if err != nil {
+		return users, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.ID, &u.Name); err != nil {
+			return users, err
+		}
+		users = append(users, u)
+	}
+	return users, nil
+}

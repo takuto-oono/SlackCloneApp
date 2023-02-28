@@ -41,3 +41,11 @@ func GetUserByNameAndPasswordTest(t *testing.T) {
 		}
 	})
 }
+
+func TestGetUsers(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	_, err := GetUsers()
+	assert.Empty(t, err)
+}
