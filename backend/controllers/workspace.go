@@ -234,12 +234,16 @@ func GetUsersInWorkspace(c *gin.Context) {
 
 	// requestしたuserがworkspaceに存在しているか確認
 	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
-		c.JSON(http.)
-
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
+		return
 	}
-	
 
+	// userの情報を取得する
+	res, err := controllerUtils.GetUserInWorkspace(workspaceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 
-
-
+	c.JSON(http.StatusOK, res)
 }

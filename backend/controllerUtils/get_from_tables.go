@@ -31,8 +31,37 @@ func GetWorkspacesByUserId(userId uint32) ([]models.Workspace, error) {
 	return workspaces, err
 }
 
-func GetUserInWorkspaceUser(workspaceId int) ([]UserInfoInWorkspace, error) {
+func GetUserInWorkspace(workspaceId int) ([]UserInfoInWorkspace, error) {
 	// workspace内のuserの情報を配列にして返す
 	// userぞれぞれの情報は返り値のstructを参照
-	// アクセスしたuser
+	// アクセスしたuserの情報も含めて返す
+
+	res := make([]UserInfoInWorkspace, 0)
+
+	// workspaces_and_users tableからworkspace_idが等しいものをすべて取得する
+	waus, err := models.GetWAUsByWorkspaceId(workspaceId)
+	if err != nil {
+		return res, err
+	}
+
+	// users tableの全情報を取得する
+	users, err := models.GetUsers()
+	if err != nil {
+		return res, err
+	}
+
+	// 2つのデータからuser_idが等しいものの組み合わせを見つけて、res配列に追加する
+	for _, wau := range waus {
+		for _, user := range users {
+			if user.ID == wau.UserId {
+				res = append(res, UserInfoInWorkspace{
+					ID:     user.ID,
+					Name:   user.Name,
+					RoleId: wau.RoleId,
+				})
+				break
+			}
+		}
+	}
+	return res, nil
 }

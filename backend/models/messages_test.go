@@ -26,9 +26,9 @@ func TestCreateMessage(t *testing.T) {
 }
 
 func TestGetMessagesByChannelId(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	t.Run("1 messageが存在する場合", func(t *testing.T) {
 		testNum := 100
