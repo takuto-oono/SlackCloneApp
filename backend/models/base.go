@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 
 	"backend/config"
 )
@@ -12,10 +14,11 @@ import (
 var DbConnection *sql.DB
 
 func init() {
-	driver := config.Config.Driver
-	dbName := config.Config.DbName
+	// driver := config.Config.Driver
+	driver := "postgres"
+	// dbName := config.Config.DbName
 	var err error
-	DbConnection, err = sql.Open(driver, dbName)
+	DbConnection, err = sql.Open(driver, "host=db  user=postgres password=postgres dbname=postgres sslmode=disable")
 	if err != nil {
 		fmt.Println(err)
 	}

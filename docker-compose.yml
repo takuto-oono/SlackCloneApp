@@ -11,6 +11,8 @@ services:
       - ./backend:/go/src
     ports:
       - "8080:8080"
+    depends_on:
+      - db
   frontend:
     platform: linux/amd64
     build:
@@ -22,5 +24,16 @@ services:
     volumes:
       - ./frontend/:/frontend/
     stdin_open: true
-
     command: sh -c "npm run dev"
+  db:
+    platform: linux/amd64
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
