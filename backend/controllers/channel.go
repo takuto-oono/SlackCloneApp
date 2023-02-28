@@ -293,6 +293,12 @@ func GetChannelsByUser(c *gin.Context) {
 		return
 	}
 
+	// userがworkspaceに存在しているかを確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "request user not found in workspace"})
+		return
+	}
+
 	// channelの配列を取得
 	chs, err := controllerUtils.GetChannelsByUserIdAndWorkspaceId(userId, workspaceId)
 	if err != nil {

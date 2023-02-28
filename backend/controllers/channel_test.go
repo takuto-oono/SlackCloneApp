@@ -1322,11 +1322,12 @@ func TestDeleteChannel(t *testing.T) {
 }
 
 func TestGetChannelsByUser(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	// 1. general channel以外のchannelが存在する場合 200
+	// 2. userがworkspaceに存在していない場合 404
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		testNum := "1"
@@ -1394,6 +1395,55 @@ func TestGetChannelsByUser(t *testing.T) {
 			assert.Contains(t, channelIds, ch.ID)
 			assert.Contains(t, channelNames1, ch.Name)
 		}
+	})
+
+	t.Run("2 userがworkspaceに存在していない場合", func(t *testing.T) {
+		testNum := "2"
+		channelCount := 10
+		userName1 := "testGetChannelsByUser" + testNum + ".1"
+		userName2 := "testGetChannelsByUser" + testNum + ".2"
+		workspaceName := "testGetChannelsByUserWorkspaceName" + testNum
+		isPrivate := true
+		channelNames := make([]string, channelCount)
+
+		for i := 0; i < channelCount; i++ {
+			channelNames[i] = "testGetChannelsByUserChannelName" + strconv.Itoa(i)
+		}
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName1, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName2, "pass").Code)
+
+		rr := loginTestFunc(userName1, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr1 := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr1)
+
+		rr = loginTestFunc(userName2, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		lr2 := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr2)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		channelIds := make([]int, channelCount)
+		for i := 0; i < channelCount; i++ {
+			rr = createChannelTestFunc(channelNames[i], "des", &isPrivate, lr1.Token, w.ID)
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ = ioutil.ReadAll(rr.Body)
+			ch := new(models.Channel)
+			json.Unmarshal(([]byte)(byteArray), ch)
+			channelIds[i] = ch.ID
+		}
+
+		rr = getChannelsByUserTestFunc(w.ID, lr2.Token)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 	})
 
 }
