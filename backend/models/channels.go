@@ -111,7 +111,7 @@ func (c *Channel) GetChannelByIdAndWorkspaceId() error {
 
 func GetChannelsByWorkspaceId(workspaceId int) ([]Channel, error) {
 	channels := make([]Channel, 0)
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE workspace_id = ?", config.Config.ChannelsTableName)
+	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE workspace_id = $1", config.Config.ChannelsTableName)
 	rows, err := DbConnection.Query(cmd, workspaceId)
 	if err != nil {
 		return channels, err

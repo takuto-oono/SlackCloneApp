@@ -71,7 +71,7 @@ func GetWAUsByUserId(userId uint32) ([]WorkspaceAndUsers, error) {
 
 func GetWAUsByWorkspaceId(workspaceId int) ([]WorkspaceAndUsers, error) {
 	res := make([]WorkspaceAndUsers, 0)
-	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = ?", config.Config.WorkspaceAndUserTableName)
+	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = $1", config.Config.WorkspaceAndUserTableName)
 	rows, err := DbConnection.Query(cmd, workspaceId)
 	if err != nil {
 		return res, err
