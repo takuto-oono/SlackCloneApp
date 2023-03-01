@@ -78,7 +78,7 @@ func DeleteCAUByChannelId(channelId int) error {
 
 func GetCAUsByUserId(userId uint32) ([]ChannelsAndUsers, error) {
 	caus := make([]ChannelsAndUsers, 0)
-	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE user_id = ?", config.Config.ChannelsAndUserTableName)
+	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE user_id = $1", config.Config.ChannelsAndUserTableName)
 	rows, err := DbConnection.Query(cmd, userId)
 	if err != nil {
 		return caus, err
