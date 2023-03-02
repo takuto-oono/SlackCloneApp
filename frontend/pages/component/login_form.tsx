@@ -8,9 +8,15 @@ function LoginForm() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
-  const [workspaceslist, setWorkspacesList] = useState([{}]);
+  const [workspacelist, setWorkspaceList] = useState([
+    {
+      id: 0,
+      name: "",
+      primary_owner_id: 0
+    }
+  ]);
 
-  const list = workspaceslist.map((item, index) => (
+  const list = workspacelist.map((item, index) => (
     <div key={index}>
       <p>{item.id}</p>
       <p>{item.name}</p>
@@ -38,8 +44,8 @@ function LoginForm() {
     getWorkspaces().then((workspaces: Workspace[]) => { 
       console.log("workspaces")
       console.log(workspaces)
-      setWorkspacesList(workspaces)
-      console.log(workspaceslist)
+      setWorkspaceList(workspaces)
+      console.log(workspacelist)
     });
   };
 
