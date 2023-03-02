@@ -14,7 +14,7 @@ func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	primaryOwnerId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 	// bodyの情報を取得
@@ -73,7 +73,7 @@ func AddUserInWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -118,7 +118,7 @@ func RenameWorkspaceName(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -161,7 +161,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -217,4 +217,33 @@ func GetWorkspacesByUserId(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 	c.JSON(http.StatusOK, workspaces)
+}
+
+func GetUsersInWorkspace(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// requestしたuserがworkspaceに存在しているか確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
+		return
+	}
+
+	// userの情報を取得する
+	res, err := controllerUtils.GetUserInWorkspace(workspaceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }

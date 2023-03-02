@@ -14,7 +14,7 @@ func SendMessage(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -53,7 +53,7 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 

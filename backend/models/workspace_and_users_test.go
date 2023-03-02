@@ -131,3 +131,32 @@ func TestGetWAUsByUserId(t *testing.T) {
 		assert.Equal(t, 0, len(res))
 	})
 }
+
+func TestGetWAUsByWorkspaceId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		testCases := 10
+		workspaceId := int(rand.Uint64())
+		waus := make([]WorkspaceAndUsers, testCases)
+		for i := 0; i < testCases; i++ {
+			wau := NewWorkspaceAndUsers(workspaceId, rand.Uint32(), rand.Int()%4+1)
+			assert.Empty(t, wau.Create())
+			waus[i] = *wau
+		}
+		res, err := GetWAUsByWorkspaceId(workspaceId)
+		assert.Empty(t, err)
+		assert.Equal(t, testCases, len(res))
+		for _, wau := range waus {
+			assert.Contains(t, res, wau)
+		}
+	})
+
+	t.Run("2 データがぞんざいしない場合", func(t *testing.T) {
+		res, err := GetWAUsByWorkspaceId(int(rand.Uint64()))
+		assert.Empty(t, err)
+		assert.Equal(t, 0, len(res))
+	})
+}

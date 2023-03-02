@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -74,6 +75,14 @@ func deleteUserFromWorkspaceTestFunc(workspaceId int, userId uint32, jwtToken st
 func getWorkspacesByUserIdTestFunc(userId uint32, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/workspace/get_by_user", nil)
+	req.Header.Add("Authorization", jwtToken)
+	workspaceRouter.ServeHTTP(rr, req)
+	return rr
+}
+
+func GetUsersInWorkspaceTestFunc(workspaceId int, jwtToken string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/workspace/get_users/"+strconv.Itoa(workspaceId), nil)
 	req.Header.Add("Authorization", jwtToken)
 	workspaceRouter.ServeHTTP(rr, req)
 	return rr
@@ -457,7 +466,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"pq: duplicate key value violates unique constraint \\\"workspaces_and_users_pkey\\\"\"}", rr.Body.String())
 
 	})
 }
@@ -761,5 +770,110 @@ func TestGetWorkspacesById(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), &ws)
 		assert.Equal(t, 0, len(ws))
 
+	})
+}
+
+func TestGetUsersInWorkspace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. 正常な場合 200
+	// 2. workspaceにいないuserからのアクセスだった場合 404
+
+	t.Run("1 正常な場合", func(t *testing.T) {
+		testNum := "1"
+		userCount := 10
+		ownerUserName := "testGetUsersInWorkspaceNameOwnerUserName" + testNum
+		userInfos := make([]controllerUtils.UserInfoInWorkspace, userCount)
+		workspaceName := "testGetUsersInWorkspaceName" + testNum
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		for i := 0; i < userCount; i++ {
+			userInfos[i] = controllerUtils.UserInfoInWorkspace{
+				ID:     0,
+				Name:   "testGetUserInWorkspaceUserName" + testNum + "." + strconv.Itoa(i),
+				RoleId: rand.Int()%3 + 2,
+			}
+
+		}
+
+		for i, ui := range userInfos {
+			assert.Equal(t, http.StatusOK, signUpTestFunc(ui.Name, "pass").Code)
+
+			rr := loginTestFunc(ui.Name, "pass")
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := ioutil.ReadAll(rr.Body)
+			ulr := new(LoginResponse)
+			json.Unmarshal(([]byte)(byteArray), ulr)
+			fmt.Println(ulr.UserId)
+			userInfos[i].ID = ulr.UserId
+		}
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		for _, ui := range userInfos {
+			assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, ui.RoleId, ui.ID, lr.Token).Code)
+		}
+
+		rr = GetUsersInWorkspaceTestFunc(w.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		res := make([]controllerUtils.UserInfoInWorkspace, 0)
+		json.Unmarshal(([]byte)(byteArray), &res)
+
+		assert.Equal(t, userCount+1, len(res))
+		userInfos = append(userInfos, controllerUtils.UserInfoInWorkspace{
+			ID:     lr.UserId,
+			Name:   lr.Username,
+			RoleId: 1,
+		})
+
+		for _, ui := range userInfos {
+			assert.Contains(t, res, ui)
+		}
+	})
+
+	t.Run("2 workspaceにいないuserからのアクセスの場合", func(t *testing.T) {
+		testNum := "2"
+		ownerUserName := "testGetUsersInWorkspaceNameOwnerUserName" + testNum
+		requestUserName := "testGetUsersInWorkspaceRequestUserName" + testNum
+		workspaceName := "testGetUsersInWorkspaceName" + testNum
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+
+		rr := loginTestFunc(ownerUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = ioutil.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = GetUsersInWorkspaceTestFunc(w.ID, rlr.Token)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"user not found in workspace\"}", rr.Body.String())
 	})
 }

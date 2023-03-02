@@ -1,6 +1,7 @@
 package models
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,7 +33,7 @@ func TestGetCAUByChannelIdAndUserId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	
+
 	channelId := 7592792472623
 	userId := uint32(137201051)
 
@@ -44,9 +45,8 @@ func TestGetCAUByChannelIdAndUserId(t *testing.T) {
 	assert.Equal(t, *cau, res)
 
 	_, err = GetCAUByChannelIdAndUserId(-1, userId)
-	assert.NotEmpty(t, err)		
+	assert.NotEmpty(t, err)
 }
-
 
 func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 	if testing.Short() {
@@ -126,4 +126,36 @@ func TestDeleteCAUByChannelId(t *testing.T) {
 	for _, userId := range userIds {
 		assert.Equal(t, false, IsExistCAUByChannelIdAndUserId(channelId, userId))
 	}
+}
+
+func TestGetCAUsByUserId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. データが存在する場合
+	// 2. データが存在しない場合
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		cauCount := 10
+		userId := rand.Uint32()
+		caus := make([]ChannelsAndUsers, cauCount)
+		for i := 0; i < cauCount; i++ {
+			cau := NewChannelsAndUses(int(rand.Uint64()), userId, false)
+			assert.Empty(t, cau.Create())
+			caus[i] = *cau
+		}
+		res, err := GetCAUsByUserId(userId)
+		assert.Empty(t, err)
+		assert.Equal(t, cauCount, len(res))
+		for _, cau := range caus {
+			assert.Contains(t, res, cau)
+		}
+	})
+
+	t.Run("2 データが存在しない場合", func(t *testing.T) {
+		res, err := GetCAUsByUserId(rand.Uint32())
+		assert.Empty(t, err)
+		assert.Equal(t, 0, len(res))
+	})
 }

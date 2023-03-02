@@ -16,7 +16,7 @@ func NewRole(id int, name string) *Role {
 }
 
 func (r *Role) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name) VALUES (?, ?)", config.Config.RoleTableName)
+	cmd := fmt.Sprintf("INSERT INTO %s (id, name) VALUES ($1, $2)", config.Config.RoleTableName)
 	_, err := DbConnection.Exec(cmd, r.ID, r.Name)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -25,7 +25,7 @@ func (r *Role) Create() error {
 }
 
 func GetRoleById(id int) (Role, error) {
-	cmd := fmt.Sprintf("SELECT id, name FROM %s WHERE id = ?", config.Config.RoleTableName)
+	cmd := fmt.Sprintf("SELECT id, name FROM %s WHERE id = $1", config.Config.RoleTableName)
 	row := DbConnection.QueryRow(cmd, id)
 	var r Role
 	err := row.Scan(&r.ID, &r.Name)

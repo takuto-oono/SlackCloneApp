@@ -47,6 +47,7 @@ func IsExistWAUByWorkspaceIdAndUserId(workspaceId int, userId uint32) bool {
 	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
 	if err != nil {
 		fmt.Println(err)
+		return false
 	}
 	return wau.WorkspaceId == workspaceId && wau.UserId == userId
 }
