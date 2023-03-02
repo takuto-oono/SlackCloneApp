@@ -4,10 +4,6 @@ export interface Workspace {
     primary_owner_id: number;
 }
 
-export interface workspaceList {
-    workspaces?: Workspace[]
-}
-
 
 //Cookieに保存されているjwtTokenを取り出す
 function getToken() {
@@ -23,17 +19,17 @@ function getToken() {
 
 const baseUrl = 'http://localhost:8080/api/workspace/'
 
-export async function getWorkspaces(): Promise<workspaceList> {
+export async function getWorkspaces(): Promise<Workspace[]> {
     const url = baseUrl + 'get_by_user'
   let res_workspaces: Workspace[]
-  const workspace = {
+  const workspaces = [
+    {
     id: 0,
     name: "",
     primary_owner_id: 0
-  }
-  const workspace_list = {
-    workspaces: [workspace]
-  }
+    }
+  ]
+  
     try {
         const res = await fetch(url, {
           method: 'GET',
@@ -47,15 +43,13 @@ export async function getWorkspaces(): Promise<workspaceList> {
         console.log(res_workspaces);
       
         return new Promise((resolve) => {
-        const workspace_list: workspaceList = {
-          workspaces: res_workspaces
-        };
+        const workspaces: Workspace[] = res_workspaces;
           console.log("workspaces2")
-          console.log(workspace_list)
-        resolve(workspace_list);
+          console.log(workspaces)
+        resolve(workspaces);
       });
     } catch (err) {
         console.log(err)
     }
-  return workspace_list;
+  return workspaces;
 }
