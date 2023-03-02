@@ -13,7 +13,7 @@ const baseUrl = 'http://localhost:8080/api/user/';
 
 export async function login(user: User): Promise<currentUser> {
   const url = baseUrl + 'login';
-  const currentuser = {
+  const currentUser = {
     token: "",
     user_id: "",
     username: ""
@@ -30,16 +30,16 @@ export async function login(user: User): Promise<currentUser> {
             })
         })
       console.log(res);
-      const tempUser = await res.json();
+      const User = await res.json();
 
       return new Promise((resolve) => {
-        const currentuser: currentUser = {
-          token: tempUser.token,
-          user_id: tempUser.user_id,
-          username: tempUser.username
+        const currentUser: currentUser = {
+          token: User.token,
+          user_id: User.user_id,
+          username: User.username
         };
-        console.log(currentuser);
-        resolve(currentuser);
+        console.log(currentUser);
+        resolve(currentUser);
       });
 
 
@@ -47,5 +47,5 @@ export async function login(user: User): Promise<currentUser> {
       console.log(err);
   }
 
-  return currentuser;
+  return currentUser;
 }
