@@ -8,9 +8,9 @@ function LoginForm() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
-  const [workspacelist, setWorkspaceList] = useState<Workspace[]>([]);
+  const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
 
-  const list = workspacelist.map((item, index) => (
+  const list = workspaceList.map((item, index) => (
     <div key={index}>
       <p>{item.id}</p>
       <p>{item.name}</p>
@@ -32,14 +32,14 @@ function LoginForm() {
   const handleLogin = () => {
     console.log("login");
     let user = { name: name, password: password }
-    login(user).then((currentuser: currentUser) => { 
-      setCookie("token", currentuser.token);
+    login(user).then((currentUser: currentUser) => { 
+      setCookie("token", currentUser.token);
     });
     getWorkspaces().then((workspaces: Workspace[]) => { 
       console.log("workspaces")
       console.log(workspaces)
       setWorkspaceList(workspaces)
-      console.log(workspacelist)
+      console.log(workspaceList)
     });
   };
 
