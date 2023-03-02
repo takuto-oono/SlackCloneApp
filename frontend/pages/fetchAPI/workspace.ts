@@ -1,3 +1,5 @@
+import { getToken } from "./token";
+
 export interface Workspace {
     id: number;
     name: string;
@@ -5,22 +7,13 @@ export interface Workspace {
 }
 
 
-//Cookieに保存されているjwtTokenを取り出す
-function getToken() {
-  if (typeof document !== 'undefined') {
-    const jwtToken = document.cookie.split( '; ' )[ 0 ].split( '=' )[ 1 ];
-    return jwtToken
-  }
-  else {
-    const jwtToken = "";
-    return jwtToken
-  }
-}
 
 const baseUrl = 'http://localhost:8080/api/workspace/'
 
 export async function getWorkspaces(): Promise<Workspace[]> {
-    const url = baseUrl + 'get_by_user'
+  const url = baseUrl + 'get_by_user'
+  console.log("getToken()")
+  console.log(getToken());
   let res_workspaces: Workspace[]
   const workspaces = [
     {
@@ -37,6 +30,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
               'Authorization': getToken(),
           },
         })
+        
         console.log(res)
         res_workspaces = await res.json()
         console.log("workspaces1")
