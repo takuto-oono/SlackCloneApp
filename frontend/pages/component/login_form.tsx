@@ -7,6 +7,7 @@ function LoginForm() {
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [userId, setUserId] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
 
@@ -34,6 +35,7 @@ function LoginForm() {
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 
       setCookie("token", currentUser.token);
+      setUserId(currentUser.user_id);
     });
     getWorkspaces().then((workspaces: Workspace[]) => { 
       console.log("workspaces")
