@@ -4,17 +4,11 @@ import { currentUser, login } from 'pages/fetchAPI/login'
 import { getWorkspaces, Workspace } from 'pages/fetchAPI/workspace'
 
 function LoginForm() {
-  
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
-  const [workspacelist, setWorkspaceList] = useState([
-    {
-      id: 0,
-      name: "",
-      primary_owner_id: 0
-    }
-  ]);
+  const [workspacelist, setWorkspaceList] = useState<Workspace[]>([]);
 
   const list = workspacelist.map((item, index) => (
     <div key={index}>
