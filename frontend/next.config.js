@@ -9,7 +9,7 @@ const nextConfig = {
       aggregateTimeout: 300,
     }
     return config
-  },
+  }
   // ここまで
 }
 
