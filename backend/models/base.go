@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
 
 	"backend/config"
 )
@@ -14,11 +12,10 @@ import (
 var DbConnection *sql.DB
 
 func init() {
-	// driver := config.Config.Driver
-	driver := "postgres"
-	// dbName := config.Config.DbName
+	driver := config.Config.Driver
+	dbName := config.Config.DbName
 	var err error
-	DbConnection, err = sql.Open(driver, "host=db  user=postgres password=postgres dbname=postgres sslmode=disable")
+	DbConnection, err = sql.Open(driver, dbName)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -26,9 +23,9 @@ func init() {
 	// create users table
 	cmd := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
-			id bigint PRIMARY KEY NOT NULL,
-			name varchar(100) NOT NULL,
-			password varchar(100) NOT NULL
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL,
+			password STRING NOT NULL
 		)
 	`, config.Config.UserTableName)
 	_, err = DbConnection.Exec(cmd)
@@ -37,32 +34,35 @@ func init() {
 	// create workspace table
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
-			id bigint PRIMARY KEY NOT NULL,
-			name varchar(100) NOT NULL UNIQUE,
-			workspace_primary_owner_id bigint not NULL
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL UNIQUE,
+			workspace_primary_owner_id STRING not NULL
 		)
 	`, config.Config.WorkspaceTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create workspace and user table
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
-			workspace_id bigint NOT NULL,
-			user_id bigint NOT NULL,
-			role_id bigint NOT NULL,
+			workspace_id INT NOT NULL,
+			user_id INT NOT NULL,
+			role_id INT NOT NULL,
 			PRIMARY KEY (workspace_id, user_id)
 		)
 	`, config.Config.WorkspaceAndUserTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create role table
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
-			id bigint PRIMARY KEY NOT NULL,
-			name varchar(100) NOT NULL
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL
 		)
 	`, config.Config.RoleTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// insert 4 roles in roles table
 	roleNames := []string{
@@ -83,38 +83,41 @@ func init() {
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s 
 		(
-			id bigint PRIMARY KEY NOT NULL,
-			name varchar(100) NOT NULL,
-			description varchar(100),
-			is_private boolean NOT NULL,
-			is_archive boolean NOT NULL,
-			workspace_id bigint NOT NULL
+			id INT PRIMARY KEY NOT NULL,
+			name STRING NOT NULL,
+			description STRING,
+			is_private BOOLEAN NOT NULL,
+			is_archive BOOLEAN NOT NULL,
+			workspace_id INT NOT NULL
 		)
 	`, config.Config.ChannelsTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create channels_and_users table
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s
 		(
-			channel_id bigint NOT NULL,
-			user_id bigint NOT NULL,
-			is_admin boolean NOT NULL,
+			channel_id INT NOT NULL,
+			user_id INT NOT NULL,
+			is_admin BOOLEAN NOT NULL,
 			PRIMARY KEY (channel_id, user_id)
 		)
 	`, config.Config.ChannelsAndUserTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create messages table
 	cmd = fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s 
 		(
-			id bigint PRIMARY KEY NOT NULL,
-			text varchar(100) NOT NULL,
-			date varchar(100) NOT NULL,
-			channel_id bigint NOT NULL,
-			user_id bigint NOT NULL
+			id INT PRIMARY KEY NOT NULL,
+			text STRING NOT NULL,
+			date STRING NOT NULL,
+			channel_id INT NOT NULL,
+			user_id INT NOT NULL
 		)
 	`, config.Config.MessagesTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 }

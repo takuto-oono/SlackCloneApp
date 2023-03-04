@@ -466,7 +466,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"pq: duplicate key value violates unique constraint \\\"workspaces_and_users_pkey\\\"\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
 
 	})
 }
