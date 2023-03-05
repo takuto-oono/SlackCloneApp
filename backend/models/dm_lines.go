@@ -10,8 +10,8 @@ type DMLine struct {
 	gorm.Model
 	ID          uint   `json:"id" gorm:"unique"`
 	WorkspaceId int    `json:"workspace_id" gorm:"not null"`
-	UserId1     uint32 `json:"user_id_1" gorm:"primaryKey"`
-	UserId2     uint32 `json:"user_id_2" gorm:"primaryKey"`
+	UserId1     uint32 `json:"user_id_1" gorm:"primaryKey; column:user_id_1"`
+	UserId2     uint32 `json:"user_id_2" gorm:"primaryKey; column:user_id_2"`
 }
 
 func NewDMLine(workspaceId int, userId1, userId2 uint32) *DMLine {
@@ -48,6 +48,6 @@ func GetDLByUserIdsAndWorkspaceId(userId1, userId2 uint32, workspaceId int) (DML
 	if !(userId1 <= userId2) {
 		userId1, userId2 = userId2, userId1
 	}
-	result := db.First(&dm_line, "user_id1 = ? AND user_id2 = ? AND workspace_id = ?", userId1, userId2, workspaceId)
+	result := db.First(&dm_line, "user_id_1 = ? AND user_id_2 = ? AND workspace_id = ?", userId1, userId2, workspaceId)
 	return dm_line, result.Error
 }

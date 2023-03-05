@@ -11,7 +11,7 @@ type DirectMessage struct {
 	ID         uint      `json:"id" gorm:"primaryKey"`
 	Text       string    `json:"text" gorm:"not null"`
 	SendUserId uint32    `json:"send_user_id" gorm:"not null"`
-	DMLineId   uint      `json:"dm_line_id" gorm:"not null"`
+	DMLineId   uint      `json:"dm_line_id" gorm:"not null; column: dm_line_id"`
 	CreatedAt  time.Time `json:"create_at" gorm:"not null"`
 	UpdatedAt  time.Time `json:"update_at" gorm:"not null"`
 }

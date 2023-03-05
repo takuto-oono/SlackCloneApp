@@ -8,9 +8,9 @@ import (
 )
 
 func TestCreateDMLine(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	dl := NewDMLine(int(rand.Uint64()), rand.Uint32(), rand.Uint32())
 	res := dl.Create()
@@ -19,9 +19,9 @@ func TestCreateDMLine(t *testing.T) {
 }
 
 func TestGetByUserIds(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		userId1 := rand.Uint32()

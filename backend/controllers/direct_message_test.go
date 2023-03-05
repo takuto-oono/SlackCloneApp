@@ -34,9 +34,9 @@ func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int
 }
 
 func TestSendDM(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1. 正常な場合 200
 	// 2. 自分自身に送信する場合 200
