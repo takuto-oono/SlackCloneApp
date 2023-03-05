@@ -134,27 +134,29 @@ func init() {
 	fmt.Println(err)
 	
 	// create direct_messages table
-	cmd = fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s
-		(
-			id INT PRIMARY KEY NOT NULL,
-			text STRING NOT NULL,
-			date STRING NOT NULL,
-			send_user_id INT NOT NULL,
-			dm_line INT NOT NULL
-		)
-	`, config.Config.DirectMessagesTableName)
-	db.Exec(cmd)
+	// cmd = fmt.Sprintf(`
+	// 	CREATE TABLE IF NOT EXISTS %s
+	// 	(
+	// 		id INT PRIMARY KEY NOT NULL,
+	// 		text STRING NOT NULL,
+	// 		date STRING NOT NULL,
+	// 		send_user_id INT NOT NULL,
+	// 		dm_line INT NOT NULL
+	// 	)
+	// `, config.Config.DirectMessagesTableName)
+	// db.Exec(cmd)
+	db.AutoMigrate(&DirectMessage{})
 	
 	// create dm_lines table
-	cmd = fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s
-		(
-			id INT PRIMARY KEY NOT NULL,
-			workspace_id INT NOT NULL,
-			user_id_1 INT NOT NULL,
-			user_id_2 INT NOT NULL
-		)
-	`, config.Config.DMLinesTableName)
-	db.Exec(cmd)
+	// cmd = fmt.Sprintf(`
+	// 	CREATE TABLE IF NOT EXISTS %s
+	// 	(
+	// 		id INT PRIMARY KEY NOT NULL,
+	// 		workspace_id INT NOT NULL,
+	// 		user_id_1 INT NOT NULL,
+	// 		user_id_2 INT NOT NULL
+	// 	)
+	// `, config.Config.DMLinesTableName)
+	// db.Exec(cmd)
+	db.AutoMigrate(&DMLine{})
 }

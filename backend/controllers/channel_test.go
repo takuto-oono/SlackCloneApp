@@ -1322,9 +1322,9 @@ func TestDeleteChannel(t *testing.T) {
 }
 
 func TestGetChannelsByUser(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1. general channel以外のchannelが存在する場合 200
 	// 2. userがworkspaceに存在していない場合 404

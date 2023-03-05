@@ -6,8 +6,10 @@
         "gonic",
         "gorm",
         "mattn",
+        "randomstring",
         "rwau",
         "structs",
-        "waus"
+        "waus",
+        "xyproto"
     ]
 }
