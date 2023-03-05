@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -55,11 +56,10 @@ func TestSendMessage(t *testing.T) {
 	// 4. channelにuserが存在しない場合 404
 
 	t.Run("1 正常な場合", func(t *testing.T) {
-		testCaseNum := "1"
-		userName := "testSendMessageUserName" + testCaseNum
-		workspaceName := "testSendMessageWorkspaceName" + testCaseNum
-		channelName := "testSendMessageChannelName" + testCaseNum
-		text := "testSendMessageText" + testCaseNum
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -95,11 +95,10 @@ func TestSendMessage(t *testing.T) {
 	})
 
 	t.Run("2 bodyに不足がある場合", func(t *testing.T) {
-		testCaseNum := "2"
-		userName := "testSendMessageUserName" + testCaseNum
-		workspaceName := "testSendMessageWorkspaceName" + testCaseNum
-		channelName := "testSendMessageChannelName" + testCaseNum
-		text := "testSendMessageText" + testCaseNum
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -132,13 +131,12 @@ func TestSendMessage(t *testing.T) {
 	})
 
 	t.Run("3 userとchannelが同じworkspaceに存在していない場合", func(t *testing.T) {
-		testCaseNum := "3"
-		userName := "testSendMessageUserName" + testCaseNum
-		userName2 := "testSendMessageUserName" + testCaseNum + ".2"
-		workspaceName := "testSendMessageWorkspaceName" + testCaseNum
-		workspaceName2 := "testSendMessageWorkspaceName" + testCaseNum + ".2"
-		channelName := "testSendMessageChannelName" + testCaseNum
-		text := "testSendMessageText" + testCaseNum
+		userName := randomstring.EnglishFrequencyString(30)
+		userName2 := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		workspaceName2 := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -179,12 +177,11 @@ func TestSendMessage(t *testing.T) {
 		assert.Equal(t, "{\"message\":\"channel and user not found in same workspace\"}", rr.Body.String())
 	})
 	t.Run("4 channelにuserが存在しない場合", func(t *testing.T) {
-		testCaseNum := "4"
-		userName := "testSendMessageUserName" + testCaseNum
-		userName2 := "testSendMessageUserName" + testCaseNum + ".2"
-		workspaceName := "testSendMessageWorkspaceName" + testCaseNum
-		channelName := "testSendMessageChannelName" + testCaseNum
-		text := "testSendMessageText" + testCaseNum
+		userName := randomstring.EnglishFrequencyString(30)
+		userName2 := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -232,12 +229,11 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 	// 3. userがchannelに所属していない場合 404
 
 	t.Run("1 messageが存在する場合", func(t *testing.T) {
-		testNum := "1"
-		userName := "testGetAllMessageFromChannelUserName" + testNum
-		workspaceName := "testGetAllMessageFromChannelWorkspaceName" + testNum
-		channelName := "testGetAllMessageFromChannelName" + testNum
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
-		text := "testGetAllMessageFromChannelText" + testNum
+		text := randomstring.EnglishFrequencyString(30)
 		messageCount := 10
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -287,10 +283,9 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 	})
 
 	t.Run("2 messageが存在しない場合", func(t *testing.T) {
-		testNum := "2"
-		userName := "testGetAllMessageFromChannelUserName" + testNum
-		workspaceName := "testGetAllMessageFromChannelWorkspaceName" + testNum
-		channelName := "testGetAllMessageFromChannelName" + testNum
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -322,13 +317,12 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 	})
 
 	t.Run("3 userがchannelに所属していない場合", func(t *testing.T) {
-		testNum := "3"
-		userName := "testGetAllMessageFromChannelUserName" + testNum
-		userName2 := "testGetAllMessageFromChannelUserName" + testNum + ".2"
-		workspaceName := "testGetAllMessageFromChannelWorkspaceName" + testNum
-		channelName := "testGetAllMessageFromChannelName" + testNum
+		userName := randomstring.EnglishFrequencyString(30)
+		userName2 := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
-		text := "testGetAllMessageFromChannelText" + testNum
+		text := randomstring.EnglishFrequencyString(30)
 		messageCount := 3
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)

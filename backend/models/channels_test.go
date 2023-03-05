@@ -2,21 +2,21 @@ package models
 
 import (
 	"math/rand"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 )
 
 func TestCreateChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	name := "testCreateChannelModelName"
-	description := "testCreateChannelModelDescription"
+	name := randomstring.EnglishFrequencyString(30)
+	description := randomstring.EnglishFrequencyString(30)
 	is_private := true
 	is_archive := false
-	workspaceId := 7397593
+	workspaceId := rand.Int()
 	c := NewChannel(0, name, description, is_private, is_archive, workspaceId)
 	assert.Empty(t, c.Create())
 }
@@ -25,11 +25,11 @@ func TestGetChannelById(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	name := "testGetChannelByIdName"
-	description := "testGetChannelByIdDescription"
+	name := randomstring.EnglishFrequencyString(30)
+	description := randomstring.EnglishFrequencyString(30)
 	is_private := true
 	is_archive := false
-	workspaceId := 3999526
+	workspaceId := rand.Int()
 	c := NewChannel(0, name, description, is_private, is_archive, workspaceId)
 	assert.Empty(t, c.Create())
 	assert.NotEqual(t, 0, c.ID)
@@ -45,7 +45,7 @@ func TestDeleteChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	c := NewChannel(0, "testDeleteChannelName", "", true, false, 58430850380)
+	c := NewChannel(0, randomstring.EnglishFrequencyString(30), "", true, false, rand.Int())
 	assert.Empty(t, c.Create())
 	channelId := c.ID
 	assert.Empty(t, c.Delete())
@@ -63,12 +63,11 @@ func TestGetChannelsByWorkspaceId(t *testing.T) {
 	// 2. データが存在しない場合
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		testNum := "1"
 		channelCount := 10
 		workspaceId := int(rand.Uint64())
 		channels := make([]Channel, channelCount)
 		for i := 0; i < channelCount; i++ {
-			channelName := "testGetChannelsByWorkspaceId" + testNum + "." + strconv.Itoa(i)
+			channelName := randomstring.EnglishFrequencyString(30)
 			ch := NewChannel(0, channelName, "des", false, false, workspaceId)
 			assert.Empty(t, ch.Create())
 			channels[i] = *ch

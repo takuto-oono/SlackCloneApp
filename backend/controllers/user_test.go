@@ -10,9 +10,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
-	"backend/models"
 	"backend/controllerUtils"
+	"backend/models"
 )
 
 var router = SetupRouter()
@@ -67,7 +68,7 @@ func TestLogin(t *testing.T) {
 		names := make([]string, 10)
 
 		for i := 0; i < 10; i++ {
-			names[i] = "loginControllerTestUser1" + strconv.Itoa(i)
+			names[i] = randomstring.EnglishFrequencyString(30)
 		}
 
 		for i := 0; i < 10; i++ {
@@ -91,15 +92,14 @@ func TestLogin(t *testing.T) {
 			assert.NotEmpty(t, lr.Token)
 			assert.Equal(t, names[i], lr.Username)
 			assert.Equal(t, ids[i], lr.UserId)
-
 		}
 	})
 	t.Run("2", func(t *testing.T) {
 		ids := make([]uint32, 10)
-		name := "testLoginUser2"
+		name := randomstring.EnglishFrequencyString(30)
 		passwords := make([]string, 10)
 		for i := 0; i < 10; i++ {
-			passwords[i] = "TestLoginPass2" + strconv.Itoa(i)
+			passwords[i] = randomstring.EnglishFrequencyString(30)
 		}
 		for i, pass := range passwords {
 			rr := signUpTestFunc(name, pass)
@@ -127,9 +127,8 @@ func TestLogin(t *testing.T) {
 	t.Run("3", func(t *testing.T) {
 		names := make([]string, 10)
 		for i := 0; i < 10; i++ {
-			name := "testLoginUser3" + strconv.Itoa(i)
-			names[i] = name
-			assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
+			names[i] = randomstring.EnglishFrequencyString(30)
+			assert.Equal(t, http.StatusOK, signUpTestFunc(names[i], "pass").Code)
 		}
 		for i := 0; i < 10; i++ {
 			var rr *httptest.ResponseRecorder
@@ -147,7 +146,7 @@ func TestLogin(t *testing.T) {
 	t.Run("4", func(t *testing.T) {
 		names := make([]string, 10)
 		for i := 0; i < 10; i++ {
-			name := "testLoginUser4" + strconv.Itoa(i)
+			name := randomstring.EnglishFrequencyString(30)
 			if i%3 == 0 {
 				assert.Equal(t, http.StatusOK, signUpTestFunc(name, "pass").Code)
 			}
@@ -178,7 +177,7 @@ func TestSignUp(t *testing.T) {
 	// 1
 	t.Run("1", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
-			username := "testSignUpControllerUser1" + strconv.Itoa(i)
+			username := randomstring.EnglishFrequencyString(30)
 			password := "pass"
 			assert.Equal(t, http.StatusOK, signUpTestFunc(username, password).Code)
 		}
@@ -187,7 +186,7 @@ func TestSignUp(t *testing.T) {
 	// 2
 	t.Run("2", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
-			username := "testSignUpControllerUser2"
+			username := randomstring.EnglishFrequencyString(30)
 			password := "password" + strconv.Itoa(i)
 			assert.Equal(t, http.StatusOK, signUpTestFunc(username, password).Code)
 		}
@@ -196,7 +195,7 @@ func TestSignUp(t *testing.T) {
 	// 3
 	t.Run("3", func(t *testing.T) {
 		for i := 0; i < 12; i++ {
-			username := "testSignUpControllerUser3" + strconv.Itoa(i)
+			username := randomstring.EnglishFrequencyString(30)
 			password := "pass"
 
 			var rr *httptest.ResponseRecorder
@@ -213,7 +212,7 @@ func TestSignUp(t *testing.T) {
 
 	// 4
 	t.Run("4", func(t *testing.T) {
-		username := "testSignUpControllerUser4"
+		username := randomstring.EnglishFrequencyString(30)
 		password := "pass"
 		rr := signUpTestFunc(username, password)
 		assert.Equal(t, http.StatusOK, rr.Code)

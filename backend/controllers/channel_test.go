@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -78,13 +79,13 @@ func TestCreateChannel(t *testing.T) {
 	// 5. すでに同じ名前のchannelが対象のworkspaceに存在している場合 409
 
 	t.Run("1", func(t *testing.T) {
-		userName := "testCreateChannelUserName1"
-		workspaceName := "testCreateChannelWorkspaceName1"
-		channelName := "testCreateChannelName1"
-		description := "description1"
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		description := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
-		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code, "OK")
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
@@ -110,10 +111,10 @@ func TestCreateChannel(t *testing.T) {
 	})
 
 	t.Run("3", func(t *testing.T) {
-		userName := "testCreateChannelUserName3"
-		workspaceName := "testCreateChannelWorkspaceName3"
-		channelName := "testCreateChannelName3"
-		description := "description3"
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		description := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -143,11 +144,11 @@ func TestCreateChannel(t *testing.T) {
 	})
 
 	t.Run("4", func(t *testing.T) {
-		userName := "testCreateChannelUserName4"
-		createWorkspaceUserName := "testCreateChannelCreateWorkspaceUserName4"
-		workspaceName := "testCreateChannelWorkspaceName4"
-		channelName := "testCreateChannelName4"
-		description := "description4"
+		userName := randomstring.EnglishFrequencyString(30)
+		createWorkspaceUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		description := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -177,10 +178,10 @@ func TestCreateChannel(t *testing.T) {
 	})
 
 	t.Run("5", func(t *testing.T) {
-		userName := "testCreateChannelUserName5"
-		workspaceName := "testCreateChannelWorkspaceName5"
-		channelName := "testCreateChannelName5"
-		description := "description5"
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		description := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -218,10 +219,10 @@ func TestAddUserInChannel(t *testing.T) {
 	// 7. リクエストしたuserにチャンネルの管理権限がない場合 403
 
 	t.Run("1", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName1"
-		addUserName := "testAddUserInChannelAddUserName1"
-		workspaceName := "testAddUserInChannelWorkspaceName1"
-		channelName := "testAddUserInChannelChannelName1"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -264,10 +265,10 @@ func TestAddUserInChannel(t *testing.T) {
 	})
 
 	t.Run("2", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName2"
-		addUserName := "testAddUserInChannelAddUserName2"
-		workspaceName := "testAddUserInChannelWorkspaceName2"
-		channelName := "testAddUserInChannelChannelName2"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -309,11 +310,11 @@ func TestAddUserInChannel(t *testing.T) {
 	})
 
 	t.Run("3", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName3"
-		addUserName := "testAddUserInChannelAddUserName3"
-		createWorkspaceUserName := "testAddUserInChannelCreateWorkspaceUserName3"
-		workspaceName := "testAddUserInChannelWorkspaceName3"
-		channelName := "testAddUserInChannelChannelName3"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		createWorkspaceUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -359,10 +360,10 @@ func TestAddUserInChannel(t *testing.T) {
 	})
 
 	t.Run("4", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName4"
-		addUserName := "testAddUserInChannelAddUserName4"
-		workspaceName := "testAddUserInChannelWorkspaceName4"
-		channelName := "testAddUserInChannelChannelName4"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -398,10 +399,10 @@ func TestAddUserInChannel(t *testing.T) {
 	})
 
 	t.Run("6", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName6"
-		addUserName := "testAddUserInChannelAddUserName6"
-		workspaceName := "testAddUserInChannelWorkspaceName6"
-		channelName := "testAddUserInChannelChannelName6"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -442,11 +443,11 @@ func TestAddUserInChannel(t *testing.T) {
 	})
 
 	t.Run("7", func(t *testing.T) {
-		requestUserName := "testAddUserInChannelRequestUserName7"
-		addUserName := "testAddUserInChannelAddUserName7"
-		createChannelUserName := "testAddUserInChannelCreateUserName7"
-		workspaceName := "testAddUserInChannelWorkspaceName7"
-		channelName := "testAddUserInChannelChannelName7"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		createChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -515,10 +516,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	// 12. channelがアーカイブされている場合 400
 
 	t.Run("1", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName1"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName1"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName1"
-		channelName := "testDeleteUserFromChannelName1"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -562,10 +563,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("2", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName2"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName2"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName2"
-		channelName := "testDeleteUserFromChannelName2"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -609,10 +610,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("3", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName3"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName3"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName3"
-		channelName := "testDeleteUserFromChannelName3"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -655,10 +656,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("4", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName4"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName4"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName4"
-		channelName := "testDeleteUserFromChannelName4"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -694,11 +695,11 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("5", func(t *testing.T) {
-		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName5"
-		requestUserName := "testDeleteUserFromChannelRequestUserName5"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName5"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName5"
-		channelName := "testDeleteUserFromChannelName5"
+		createChannelUserName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
@@ -745,10 +746,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("6", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName6"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName6"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName6"
-		channelName := "testDeleteUserFromChannelName6"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -788,11 +789,11 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("7", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserNam7"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName7"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName7"
-		workspaceName2 := "testDeleteUserFromChannelWorkspaceName7.2"
-		channelName := "testDeleteUserFromChannelName7"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		workspaceName2 := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -882,10 +883,10 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("9", func(t *testing.T) {
-		requestUserName := "testDeleteUserFromChannelRequestUserName9"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName9"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName9"
-		channelName := "testDeleteUserFromChannelName9"
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -923,11 +924,11 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("10", func(t *testing.T) {
-		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName10"
-		requestUserName := "testDeleteUserFromChannelRequestUserName10"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName10"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName10"
-		channelName := "testDeleteUserFromChannelName10"
+		createChannelUserName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
@@ -975,11 +976,11 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	})
 
 	t.Run("11", func(t *testing.T) {
-		createChannelUserName := "testDeleteUserFromChannelCreateChannelUserName11"
-		requestUserName := "testDeleteUserFromChannelRequestUserName11"
-		deleteUserName := "testDeleteUserFromChannelDeleteUserName11"
-		workspaceName := "testDeleteUserFromChannelWorkspaceName11"
-		channelName := "testDeleteUserFromChannelName11"
+		createChannelUserName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(createChannelUserName, "pass").Code)
@@ -1043,11 +1044,10 @@ func TestDeleteChannel(t *testing.T) {
 	// 6. channelがworkspaceに存在しない場合 404
 
 	t.Run("1", func(t *testing.T) {
-		testNumber := "1"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
-		channelName := "testDeleteChannelFromWorkspaceChannelName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -1092,11 +1092,10 @@ func TestDeleteChannel(t *testing.T) {
 	})
 
 	t.Run("2", func(t *testing.T) {
-		testNumber := "2"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
-		channelName := "testDeleteChannelFromWorkspaceChannelName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -1140,12 +1139,11 @@ func TestDeleteChannel(t *testing.T) {
 	})
 
 	t.Run("3", func(t *testing.T) {
-		testNumber := "3"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		createChannelUserName := "testDeleteChannelFromWorkspaceCreateChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
-		channelName := "testDeleteChannelFromWorkspaceChannelName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		createChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -1192,11 +1190,10 @@ func TestDeleteChannel(t *testing.T) {
 	})
 
 	t.Run("4", func(t *testing.T) {
-		testNumber := "4"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
-		channelName := "testDeleteChannelFromWorkspaceChannelName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -1236,10 +1233,9 @@ func TestDeleteChannel(t *testing.T) {
 	})
 
 	t.Run("5", func(t *testing.T) {
-		testNumber := "5"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
 		assert.Equal(t, http.StatusOK, signUpTestFunc(inChannelUserName, "pass").Code)
@@ -1270,12 +1266,11 @@ func TestDeleteChannel(t *testing.T) {
 	})
 
 	t.Run("6", func(t *testing.T) {
-		testNumber := "6"
-		requestUserName := "testDeleteChannelFromWorkspaceRequestUserName" + testNumber
-		inChannelUserName := "testDeleteChannelFromWorkspaceInChannelUserName" + testNumber
-		workspaceName := "testDeleteChannelFromWorkspaceName" + testNumber
-		workspaceName2 := "testDeleteChannelFromWorkspaceName" + testNumber + "2"
-		channelName := "testDeleteChannelFromWorkspaceChannelName" + testNumber
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		inChannelUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		workspaceName2 := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
@@ -1322,26 +1317,25 @@ func TestDeleteChannel(t *testing.T) {
 }
 
 func TestGetChannelsByUser(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1. general channel以外のchannelが存在する場合 200
 	// 2. userがworkspaceに存在していない場合 404
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		testNum := "1"
 		channelCount := 10
-		userName := "testGetChannelsByUser" + testNum
-		workspaceName1 := "testGetChannelsByUserWorkspaceName" + testNum + ".1"
-		workspaceName2 := "testGetChannelsByUserWorkspaceName" + testNum + ".2"
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName1 := randomstring.EnglishFrequencyString(30)
+		workspaceName2 := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 		channelNames1 := make([]string, channelCount)
 		channelNames2 := make([]string, channelCount)
 
 		for i := 0; i < channelCount; i++ {
-			channelNames1[i] = "testGetChannelsByUserChannelName" + strconv.Itoa(i) + ".1"
-			channelNames2[i] = "testGetChannelsByUserChannelName" + strconv.Itoa(i) + ".2"
+			channelNames1[i] = randomstring.EnglishFrequencyString(30)
+			channelNames2[i] = randomstring.EnglishFrequencyString(30)
 		}
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -1398,16 +1392,15 @@ func TestGetChannelsByUser(t *testing.T) {
 	})
 
 	t.Run("2 userがworkspaceに存在していない場合", func(t *testing.T) {
-		testNum := "2"
 		channelCount := 10
-		userName1 := "testGetChannelsByUser" + testNum + ".1"
-		userName2 := "testGetChannelsByUser" + testNum + ".2"
-		workspaceName := "testGetChannelsByUserWorkspaceName" + testNum
+		userName1 := randomstring.EnglishFrequencyString(30)
+		userName2 := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		isPrivate := true
 		channelNames := make([]string, channelCount)
 
 		for i := 0; i < channelCount; i++ {
-			channelNames[i] = "testGetChannelsByUserChannelName" + strconv.Itoa(i)
+			channelNames[i] = randomstring.EnglishFrequencyString(30)
 		}
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName1, "pass").Code)
@@ -1445,5 +1438,4 @@ func TestGetChannelsByUser(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 	})
-
 }
