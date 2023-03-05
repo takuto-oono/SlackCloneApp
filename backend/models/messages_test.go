@@ -1,9 +1,11 @@
 package models
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/utils"
 )
@@ -12,9 +14,9 @@ func TestCreateMessage(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	text := "test message"
-	channelId := 7675071751
-	userId := uint32(3571521121)
+	text := randomstring.EnglishFrequencyString(30)
+	channelId := rand.Int()
+	userId := rand.Uint32()
 	m := NewMessage(text, channelId, userId)
 	assert.Empty(t, m.Create())
 	assert.NotEqual(t, 0, m.ID)
@@ -34,10 +36,10 @@ func TestGetMessagesByChannelId(t *testing.T) {
 		testNum := 100
 		texts := make([]string, testNum)
 		for i := 0; i < testNum; i++ {
-			texts[i] = "testGetMessagesByChannelId"
+			texts[i] = randomstring.EnglishFrequencyString(30)
 		}
-		channelId := 37590793729
-		userId := uint32(536357900)
+		channelId := rand.Int()
+		userId := rand.Uint32()
 
 		for _, text := range texts {
 			m := NewMessage(text, channelId, userId)
@@ -57,7 +59,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 		for _, m := range messages {
 			assert.Equal(t, channelId, m.ChannelId)
 			assert.Equal(t, userId, m.UserId)
-			assert.Equal(t, texts[0], m.Text)
+			assert.Contains(t, texts, m.Text)
 		}
 	})
 

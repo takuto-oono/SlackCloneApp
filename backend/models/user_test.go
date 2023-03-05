@@ -2,10 +2,10 @@ package models
 
 import (
 	"math/rand"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 )
 
 func CreateTest(t *testing.T) {
@@ -14,7 +14,7 @@ func CreateTest(t *testing.T) {
 	}
 	t.Run("1", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
-			u := NewUser(rand.Uint32(), "createModelUserTest1"+strconv.Itoa(i), "pass")
+			u := NewUser(rand.Uint32(), randomstring.EnglishFrequencyString(30), "pass")
 			assert.Empty(t, u.Create())
 		}
 	})
@@ -28,7 +28,7 @@ func GetUserByNameAndPasswordTest(t *testing.T) {
 		password := "pass"
 		for i := 0; i < 10; i++ {
 			id := rand.Uint32()
-			name := "loginModelUserTest1" + strconv.Itoa(i)
+			name := randomstring.EnglishFrequencyString(30)
 			u := NewUser(id, name, password)
 			assert.Empty(t, u.Create())
 			u1, err := GetUserByNameAndPassword(name, password)

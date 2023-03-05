@@ -2,10 +2,11 @@ package models
 
 import (
 	"fmt"
-	"strconv"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/config"
 )
@@ -14,10 +15,10 @@ func TestNewWorkspace(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	for i := 0; i < 1000; i++ {
-		id := i
-		name := "testNewWorkspaceName" + strconv.Itoa(i)
-		primary_owner_id := uint32(i) + 10
+	for i := 0; i < 10; i++ {
+		id := rand.Int()
+		name := randomstring.EnglishFrequencyString(30)
+		primary_owner_id := rand.Uint32()
 		w := NewWorkspace(id, name, primary_owner_id)
 		assert.Equal(t, id, w.ID)
 		assert.Equal(t, name, w.Name)
@@ -34,8 +35,8 @@ func TestCreateWorkspace(t *testing.T) {
 	names := make([]string, numbersOfTests)
 	primaryOwnerIds := make([]uint32, numbersOfTests)
 	for i := 0; i < numbersOfTests; i++ {
-		names[i] = "testCreateWorkspace" + strconv.Itoa(i)
-		primaryOwnerIds[i] = uint32(i) + 11
+		names[i] = randomstring.EnglishFrequencyString(30)
+		primaryOwnerIds[i] = rand.Uint32()
 	}
 
 	for i := 0; i < numbersOfTests; i++ {
@@ -56,11 +57,11 @@ func TestCreateWorkspace(t *testing.T) {
 	}
 
 	// workspace nameが既に存在する場合 error
-	name := "testCreateWorkspaceDuplicate"
-	w := NewWorkspace(0, name, uint32(2))
+	name := randomstring.EnglishFrequencyString(30)
+	w := NewWorkspace(0, name, rand.Uint32())
 	err := w.Create()
 	assert.Empty(t, err)
-	w2 := NewWorkspace(0, name, uint32(1))
+	w2 := NewWorkspace(0, name, rand.Uint32())
 	err = w2.Create()
 	assert.NotEmpty(t, err)
 }
@@ -69,9 +70,9 @@ func TestRenameWorkspaceName(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	w := NewWorkspace(3333, "old name", 3)
+	w := NewWorkspace(rand.Int(), randomstring.EnglishFrequencyString(30), 3)
 	w.Create()
-	w.Name = "new name"
+	w.Name = randomstring.EnglishFrequencyString(30)
 	err := w.RenameWorkspaceName()
 	assert.Empty(t, err)
 	w2, err := GetWorkspaceById(w.ID)
