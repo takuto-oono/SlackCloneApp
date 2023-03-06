@@ -22,7 +22,8 @@ type ConfigList struct {
 	ChannelsTableName         string
 	ChannelsAndUserTableName  string
 	MessagesTableName         string
-
+	DirectMessagesTableName   string
+	DMLinesTableName          string
 	//jwt-token
 	TokenHourLifeSpan string
 	SecretKey         string
@@ -60,7 +61,9 @@ func init() {
 		RoleTableName:             cfg.Section("db").Key("rolesTableName").String(),
 		ChannelsTableName:         cfg.Section("db").Key("channelsTableName").String(),
 		ChannelsAndUserTableName:  cfg.Section("db").Key("channelsAndUsersTableName").String(),
-		MessagesTableName: cfg.Section("db").Key("messagesTableName").String(),
+		MessagesTableName:         cfg.Section("db").Key("messagesTableName").String(),
+		DirectMessagesTableName:   cfg.Section("db").Key("directMessagesTableName").String(),
+		DMLinesTableName:          cfg.Section("db").Key("dmLinesTableName").String(),
 
 		TokenHourLifeSpan: cfg.Section("jwt-token").Key("tokenHourLifespan").String(),
 		SecretKey:         cfg.Section("jwt-token").Key("secretKey").String(),
