@@ -48,5 +48,7 @@ func SetupRouter() *gin.Engine {
 	message.POST("/send", SendMessage)
 	message.GET("/get_from_channel/:channel_id", GetAllMessagesFromChannel)
 
+	dm := api.Group("/dm")
+	dm.POST("/send", SendDM)
 	return r
 }

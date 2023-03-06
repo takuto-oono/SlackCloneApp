@@ -1,0 +1,256 @@
+package controllers
+
+import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
+
+	"backend/controllerUtils"
+	"backend/models"
+)
+
+var dmRouter = SetupRouter()
+
+func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	jsonInput, _ := json.Marshal(controllerUtils.SendDMInput{
+		Text:          text,
+		WorkspaceId:   workspaceId,
+		ReceiveUserId: receiveUserId,
+	})
+	req, err := http.NewRequest("POST", "/api/dm/send", bytes.NewBuffer(jsonInput))
+	if err != nil {
+		return rr
+	}
+	req.Header.Set("Authorization", jwtToken)
+	dmRouter.ServeHTTP(rr, req)
+	return rr
+}
+
+func TestSendDM(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. 正常な場合 200
+	// 2. 自分自身に送信する場合 200
+	// 3. bodyに不足がある場合 400
+	// 4. requestしたuserがworkspaceに存在しない場合 404 (workspaceが存在しない場合も含まれる)
+	// 5. receiveするuserがworkspaceに存在しない場合 404
+
+	t.Run("1 正常な場合", func(t *testing.T) {
+		sendUserName := randomstring.EnglishFrequencyString(30)
+		receiveUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text1 := randomstring.EnglishFrequencyString(100)
+		text2 := randomstring.EnglishFrequencyString(100)
+		text3 := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(sendUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(receiveUserName, "pass").Code)
+
+		rr := loginTestFunc(sendUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		slr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), slr)
+
+		rr = loginTestFunc(receiveUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, slr.Token, slr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, slr.Token).Code)
+
+		rr = sendDMTestFunc(text1, slr.Token, rlr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm1 := new(models.DirectMessage)
+		json.Unmarshal(([]byte)(byteArray), dm1)
+		assert.Equal(t, text1, dm1.Text)
+		assert.Equal(t, slr.UserId, dm1.SendUserId)
+		assert.NotEqual(t, uint(0), dm1.DMLineId)
+
+		rr = sendDMTestFunc(text2, slr.Token, rlr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm2 := new(models.DirectMessage)
+		json.Unmarshal(([]byte)(byteArray), dm2)
+		assert.Equal(t, text2, dm2.Text)
+		assert.Equal(t, slr.UserId, dm2.SendUserId)
+		assert.NotEqual(t, uint(0), dm2.DMLineId)
+
+		rr = sendDMTestFunc(text3, rlr.Token, slr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm3 := new(models.DirectMessage)
+		json.Unmarshal(([]byte)(byteArray), dm3)
+		assert.Equal(t, text3, dm3.Text)
+		assert.Equal(t, rlr.UserId, dm3.SendUserId)
+		assert.NotEqual(t, uint(0), dm3.DMLineId)
+
+		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
+		assert.Equal(t, dm1.DMLineId, dm3.DMLineId)
+	})
+
+	t.Run("2 自分自身に送信する場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text1 := randomstring.EnglishFrequencyString(100)
+		text2 := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = sendDMTestFunc(text1, lr.Token, lr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm1 := new(models.DirectMessage)
+		json.Unmarshal(([]byte)(byteArray), dm1)
+		assert.Equal(t, text1, dm1.Text)
+		assert.Equal(t, lr.UserId, dm1.SendUserId)
+		assert.NotEqual(t, uint(0), dm1.DMLineId)
+
+		rr = sendDMTestFunc(text2, lr.Token, lr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm2 := new(models.DirectMessage)
+		json.Unmarshal(([]byte)(byteArray), dm2)
+		assert.Equal(t, text2, dm2.Text)
+		assert.Equal(t, lr.UserId, dm2.SendUserId)
+		assert.NotEqual(t, uint(0), dm2.DMLineId)
+
+		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
+
+	})
+
+	t.Run("3 bodyに不足がある場合", func(t *testing.T) {
+		sendUserName := randomstring.EnglishFrequencyString(30)
+		receiveUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(sendUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(receiveUserName, "pass").Code)
+
+		rr := loginTestFunc(sendUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		slr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), slr)
+
+		rr = loginTestFunc(receiveUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, slr.Token, slr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, slr.Token).Code)
+
+		rr = sendDMTestFunc("", slr.Token, rlr.UserId, w.ID)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"text not found\"}", rr.Body.String())
+
+		rr = sendDMTestFunc(text, slr.Token, 0, w.ID)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"receive_user_id not found\"}", rr.Body.String())
+
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, 0)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"workspace_id not found\"}", rr.Body.String())
+	})
+
+	t.Run("4 requestしたuserがworkspaceに存在しない場合", func(t *testing.T) {
+		sendUserName := randomstring.EnglishFrequencyString(30)
+		receiveUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(sendUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(receiveUserName, "pass").Code)
+
+		rr := loginTestFunc(sendUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		slr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), slr)
+
+		rr = loginTestFunc(receiveUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, rlr.Token, rlr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"send user not found in workspace\"}", rr.Body.String())
+	})
+
+	t.Run("5 receiveするuserがworkspaceに存在しない場合", func(t *testing.T) {
+		sendUserName := randomstring.EnglishFrequencyString(30)
+		receiveUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(sendUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(receiveUserName, "pass").Code)
+
+		rr := loginTestFunc(sendUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		slr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), slr)
+
+		rr = loginTestFunc(receiveUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, slr.Token, slr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"receive user not found in workspace\"}", rr.Body.String())
+	})
+}

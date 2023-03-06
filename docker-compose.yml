@@ -11,8 +11,6 @@ services:
       - ./backend:/go/src
     ports:
       - "8080:8080"
-    depends_on:
-      - db
   frontend:
     platform: linux/amd64
     build:
@@ -24,27 +22,7 @@ services:
     volumes:
       - ./frontend/:/frontend/
     stdin_open: true
-    command: sh -c "npm run dev"
-  db:
-    platform: linux/amd64
-    image: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./db_data:/var/lib/postgresql/data
+    # ホットリロード設定
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-  backend_flask:
-    build:
-      context: backend_flask
-      dockerfile: backend_flask.Dockerfile
-    command: python3 backend_flask/main.py
-    volumes:
-      - ./backend_flask:/backend_flask
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-
+     - WATCHPACK_POLLING=true
+    command: sh -c "npm run dev"

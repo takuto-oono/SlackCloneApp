@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -89,9 +90,9 @@ func GetUsersInWorkspaceTestFunc(workspaceId int, jwtToken string) *httptest.Res
 }
 
 func TestCreateWorkspace(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
 	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
@@ -105,11 +106,11 @@ func TestCreateWorkspace(t *testing.T) {
 		JwtTokens := []string{}
 
 		for i := 0; i < 10; i++ {
-			UserNames = append(UserNames, "createWorkSpaceTestUserName1"+strconv.Itoa(i))
+			UserNames = append(UserNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for i := 0; i < 100; i++ {
-			WorkSpaceNames = append(WorkSpaceNames, "createWorkspaceTestWorkspaceNames1"+strconv.Itoa(i))
+			WorkSpaceNames = append(WorkSpaceNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for _, name := range UserNames {
@@ -144,11 +145,11 @@ func TestCreateWorkspace(t *testing.T) {
 		jwtTokens := []string{}
 
 		for i := 0; i < 10; i++ {
-			UserNames = append(UserNames, "createWorkSpaceTestUserName2"+strconv.Itoa(i))
+			UserNames = append(UserNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for i := 0; i < 100; i++ {
-			WorkSpaceNames = append(WorkSpaceNames, "createWorkspaceTestWorkspaceNames2"+strconv.Itoa(i))
+			WorkSpaceNames = append(WorkSpaceNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for _, name := range UserNames {
@@ -185,11 +186,11 @@ func TestCreateWorkspace(t *testing.T) {
 		jwtTokens := []string{}
 
 		for i := 0; i < 10; i++ {
-			UserNames = append(UserNames, "createWorkSpaceTestUserName3"+strconv.Itoa(i))
+			UserNames = append(UserNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for i := 0; i < 100; i++ {
-			WorkSpaceNames = append(WorkSpaceNames, "createWorkspaceTestWorkspaceNames3"+strconv.Itoa(i))
+			WorkSpaceNames = append(WorkSpaceNames, randomstring.EnglishFrequencyString(30))
 		}
 
 		for i, name := range UserNames {
@@ -239,9 +240,9 @@ func TestAddUserInWorkspace(t *testing.T) {
 
 	// 1
 	t.Run("1", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser1"
-		addUserName := "AddUserInWorkspaceTestUser1"
-		workspaceName := "AddUserInWorkspaceTestWorkspace1"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		addUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -277,9 +278,9 @@ func TestAddUserInWorkspace(t *testing.T) {
 	})
 
 	t.Run("2", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser2"
-		addUserName := "AddUserInWorkspaceTestUser2"
-		workspaceName := "AddUserInWorkspaceTestWorkspace2"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
@@ -309,9 +310,9 @@ func TestAddUserInWorkspace(t *testing.T) {
 	})
 
 	t.Run("3", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser3"
-		addUserName := "AddUserInWorkspaceTestUser3"
-		workspaceName := "AddUserInWorkspaceTestWorkspace3"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		addUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -336,16 +337,16 @@ func TestAddUserInWorkspace(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = addUserWorkspaceTestFunc(10000000000000000, addUserRoleId, alr.UserId, olr.Token)
+		rr = addUserWorkspaceTestFunc(rand.Int(), addUserRoleId, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"workspace not found\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser4"
-		reqUserName := "reqUserInWorkspaceTestReqUser4"
-		addUserName := "AddUserInWorkspaceTestUser4"
-		workspaceName := "AddUserInWorkspaceTestWorkspace4"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		reqUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		addUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -394,9 +395,9 @@ func TestAddUserInWorkspace(t *testing.T) {
 	})
 
 	t.Run("5", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser5"
-		addUserName := "AddUserInWorkspaceTestUser5"
-		workspaceName := "AddUserInWorkspaceTestWorkspace5"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		addUserRoleId := 1
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -427,9 +428,9 @@ func TestAddUserInWorkspace(t *testing.T) {
 	})
 
 	t.Run("6", func(t *testing.T) {
-		ownerUserName := "AddUserInWorkspaceTestOwnerUser6"
-		addUserName := "AddUserInWorkspaceTestUser6"
-		workspaceName := "AddUserInWorkspaceTestWorkspace6"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		addUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		addUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -466,7 +467,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"pq: duplicate key value violates unique constraint \\\"workspaces_and_users_pkey\\\"\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
 
 	})
 }
@@ -494,9 +495,9 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	// 1
 	t.Run("1", func(t *testing.T) {
-		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser1"
-		deleteUserName := "deleteUserFromWorkspaceTestUser1"
-		workspaceName := "deleteUserFromWorkspaceTestWorkspace1"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		deleteUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -535,9 +536,9 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	// 2
 	t.Run("2", func(t *testing.T) {
-		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser2"
-		deleteUserName := "deleteUserFromWorkspaceTestUser2"
-		workspaceName := "deleteUserFromWorkspaceTestWorkspace2"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		deleteUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -575,10 +576,10 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	// 3
 	t.Run("3", func(t *testing.T) {
-		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser3"
-		reqUserName := "deleteUserFromWorkspaceTestReqUser3"
-		deleteUserName := "deleteUserFromWorkspaceTestUser3"
-		workspaceName := "deleteUserFromWorkspaceTestWorkspace3"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		reqUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		deleteUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -622,9 +623,9 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	//4
 	t.Run("4", func(t *testing.T) {
-		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser4"
-		reqUserName := "deleteUserFromWorkspaceTestReqUser4"
-		workspaceName := "deleteUserFromWorkspaceTestWorkspace4"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		reqUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
@@ -657,9 +658,9 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 	// 5
 	t.Run("5", func(t *testing.T) {
-		ownerUserName := "deleteUserFromWorkspaceTestOwnerUser5"
-		deleteUserName := "deleteUserFromWorkspaceTestUser5"
-		workspaceName := "deleteUserFromWorkspaceTestWorkspace5"
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		deleteUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 		deleteUserRoleId := 4
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
@@ -705,13 +706,12 @@ func TestGetWorkspacesById(t *testing.T) {
 	// 2. workspaceが存在しない場合 200
 
 	t.Run("1 workspaceが存在する場合", func(t *testing.T) {
-		testNum := "1"
 		workspaceCount := 10
-		userName := "testGetWorkspaceByIdUserName" + testNum
+		userName := randomstring.EnglishFrequencyString(30)
 		workspaceNames := make([]string, workspaceCount)
 		workspaces := make([]models.Workspace, workspaceCount)
 		for i := 0; i < workspaceCount; i++ {
-			workspaceNames[i] = "testGetWorkspaceByIdWorkspaceName" + testNum + "." + strconv.Itoa(i)
+			workspaceNames[i] = randomstring.EnglishFrequencyString(30)
 		}
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
@@ -751,8 +751,7 @@ func TestGetWorkspacesById(t *testing.T) {
 	})
 
 	t.Run("2 workspaceが存在しない場合", func(t *testing.T) {
-		testNum := "2"
-		userName := "testGetWorkspaceByIdUserName" + testNum
+		userName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 
@@ -782,11 +781,10 @@ func TestGetUsersInWorkspace(t *testing.T) {
 	// 2. workspaceにいないuserからのアクセスだった場合 404
 
 	t.Run("1 正常な場合", func(t *testing.T) {
-		testNum := "1"
 		userCount := 10
-		ownerUserName := "testGetUsersInWorkspaceNameOwnerUserName" + testNum
+		ownerUserName := randomstring.EnglishFrequencyString(30)
 		userInfos := make([]controllerUtils.UserInfoInWorkspace, userCount)
-		workspaceName := "testGetUsersInWorkspaceName" + testNum
+		workspaceName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 
@@ -799,7 +797,7 @@ func TestGetUsersInWorkspace(t *testing.T) {
 		for i := 0; i < userCount; i++ {
 			userInfos[i] = controllerUtils.UserInfoInWorkspace{
 				ID:     0,
-				Name:   "testGetUserInWorkspaceUserName" + testNum + "." + strconv.Itoa(i),
+				Name:   randomstring.EnglishFrequencyString(30),
 				RoleId: rand.Int()%3 + 2,
 			}
 
@@ -846,10 +844,9 @@ func TestGetUsersInWorkspace(t *testing.T) {
 	})
 
 	t.Run("2 workspaceにいないuserからのアクセスの場合", func(t *testing.T) {
-		testNum := "2"
-		ownerUserName := "testGetUsersInWorkspaceNameOwnerUserName" + testNum
-		requestUserName := "testGetUsersInWorkspaceRequestUserName" + testNum
-		workspaceName := "testGetUsersInWorkspaceName" + testNum
+		ownerUserName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(ownerUserName, "pass").Code)
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)

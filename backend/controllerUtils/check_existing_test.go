@@ -2,10 +2,10 @@ package controllerUtils
 
 import (
 	"math/rand"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/xyproto/randomstring"
 
 	"backend/models"
 )
@@ -15,14 +15,14 @@ func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	cau := models.NewChannelsAndUses(27393769379, uint32(593593926), false)
+	cau := models.NewChannelsAndUses(rand.Int(), rand.Uint32(), false)
 	assert.Empty(t, cau.Create())
 
 	b, err := IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId)
 	assert.Equal(t, true, b)
 	assert.Empty(t, err)
 
-	b, err = IsExistCAUByChannelIdAndUserId(-1, cau.UserId)
+	b, err = IsExistCAUByChannelIdAndUserId(rand.Int(), cau.UserId)
 	assert.Equal(t, false, b)
 	assert.NotEmpty(t, err)
 }
@@ -33,7 +33,7 @@ func TestIsExistUserSameUsernameAndPassword(t *testing.T) {
 	}
 	names := make([]string, 10)
 	for i := 0; i < 10; i++ {
-		names[i] = "testIsExistUserSameUsernameAndPasswordUsername" + strconv.Itoa(i)
+		names[i] = randomstring.EnglishFrequencyString(30)
 	}
 
 	for _, name := range names {
@@ -52,10 +52,10 @@ func TestIsExistWorkspaceAndUser(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	w := models.NewWorkspace(0, "testIsExistWorkspaceAndUser", 4)
+	w := models.NewWorkspace(0, randomstring.EnglishFrequencyString(30), 4)
 	w.Create()
 	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
-	assert.Equal(t, false, IsExistWorkspaceById(-1))
+	assert.Equal(t, false, IsExistWorkspaceById(rand.Int()))
 }
 
 func TestIsExistWAUByWorkspaceIdAndUserId(t *testing.T) {

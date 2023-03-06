@@ -11,8 +11,8 @@ func TestCreateChannelAndUsers(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	channelId := 5553155345262
-	userId := uint32(452526)
+	channelId := rand.Int()
+	userId := rand.Uint32()
 	isAdmin := true
 
 	cau := NewChannelsAndUses(channelId, userId, isAdmin)
@@ -21,11 +21,11 @@ func TestCreateChannelAndUsers(t *testing.T) {
 	cau.IsAdmin = false
 	assert.NotEmpty(t, cau.Create())
 
-	cau.ChannelId = 5347595792
+	cau.ChannelId = rand.Int()
 	assert.Empty(t, cau.Create())
 
 	cau.ChannelId = channelId
-	cau.UserId = 53534626
+	cau.UserId = rand.Uint32()
 	assert.Empty(t, cau.Create())
 }
 
@@ -34,8 +34,8 @@ func TestGetCAUByChannelIdAndUserId(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	channelId := 7592792472623
-	userId := uint32(137201051)
+	channelId := rand.Int()
+	userId := rand.Uint32()
 
 	cau := NewChannelsAndUses(channelId, userId, false)
 	assert.Empty(t, cau.Create())
@@ -52,8 +52,8 @@ func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	channelId := 532446463423234
-	userId := uint32(3535422)
+	channelId := rand.Int()
+	userId := rand.Uint32()
 
 	cau := NewChannelsAndUses(channelId, userId, false)
 	assert.Empty(t, cau.Create())
@@ -66,13 +66,13 @@ func TestIsAdminUserInChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	cau := NewChannelsAndUses(532446463423234434, uint32(53663732), true)
+	cau := NewChannelsAndUses(rand.Int(), rand.Uint32(), true)
 	assert.Empty(t, cau.Create())
 
 	assert.Equal(t, true, IsAdminUserInChannel(cau.ChannelId, cau.UserId))
-	assert.Equal(t, false, IsAdminUserInChannel(cau.ChannelId, 46433))
+	assert.Equal(t, false, IsAdminUserInChannel(cau.ChannelId, rand.Uint32()))
 
-	cau = NewChannelsAndUses(cau.ChannelId, 5236632, false)
+	cau = NewChannelsAndUses(cau.ChannelId, rand.Uint32(), false)
 	assert.Empty(t, cau.Create())
 	assert.Equal(t, false, IsAdminUserInChannel(cau.ChannelId, cau.UserId))
 }
@@ -81,18 +81,18 @@ func TestDeleteUserFromChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	cau := NewChannelsAndUses(9479923, 646433, true)
+	cau := NewChannelsAndUses(rand.Int(), rand.Uint32(), true)
 	assert.Empty(t, cau.Create())
 	assert.Empty(t, cau.Delete())
 
-	cau = NewChannelsAndUses(6464333, 79797, true)
+	cau = NewChannelsAndUses(rand.Int(), rand.Uint32(), true)
 	assert.Empty(t, cau.Create())
 	cau.IsAdmin = false
 	assert.Empty(t, cau.Delete())
 	assert.Equal(t, false, IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId))
 
-	channelId := 37597692793
-	userId := uint32(35362622)
+	channelId := rand.Int()
+	userId := rand.Uint32()
 	cau = NewChannelsAndUses(channelId, userId, true)
 	assert.Empty(t, cau.Create())
 	assert.Equal(t, true, IsExistCAUByChannelIdAndUserId(channelId, userId))
@@ -110,10 +110,10 @@ func TestDeleteCAUByChannelId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	channelId := 525325
+	channelId := rand.Int()
 	userIds := make([]uint32, 20)
 	for i := 0; i < 20; i++ {
-		userIds[i] = uint32(758932 + i*10)
+		userIds[i] = rand.Uint32()
 	}
 
 	for _, userId := range userIds {
