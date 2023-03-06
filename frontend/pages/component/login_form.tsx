@@ -7,8 +7,7 @@ function LoginForm() {
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [userId, setUserId] = useState("");
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
   
 
   const nameChange = (e: any) => {
@@ -20,14 +19,15 @@ function LoginForm() {
 
   const handleLogout = () => {
     console.log("logout");
-    removeCookie("token", {path: '/'});
+    removeCookie("token", {path: '/' });
+    removeCookie("user_id", {path: '/'});
   };
   const handleLogin = () => {
     console.log("login");
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 
       setCookie("token", currentUser.token);
-      setUserId(currentUser.user_id);
+      setCookie("user_id", currentUser.user_id);
     });
     
   };

@@ -3,18 +3,10 @@
 import React from "react";
 import LoginForm from "./component/login_form";
 import WorkspaceIndex from "./component/workspace_index";
+import CreateWorkspace from "./component/create_workspace";
 import { CookiesProvider } from "react-cookie";
 // import testAPI1 from "./api/test_api_1";
 export default function Home() {
-
-  // console.log(getUsers())
-  // let user: User = {
-  //   id: "",
-  //   name: "test docker",
-  //   password: "test docker"
-  // }
-  // let userRes = postUser(user)
-  // console.log(userRes)
   return (
     <CookiesProvider>
       <main>
@@ -22,6 +14,7 @@ export default function Home() {
         <h2>login</h2>
         < LoginForm />
         < WorkspaceIndex />
+        < CreateWorkspace />
       </main>
     </CookiesProvider>
   )

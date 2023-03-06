@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { getWorkspaces, Workspace } from 'pages/fetchAPI/workspace'
-import { getToken } from "pages/fetchAPI/token";
+import { getToken } from "@/pages/fetchAPI/cookie";
 
 function WorkspaceIndex() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
