@@ -28,7 +28,8 @@ func init() {
 			password STRING NOT NULL
 		)
 	`, config.Config.UserTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create workspace table
 	cmd = fmt.Sprintf(`
@@ -38,7 +39,8 @@ func init() {
 			workspace_primary_owner_id STRING not NULL
 		)
 	`, config.Config.WorkspaceTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create workspace and user table
 	cmd = fmt.Sprintf(`
@@ -49,7 +51,8 @@ func init() {
 			PRIMARY KEY (workspace_id, user_id)
 		)
 	`, config.Config.WorkspaceAndUserTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create role table
 	cmd = fmt.Sprintf(`
@@ -58,7 +61,8 @@ func init() {
 			name STRING NOT NULL
 		)
 	`, config.Config.RoleTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// insert 4 roles in roles table
 	roleNames := []string{
@@ -87,7 +91,8 @@ func init() {
 			workspace_id INT NOT NULL
 		)
 	`, config.Config.ChannelsTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create channels_and_users table
 	cmd = fmt.Sprintf(`
@@ -99,7 +104,8 @@ func init() {
 			PRIMARY KEY (channel_id, user_id)
 		)
 	`, config.Config.ChannelsAndUserTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 
 	// create messages table
 	cmd = fmt.Sprintf(`
@@ -112,5 +118,6 @@ func init() {
 			user_id INT NOT NULL
 		)
 	`, config.Config.MessagesTableName)
-	DbConnection.Exec(cmd)
+	_, err = DbConnection.Exec(cmd)
+	fmt.Println(err)
 }

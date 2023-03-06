@@ -50,5 +50,5 @@ func GetUserIdFromToken(tokenString string) (uint32, error) {
 		}
 		return uint32(uint(uid)), nil
 	}
-	return 0, nil
+	return 0, fmt.Errorf("error in GetUserIdFromToken func")
 }

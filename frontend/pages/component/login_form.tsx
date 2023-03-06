@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useCookies } from "react-cookie";
-import { currentUser,login } from 'pages/fetchAPI/login'
+import { currentUser, login } from 'pages/fetchAPI/login'
+
 
 function LoginForm() {
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  
 
   const nameChange = (e: any) => {
     setName(e.target.value);
@@ -21,9 +24,10 @@ function LoginForm() {
   const handleLogin = () => {
     console.log("login");
     let user = { name: name, password: password }
-    login(user).then((currentuser: currentUser) => { 
-      setCookie("token", currentuser.token);
-    });    
+    login(user).then((currentUser: currentUser) => { 
+      setCookie("token", currentUser.token);
+    });
+    
   };
 
   return (
@@ -35,7 +39,7 @@ function LoginForm() {
           <input type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} />
         </label><br />
         <button onClick={handleLogin} >ログイン</button>
-        <button onClick={handleLogout}>ログアウト</button>
+      <button onClick={handleLogout}>ログアウト</button>
     </div>
   );
 }
