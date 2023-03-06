@@ -22,4 +22,7 @@ services:
     volumes:
       - ./frontend/:/frontend/
     stdin_open: true
+    # ホットリロード設定
+    environment:
+     - WATCHPACK_POLLING=true
     command: sh -c "npm run dev"
