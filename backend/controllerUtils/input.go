@@ -50,7 +50,7 @@ type SendMessageInput struct {
 }
 
 type SendDMInput struct {
-	ReceiveUserId uint32 `json:"receive_user_id"`
+	ReceiveUserId uint32 `json:"received_user_id"`
 	Text          string `json:"text"`
 	WorkspaceId   int    `json:"workspace_id"`
 }
@@ -178,7 +178,7 @@ func InputAndValidateSendDM(c *gin.Context) (SendDMInput, error) {
 		return in, err
 	}
 	if in.ReceiveUserId == 0 {
-		return in, fmt.Errorf("receive_user_id not found")
+		return in, fmt.Errorf("received_user_id not found")
 	}
 	if in.WorkspaceId == 0 {
 		return in, fmt.Errorf("workspace_id not found")

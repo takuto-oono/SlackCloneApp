@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"backend/controllerUtils"
 	"backend/models"
+	"backend/utils"
 )
 
 func SendDM(c *gin.Context) {
@@ -58,4 +61,46 @@ func SendDM(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dm)
+}
+
+func GetDMsInLine(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからdm_line_idを取得する
+	dmLineId, err := utils.StringToUint(c.Param("dm_line_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// dm_lineの情報を取得する
+	dl, err := models.GetDLById(dmLineId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// dm_lineにrequestしたuserが存在しているか確認
+	if !(dl.UserId1 == userId || dl.UserId2 == userId) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "you don't access this page"})
+		return			
+	}
+
+	// direct_messages tableから情報を取得
+	dms, err := models.GetAllDMsByDLId(dl.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return		
+	}
+
+	c.JSON(http.StatusOK, dms)
 }
