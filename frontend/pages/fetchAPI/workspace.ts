@@ -1,4 +1,4 @@
-import { getToken } from "./token";
+import { getToken,getUserId } from "./cookie";
 
 export interface Workspace {
     id: number;
@@ -46,4 +46,29 @@ export async function getWorkspaces(): Promise<Workspace[]> {
         console.log(err)
     }
   return workspaces;
+}
+
+
+export async function postWorkspace(workspaceName:string) {
+    const url = baseUrl + 'create'
+  let workspace: Workspace
+  console.log(getUserId());
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': getToken(),
+            },
+            body: JSON.stringify({
+                name: workspaceName,
+                user_id: getUserId(),
+            })
+        })
+        console.log(res)
+        workspace = await res.json()
+        console.log(workspace)
+    } catch (err) {
+        console.log(err)
+    }
+    return
 }
