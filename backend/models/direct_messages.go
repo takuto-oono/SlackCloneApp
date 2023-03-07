@@ -7,11 +7,10 @@ import (
 )
 
 type DirectMessage struct {
-	gorm.Model
 	ID         uint      `json:"id" gorm:"primaryKey"`
 	Text       string    `json:"text" gorm:"not null"`
 	SendUserId uint32    `json:"send_user_id" gorm:"not null"`
-	DMLineId   uint      `json:"dm_line_id" gorm:"not null; column: dm_line_id"`
+	DMLineId   uint      `json:"dm_line_id" gorm:"not null; column:dm_line_id"`
 	CreatedAt  time.Time `json:"create_at" gorm:"not null"`
 	UpdatedAt  time.Time `json:"update_at" gorm:"not null"`
 }
@@ -26,4 +25,19 @@ func NewDirectMessage(text string, sendUserId uint32, dmLineId uint) *DirectMess
 
 func (dm *DirectMessage) Create() *gorm.DB {
 	return db.Create(dm)
+}
+
+func GetAllDMsByDLId(dmLineId uint) ([]DirectMessage, error) {
+	var result []DirectMessage
+	rows, err := db.Model(&DirectMessage{}).Where("dm_line_id = ?", dmLineId).Order("created_at desc").Rows()
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var dm DirectMessage
+		db.ScanRows(rows, &dm)
+		result = append(result, dm)
+	}
+	return result, nil
 }

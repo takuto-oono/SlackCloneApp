@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +27,17 @@ func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int
 		ReceiveUserId: receiveUserId,
 	})
 	req, err := http.NewRequest("POST", "/api/dm/send", bytes.NewBuffer(jsonInput))
+	if err != nil {
+		return rr
+	}
+	req.Header.Set("Authorization", jwtToken)
+	dmRouter.ServeHTTP(rr, req)
+	return rr
+}
+
+func getDMsInLineTestFunc(dlId uint, jwtToken string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/api/dm/"+strconv.Itoa(int(dlId)), nil)
 	if err != nil {
 		return rr
 	}
@@ -183,7 +196,7 @@ func TestSendDM(t *testing.T) {
 
 		rr = sendDMTestFunc(text, slr.Token, 0, w.ID)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.Equal(t, "{\"message\":\"receive_user_id not found\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"received_user_id not found\"}", rr.Body.String())
 
 		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, 0)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -252,5 +265,132 @@ func TestSendDM(t *testing.T) {
 		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"receive user not found in workspace\"}", rr.Body.String())
+	})
+}
+
+func TestGetAllDMsByDLId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1 正常な場合 dmが存在している場合 200
+	// 2 存在しないdm_lineだった場合 404
+	// 3 requestしたuserが参加していないdm_lineの場合 403
+
+	t.Run("1 正常な場合 dmが存在している場合", func(t *testing.T) {
+		messageCount := 3
+		username := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		dms := make([]models.DirectMessage, messageCount)
+		text := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(username, "pass").Code)
+
+		rr := loginTestFunc(username, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		for i := 0; i < messageCount; i++ {
+			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ = io.ReadAll(rr.Body)
+			var dm models.DirectMessage
+			json.Unmarshal(([]byte)(byteArray), &dm)
+			dms[i] = dm
+		}
+
+		rr = getDMsInLineTestFunc(dms[0].DMLineId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		res := make([]models.DirectMessage, messageCount)
+		byteArray, _ = io.ReadAll(rr.Body)
+		json.Unmarshal(([]byte)(byteArray), &res)
+		assert.Equal(t, messageCount, len(res))
+
+		for i := 0; i < messageCount-1; i++ {
+			assert.True(t, res[i].CreatedAt.After(res[i+1].CreatedAt))
+		}
+
+		for _, dm := range res {
+			assert.Equal(t, dms[0].DMLineId, dm.DMLineId)
+			assert.Equal(t, text, dm.Text)
+			assert.Equal(t, lr.UserId, dm.SendUserId)
+		}
+
+	})
+
+	t.Run("2 存在しないdm_lineだった場合", func(t *testing.T) {
+		username := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(username, "pass").Code)
+
+		rr := loginTestFunc(username, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = getDMsInLineTestFunc(uint(rand.Uint64()), lr.Token)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
+	})
+
+	t.Run("3 requestしたuserが参加していないdm_lineだった場合", func(t *testing.T) {
+		messageCount := 3
+		username := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		dms := make([]models.DirectMessage, messageCount)
+		text := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(username, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+
+		rr := loginTestFunc(username, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		for i := 0; i < messageCount; i++ {
+			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ = io.ReadAll(rr.Body)
+			var dm models.DirectMessage
+			json.Unmarshal(([]byte)(byteArray), &dm)
+			dms[i] = dm
+		}
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, lr.Token).Code)
+
+		rr = getDMsInLineTestFunc(dms[0].DMLineId, rlr.Token)
+		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, "{\"message\":\"you don't access this page\"}", rr.Body.String())
 	})
 }

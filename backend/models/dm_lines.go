@@ -7,7 +7,6 @@ import (
 )
 
 type DMLine struct {
-	gorm.Model
 	ID          uint   `json:"id" gorm:"unique"`
 	WorkspaceId int    `json:"workspace_id" gorm:"not null"`
 	UserId1     uint32 `json:"user_id_1" gorm:"primaryKey; column:user_id_1"`
@@ -30,7 +29,7 @@ func (dl *DMLine) SetID() {
 	cnt := 0
 	defer rows.Close()
 	for rows.Next() {
-		cnt ++
+		cnt++
 	}
 	dl.ID = uint(cnt + 1)
 }
@@ -50,4 +49,10 @@ func GetDLByUserIdsAndWorkspaceId(userId1, userId2 uint32, workspaceId int) (DML
 	}
 	result := db.First(&dm_line, "user_id_1 = ? AND user_id_2 = ? AND workspace_id = ?", userId1, userId2, workspaceId)
 	return dm_line, result.Error
+}
+
+func GetDLById(id uint) (DMLine, error) {
+	var dl DMLine
+	result := db.First(&dl, "id = ?", id)
+	return dl, result.Error
 }
