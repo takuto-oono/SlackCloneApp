@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { getWorkspaces, Workspace } from 'pages/fetchAPI/workspace'
-import { getToken } from "@/pages/fetchAPI/cookie";
 
 function WorkspaceIndex() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
 
-  const list = workspaceList.map((item, index) => (
+  const list = Object.values(workspaceList).map((item, index) => (
     <div key={index}>
       <p>{item.id}</p>
       <p>{item.name}</p>
@@ -13,14 +12,12 @@ function WorkspaceIndex() {
     </div>
   ));
   const handleGetWorkspaces = () => {
-    if (typeof getToken() !== 'undefined') {
-      getWorkspaces().then((workspaces: Workspace[]) => {
-        console.log("workspaces")
-        console.log(workspaces)
-        setWorkspaceList(workspaces)
-        console.log(workspaceList)
-      });
-    }
+    getWorkspaces().then((workspaces: Workspace[]) => {
+      console.log("workspaces")
+      console.log(workspaces)
+      setWorkspaceList(workspaces)
+      console.log(workspaceList)
+    });
   }
 
   return (
