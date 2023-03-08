@@ -3,6 +3,8 @@ package controllerUtils
 import (
 	"fmt"
 
+	"gorm.io/gorm"
+
 	"backend/models"
 )
 
@@ -50,4 +52,16 @@ func IsExistWAUByWorkspaceIdAndUserId(workspaceId int, userId uint32) bool {
 		return false
 	}
 	return wau.WorkspaceId == workspaceId && wau.UserId == userId
+}
+
+func IsExistDMById(dmId uint) (bool, error) {
+	_, err := models.GetDMById(dmId)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// not found errorはfalse, nilを返すようにする
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

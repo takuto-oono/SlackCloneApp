@@ -1,6 +1,10 @@
 package controllerUtils
 
 import (
+	"fmt"
+
+	"gorm.io/gorm"
+
 	"backend/models"
 )
 
@@ -44,4 +48,16 @@ func HasPermissionDeletingUserInChannel(userId uint32, workspaceId int, ch model
 
 func HasPermissionDeletingChannel(wau models.WorkspaceAndUsers) bool { 
 	return (wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3)	
+}
+
+func HasPermissionEditDM(dmId uint, userId uint32) bool {
+	dm, err := models.GetDMById(dmId)
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			fmt.Println(err.Error())
+		}
+		return false
+	}
+	return dm.SendUserId == userId
+
 }

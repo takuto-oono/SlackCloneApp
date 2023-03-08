@@ -41,3 +41,23 @@ func GetAllDMsByDLId(dmLineId uint) ([]DirectMessage, error) {
 	}
 	return result, nil
 }
+
+func GetDMById(id uint) (DirectMessage, error) {
+	var result DirectMessage
+	err := db.Model(&DirectMessage{}).Where("id = ?", id).First(
+		&result).Error
+	return result, err
+}
+
+func UpdateDM(id uint, text string) (DirectMessage, error) {
+	var result DirectMessage
+	err := db.Model(&DirectMessage{}).Where("id = ?", id).Update("text", text).Row().Scan(
+		&result.ID,
+		&result.Text,
+		&result.SendUserId,
+		&result.DMLineId,
+		&result.CreatedAt,
+		&result.UpdatedAt,
+	)
+	return result, err
+}
