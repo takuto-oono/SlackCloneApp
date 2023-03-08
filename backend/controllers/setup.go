@@ -51,6 +51,6 @@ func SetupRouter() *gin.Engine {
 	dm := api.Group("/dm")
 	dm.POST("/send", SendDM)
 	dm.GET("/:dm_line_id", GetDMsInLine)
-
+	dm.PATCH("/:dm_id", EditDM)
 	return r
 }
