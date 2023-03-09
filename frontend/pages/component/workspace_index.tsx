@@ -13,14 +13,16 @@ function WorkspaceIndex() {
     </div>
   ));
   const handleGetWorkspaces = () => {
-    if (typeof getToken() !== 'undefined') {
-      getWorkspaces().then((workspaces: Workspace[]) => {
-        console.log("workspaces")
-        console.log(workspaces)
+    getWorkspaces().then((workspaces: Workspace[]) => {
+      console.log("workspaces")
+      console.log(workspaces)
+      if (Array.isArray(workspaces)) {
         setWorkspaceList(workspaces)
         console.log(workspaceList)
-      });
+      }
     }
+    );
+  
   }
 
   return (
