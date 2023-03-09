@@ -1,7 +1,12 @@
+
+import { useRouter } from "next/router";
+
 function ShowWorkspace() {
+    const router = useRouter();
+
   return (
     <div>
-      てすと
+      {" " + router.query.id}
     </div>
   )
 }
