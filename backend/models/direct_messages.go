@@ -61,3 +61,11 @@ func UpdateDM(id uint, text string) (DirectMessage, error) {
 	)
 	return result, err
 }
+
+func DeleteDM(id uint) (DirectMessage, error) {
+	dm, err := GetDMById(id)
+	if err != nil {
+		return dm, err
+	}
+	return dm, db.Delete(&DirectMessage{}, id).Error
+}
