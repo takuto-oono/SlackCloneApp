@@ -17,6 +17,7 @@ function WorkspaceIndex() {
       <p>---</p>
     </div>
   ));
+
   useEffect(() => {
     if (typeof getToken() !== 'undefined') {
       getWorkspaces().then((workspaces: Workspace[]) => {
