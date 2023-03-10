@@ -13,6 +13,7 @@ function CreateWorkspace() {
 
   return (
     <div className="CreateWorkspace">
+        <h2>Create Workspace</h2>
         <label>ワークスペースの名前
           <input type="text" value={ name } name="name" onChange={(e) => nameChange(e)} />
         </label><br />

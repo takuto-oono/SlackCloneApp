@@ -12,9 +12,6 @@ function WorkspaceIndex() {
       <Link href={{ pathname: "/component/show_workspace/"+item.id, query: item.id.toString}} as={"/component/show_workspace/"+item.id}>
           Workspace{item.id} &gt;&gt;
       </Link><br></br>
-      <p>id:{item.id}</p>
-      <p>owner_id:{item.primary_owner_id}</p>
-      <p>---</p>
     </div>
   ));
 
@@ -31,9 +28,11 @@ function WorkspaceIndex() {
 
   return (
     <div className="App">
+      <h2>Workspace Index</h2>
       <Link href="/component/create_workspace">
           Create Workspace &gt;&gt;
       </Link><br></br>
+      <p>---</p>
       <div>
         {list}
       </div>

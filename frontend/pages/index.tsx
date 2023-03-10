@@ -4,11 +4,11 @@ import Link from 'next/link'
 export default function Home() {
   return (
       <main>
-        <h1>hello nextjs</h1>
-        <h2>login</h2>
+        <h2>Login</h2>
         < LoginForm />
+        <p>---</p>
         <Link href="/component/workspace_index">
-          Go to WorkspaceIndex &gt;&gt;
+          WorkspaceIndex &gt;&gt;
         </Link>
       </main>
   )
