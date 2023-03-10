@@ -19,12 +19,12 @@ function WorkspaceIndex() {
   ));
   useEffect(() => {
     if (typeof getToken() !== 'undefined') {
-    getWorkspaces().then((workspaces: Workspace[]) => {
+      getWorkspaces().then((workspaces: Workspace[]) => {
       if (Array.isArray(workspaces)) {
         setWorkspaceList(workspaces)
       }
       console.log(workspaceList)
-    });
+      });
     }
   },[]);
 
