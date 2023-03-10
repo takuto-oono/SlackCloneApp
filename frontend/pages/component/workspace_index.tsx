@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getWorkspaces, Workspace } from 'pages/fetchAPI/workspace'
 import { getToken } from "@/pages/fetchAPI/cookie";
 import Link from 'next/link'
-// import { Link } from "react-router-dom";
 
 
 function WorkspaceIndex() {
@@ -18,25 +17,22 @@ function WorkspaceIndex() {
       <p>---</p>
     </div>
   ));
-  const handleGetWorkspaces = () => {
-    // if (typeof getToken() !== 'undefined') {
-      getWorkspaces().then((workspaces: Workspace[]) => {
-        console.log("workspaces")
-        console.log(workspaces)
-        if (Array.isArray(workspaces)) {
-          setWorkspaceList(workspaces)
-        }
-          console.log(workspaceList)
-      });
-    // }
-  }
+  useEffect(() => {
+    if (typeof getToken() !== 'undefined') {
+    getWorkspaces().then((workspaces: Workspace[]) => {
+      if (Array.isArray(workspaces)) {
+        setWorkspaceList(workspaces)
+      }
+      console.log(workspaceList)
+    });
+    }
+  },[]);
 
   return (
     <div className="App">
       <Link href="/component/create_workspace">
           Create Workspace &gt;&gt;
       </Link><br></br>
-      <button onClick={handleGetWorkspaces}>ワークスペース一覧を表示</button>
       <div>
         {list}
       </div>
