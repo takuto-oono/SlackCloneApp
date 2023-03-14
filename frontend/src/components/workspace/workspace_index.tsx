@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace } from 'pages/fetchAPI/workspace'
-import { getToken } from "@/pages/fetchAPI/cookie";
+import { getWorkspaces, Workspace } from 'src/fetchAPI/workspace'
+import { getToken } from "src/fetchAPI/cookie";
 import Link from 'next/link'
 
 

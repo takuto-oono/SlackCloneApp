@@ -1,5 +1,5 @@
 import React from "react";
-import LoginForm from "./component/login_form";
+import LoginForm from "src/components/login_form";
 import Link from 'next/link'
 export default function Home() {
   return (

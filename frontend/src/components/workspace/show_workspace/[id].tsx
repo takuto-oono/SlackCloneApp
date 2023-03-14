@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getChannelsByWorkspaceId, Channel } from 'pages/fetchAPI/channel';
+import { getChannelsByWorkspaceId, Channel } from 'src/fetchAPI/channel';
 import { useRouter } from "next/router";
 import Link from 'next/link'
 

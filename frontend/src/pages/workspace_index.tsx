@@ -1,5 +1,5 @@
 import React from "react";
-import WorkspaceIndex from "./component/workspace/workspace_index";
+import WorkspaceIndex from "src/components/workspace/workspace_index";
 import Link from 'next/link'
 export default function IndexW() {
   return (
