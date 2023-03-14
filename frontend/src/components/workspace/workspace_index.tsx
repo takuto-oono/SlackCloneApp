@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getWorkspaces, Workspace } from 'src/fetchAPI/workspace'
-import { getToken } from "src/fetchAPI/cookie";
+import { getToken } from 'src/fetchAPI/cookie'
 import Link from 'next/link'
+import router from "next/router";
 
 
 function WorkspaceIndex() {
@@ -16,7 +17,10 @@ function WorkspaceIndex() {
 
 
   useEffect(() => {
-    if (typeof getToken() !== 'undefined') {
+    if (getToken() === undefined) {
+      console.log("redirect");
+      router.replace('/')
+    } else {
       getWorkspaces().then((workspaces: Workspace[]) => {
       if (Array.isArray(workspaces)) {
         setWorkspaceList(workspaces)

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getChannelsByWorkspaceId, Channel } from 'src/fetchAPI/channel';
 import { useRouter } from "next/router";
-import Link from 'next/link'
+import { getToken } from "@/src/fetchAPI/cookie";
 
 
 function ShowWorkspace() {
@@ -20,12 +20,17 @@ function ShowWorkspace() {
   ));
 
   useEffect(() => {
+    if (getToken() === undefined) {
+      console.log("redirect");
+      router.replace('/')
+    } else {
       getChannelsByWorkspaceId(parseInt(router.query.id)).then((channels: Channel[]) => {
       if (Array.isArray(channels)) {
         setChannelList(channels)
       }
-      console.log(channelList)
+        console.log(channelList)
       });
+    }
   },[]);
 
     

@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import router from "next/router";
+import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from 'src/fetchAPI/login'
+import { getToken } from "../fetchAPI/cookie";
 
 
 function LoginForm() {
@@ -28,9 +30,17 @@ function LoginForm() {
     login(user).then((currentUser: currentUser) => { 
       setCookie("token", currentUser.token);
       setCookie("user_id", currentUser.user_id);
+      router.replace('/workspace_index')
     });
     
   };
+
+  useEffect(() => {
+    if (getToken() !== undefined) {
+      console.log("redirect");
+      router.replace('/workspace_index')
+    }
+  },[]);
 
   return (
     <div className="App">

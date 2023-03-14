@@ -12,7 +12,7 @@ const baseUrl = 'http://localhost:8080/api/workspace/'
 
 export async function getWorkspaces(): Promise<Workspace[]> {
   const url = baseUrl + 'get_by_user'
-  console.log("getToken()")
+  console.log("getWorkspaces")
   console.log(getToken());
   let res_workspaces: Workspace[]
   const workspaces = [
@@ -31,19 +31,20 @@ export async function getWorkspaces(): Promise<Workspace[]> {
           },
         })
         
-        console.log(res)
+        // console.log(res)
         res_workspaces = await res.json()
-        console.log("workspaces1")
-        console.log(res_workspaces);
+        // console.log("workspaces1")
+        // console.log(res_workspaces);
       
         return new Promise((resolve) => {
         const workspaces: Workspace[] = res_workspaces;
-          console.log("workspaces2")
-          console.log(workspaces)
+          // console.log("workspaces2")
+          // console.log(workspaces)
         resolve(workspaces);
       });
     } catch (err) {
-        console.log(err)
+      console.log(err)
+      
     }
   return workspaces;
 }
