@@ -1,3 +1,4 @@
+import router from "next/router";
 import { getToken,getUserId } from "./cookie";
 
 export interface Workspace {
@@ -5,10 +6,6 @@ export interface Workspace {
     name: string;
     primary_owner_id: number;
 }
-
-type Authorization = string | undefined;
-
-
 
 const baseUrl = 'http://localhost:8080/api/workspace/'
 
@@ -25,29 +22,24 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     }
   ]
   
-    try {
-        const res = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': getToken(),
-          },
-        })
-        
-        // console.log(res)
-        res_workspaces = await res.json()
-        // console.log("workspaces1")
-        // console.log(res_workspaces);
-      
-        return new Promise((resolve) => {
-        const workspaces: Workspace[] = res_workspaces;
-          // console.log("workspaces2")
-          // console.log(workspaces)
-        resolve(workspaces);
-      });
-    } catch (err) {
-      console.log(err)
-      
-    }
+  try {
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': getToken(),
+        },
+      })
+      res_workspaces = await res.json()
+      return new Promise((resolve) => {
+      const workspaces: Workspace[] = res_workspaces;
+      resolve(workspaces);
+    });
+  } catch (err) {
+    console.log(err)
+    console.log("redirect");
+    router.replace('/')
+  }
+  console.log(workspaces);
   return workspaces;
 }
 
