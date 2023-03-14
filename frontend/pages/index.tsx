@@ -7,11 +7,9 @@ export default function Home() {
         <h2>Login</h2>
         < LoginForm />
         <p>---</p>
-        <Link href="/component/workspace_index">
+        <Link href="workspace_index">
           WorkspaceIndex &gt;&gt;
         </Link>
       </main>
   )
 }
-
-

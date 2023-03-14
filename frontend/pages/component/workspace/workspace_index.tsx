@@ -8,7 +8,7 @@ function WorkspaceIndex() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const list = workspaceList.map((item, index) => (
     <div key={index}>
-      <Link href={{ pathname: "/component/show_workspace/"+item.id, query: item.id.toString}} as={"/component/show_workspace/"+item.id}>
+      <Link href={{ pathname: "/workspace_show/"+item.id, query: item.id.toString}} as={"/workspace_show/"+item.id}>
           Workspace{item.id} &gt;&gt;
       </Link><br></br>
     </div>
@@ -29,14 +29,10 @@ function WorkspaceIndex() {
   return (
     <div className="App">
       <h2>Workspace Index</h2>
-      <Link href="/component/create_workspace">
-          Create Workspace &gt;&gt;
-      </Link><br></br>
-      <p>---</p>
+      <br></br>
       <div>
         {list}
-
-      </div>
+      </div><br></br>
     </div>
     );
 }
