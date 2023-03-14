@@ -13,8 +13,11 @@ function CreateWorkspace() {
       router.replace('/')
     } else {
       console.log("create");
-      let workspaceName = name
-      postWorkspace(workspaceName)
+      let workspaceName = name;
+      postWorkspace(workspaceName).then(() => {
+        console.log("redirect");
+        router.replace('/workspace_index')
+      });
     }
   };
   useEffect(() => {
