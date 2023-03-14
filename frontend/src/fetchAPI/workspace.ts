@@ -6,6 +6,8 @@ export interface Workspace {
     primary_owner_id: number;
 }
 
+type Authorization = string | undefined;
+
 
 
 const baseUrl = 'http://localhost:8080/api/workspace/'
@@ -27,7 +29,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
         const res = await fetch(url, {
           method: 'GET',
           headers: {
-              'Authorization': getToken(),
+            'Authorization': getToken(),
           },
         })
         

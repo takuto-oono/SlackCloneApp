@@ -7,6 +7,7 @@ import { getToken } from "@/src/fetchAPI/cookie";
 function ShowWorkspace() {
   const router = useRouter();
   const [channelList, setChannelList] = useState<Channel[]>([]);
+  const workspaceId = router.query.id as string;
 
   const list = channelList.map((item, index) => (
     <div key={index}>
@@ -24,7 +25,8 @@ function ShowWorkspace() {
       console.log("redirect");
       router.replace('/')
     } else {
-      getChannelsByWorkspaceId(parseInt(router.query.id)).then((channels: Channel[]) => {
+      
+      getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
       if (Array.isArray(channels)) {
         setChannelList(channels)
       }
