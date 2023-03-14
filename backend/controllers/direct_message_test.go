@@ -46,6 +46,20 @@ func getDMsInLineTestFunc(dlId uint, jwtToken string) *httptest.ResponseRecorder
 	return rr
 }
 
+func editDMTestFunc(dmId uint, jwtToken, text string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	jsonInput, _ := json.Marshal(controllerUtils.EditDMInput{
+		Text: text,
+	})
+	req, err := http.NewRequest("PATCH", "/api/dm/"+strconv.Itoa(int(dmId)), bytes.NewBuffer(jsonInput))
+	if err != nil {
+		return rr
+	}
+	req.Header.Set("Authorization", jwtToken)
+	dmRouter.ServeHTTP(rr, req)
+	return rr
+}
+
 func TestSendDM(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
@@ -393,4 +407,126 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"you don't access this page\"}", rr.Body.String())
 	})
+}
+
+func TestEditDM(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. 正常な場合 200
+	// 2. bodyにtextがなかった場合 400
+	// 3. DMが存在しない場合 404
+	// 4. DMが他のuserが送信したものだった場合 403
+
+	t.Run("1 正常な場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		oldText := randomstring.EnglishFrequencyString(100)
+		newText := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = sendDMTestFunc(oldText, lr.Token, lr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		var dm models.DirectMessage
+		json.Unmarshal(([]byte)(byteArray), &dm)
+
+		rr = editDMTestFunc(dm.ID, lr.Token, newText)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		var res models.DirectMessage
+		json.Unmarshal(([]byte)(byteArray), &res)
+
+		assert.Equal(t, dm.ID, res.ID)
+		assert.Equal(t, newText, res.Text)
+		assert.Equal(t, dm.SendUserId, res.SendUserId)
+		assert.Equal(t, dm.DMLineId, res.DMLineId)
+		assert.Equal(t, dm.CreatedAt, res.CreatedAt)
+		assert.True(t, res.UpdatedAt.After(dm.UpdatedAt))
+	})
+
+	t.Run("2 bodyにtextがなかった場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = editDMTestFunc(uint(rand.Uint64()), lr.Token, "")
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "{\"message\":\"text not found\"}", rr.Body.String())
+	})
+
+	t.Run("3 DMが存在しない場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = editDMTestFunc(uint(rand.Uint64()), lr.Token, randomstring.EnglishFrequencyString(100))
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, "{\"message\":\"dm not found\"}", rr.Body.String())
+	})
+
+	t.Run("DMが他のuserが送信したものだった場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+		
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		var dm models.DirectMessage
+		json.Unmarshal(([]byte)(byteArray), &dm)
+		
+		rr = editDMTestFunc(dm.ID, rlr.Token, randomstring.EnglishFrequencyString(100))
+		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, "{\"message\":\"no permission\"}", rr.Body.String())
+
+	})
+
 }

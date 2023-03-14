@@ -55,6 +55,10 @@ type SendDMInput struct {
 	WorkspaceId   int    `json:"workspace_id"`
 }
 
+type EditDMInput struct {
+	Text string `json:"text"`
+}
+
 func InputSignUpAndLogin(c *gin.Context) (SignUpAndLoginInput, error) {
 	var in SignUpAndLoginInput
 	if err := c.ShouldBindJSON(&in); err != nil {
@@ -182,6 +186,17 @@ func InputAndValidateSendDM(c *gin.Context) (SendDMInput, error) {
 	}
 	if in.WorkspaceId == 0 {
 		return in, fmt.Errorf("workspace_id not found")
+	}
+	if in.Text == "" {
+		return in, fmt.Errorf("text not found")
+	}
+	return in, nil
+}
+
+func InputAndValidateEditDM(c *gin.Context) (EditDMInput, error) {
+	var in EditDMInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		return in, err
 	}
 	if in.Text == "" {
 		return in, fmt.Errorf("text not found")

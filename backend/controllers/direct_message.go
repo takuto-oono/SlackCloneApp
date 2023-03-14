@@ -104,3 +104,52 @@ func GetDMsInLine(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dms)
 }
+
+func EditDM(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからdm_idを取得
+	dmId, err := utils.StringToUint(c.Param("dm_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	
+	// bodyからtextを取得
+	in, err := controllerUtils.InputAndValidateEditDM(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// dmが存在するかどうかを確認
+	b, err := controllerUtils.IsExistDMById(dmId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if !b {
+		c.JSON(http.StatusNotFound, gin.H{"message": "dm not found"})
+		return
+	}
+
+	// 対象のdmがuserが送信したものかを確認
+	if !controllerUtils.HasPermissionEditDM(dmId, userId) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "no permission"})
+		return
+	}
+
+	// direct_messages tableをupdate
+	dm, err := models.UpdateDM(dmId, in.Text)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dm)
+}
