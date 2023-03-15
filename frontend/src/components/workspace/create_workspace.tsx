@@ -1,6 +1,4 @@
-import { getToken } from "@/src/fetchAPI/cookie";
-import router from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { postWorkspace } from 'src/fetchAPI/workspace';
 function CreateWorkspace() {
   const [name, setName] = useState("");
@@ -8,24 +6,10 @@ function CreateWorkspace() {
     setName(e.target.value);
   };
   const handleCreate = () => {
-    if (getToken() === undefined) {
-      console.log("redirect");
-      router.replace('/')
-    } else {
-      console.log("create");
-      let workspaceName = name;
-      postWorkspace(workspaceName).then(() => {
-        console.log("redirect");
-        router.replace('/workspace_index')
-      });
-    }
+    console.log("create");
+    let workspaceName = name;
+    postWorkspace(workspaceName)
   };
-  useEffect(() => {
-    if (getToken() === undefined) {
-      console.log("redirect");
-      router.replace('/')
-    }
-  });
 
   return (
     <div className="CreateWorkspace">

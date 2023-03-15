@@ -2,8 +2,6 @@ import router from "next/router";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from 'src/fetchAPI/login'
-import { getToken } from "../fetchAPI/cookie";
-
 
 function LoginForm() {
 
@@ -34,13 +32,6 @@ function LoginForm() {
     });
     
   };
-
-  useEffect(() => {
-    if (getToken() !== undefined) {
-      console.log("redirect");
-      router.replace('/workspace_index')
-    }
-  },[]);
 
   return (
     <div className="App">

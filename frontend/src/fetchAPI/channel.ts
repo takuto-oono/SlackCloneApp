@@ -1,3 +1,4 @@
+import router from "next/router";
 import { getToken } from "./cookie";
 
 export interface Channel {
@@ -32,7 +33,11 @@ export async function getChannelsByWorkspaceId(workspace_id: number): Promise<Ch
               'Authorization': getToken(),
           },
       })
-      console.log(res)
+    console.log(res)
+    if (res.status == 401) {
+        console.log("redirect");
+        router.replace('/')
+      }
       res_channels = await res.json()
       return new Promise((resolve) => {
         const channels: Channel[] = res_channels;

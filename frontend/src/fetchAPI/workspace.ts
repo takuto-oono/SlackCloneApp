@@ -29,6 +29,11 @@ export async function getWorkspaces(): Promise<Workspace[]> {
           'Authorization': getToken(),
         },
       })
+    // 認証エラーの時のみリダイレクトする
+      if (res.status == 401) {
+        console.log("redirect");
+        router.replace('/')
+      }
       res_workspaces = await res.json()
       return new Promise((resolve) => {
       const workspaces: Workspace[] = res_workspaces;
@@ -36,15 +41,13 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     });
   } catch (err) {
     console.log(err)
-    console.log("redirect");
-    router.replace('/')
   }
   console.log(workspaces);
   return workspaces;
 }
 
 
-export async function postWorkspace(workspaceName:string) {
+export async function postWorkspace(workspaceName:string){
     const url = baseUrl + 'create'
   let workspace: Workspace
   console.log(getUserId());
@@ -59,11 +62,17 @@ export async function postWorkspace(workspaceName:string) {
                 user_id: getUserId(),
             })
         })
-        console.log(res)
+        console.log("status-code")
+      console.log(res.status);
+      if (res.status == 401) {
+        console.log("redirect");
+        router.replace('/')
+      }
+      console.log(res)
         workspace = await res.json()
-        console.log(workspace)
+      console.log(workspace)
     } catch (err) {
-        console.log(err)
+      console.log(err)
     }
     return
 }
