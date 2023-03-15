@@ -62,15 +62,20 @@ export async function postWorkspace(workspaceName:string){
                 user_id: getUserId(),
             })
         })
-        console.log("status-code")
+      console.log(res)
+      workspace = await res.json()
+      console.log(workspace)
+      console.log("status-code")
       console.log(res.status);
+      
       if (res.status == 401) {
         console.log("redirect");
         router.replace('/')
+      } else if (res.status == 200) {
+        console.log("redirect");
+        router.replace('/workspace_index')
       }
-      console.log(res)
-        workspace = await res.json()
-      console.log(workspace)
+      
     } catch (err) {
       console.log(err)
     }
