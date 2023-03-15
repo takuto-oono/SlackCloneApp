@@ -21,18 +21,12 @@ function ShowWorkspace() {
   ));
 
   useEffect(() => {
-    if (getToken() === undefined) {
-      console.log("redirect");
-      router.replace('/')
-    } else {
-      
-      getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
-      if (Array.isArray(channels)) {
-        setChannelList(channels)
-      }
-        console.log(channelList)
-      });
+    getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
+    if (Array.isArray(channels)) {
+      setChannelList(channels)
     }
+      console.log(channelList)
+    });
   },[]);
 
     
