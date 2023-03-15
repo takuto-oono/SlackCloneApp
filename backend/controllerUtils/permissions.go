@@ -9,7 +9,7 @@ import (
 )
 
 func HasPermissionAddUserInWorkspace(userId uint32, workspaceId int) bool {
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+	wau, err := models.GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 	if err != nil {
 		return false
 	}
@@ -17,14 +17,14 @@ func HasPermissionAddUserInWorkspace(userId uint32, workspaceId int) bool {
 }
 
 func HasPermissionRenamingWorkspaceName(workspaceId int, userId uint32) (bool, error) {
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+	wau, err := models.GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 	if err != nil {
 		return false, err
 	}
 	return (wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3), nil
 }
 
-func HasPermissionDeletingUserFromWorkspace(workspaceId int, userId uint32) (bool, error) { wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+func HasPermissionDeletingUserFromWorkspace(workspaceId int, userId uint32) (bool, error) { wau, err := models.GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 	if err != nil {
 		return false, err
 	}
@@ -32,18 +32,26 @@ func HasPermissionDeletingUserFromWorkspace(workspaceId int, userId uint32) (boo
 }
 
 func HasPermissionAddingUserInChannel(channelId int, userId uint32) bool {
-	return models.IsAdminUserInChannel(channelId, userId)
+	cau, err := models.GetCAUByChannelIdAndUserId(db, channelId, userId)
+	if err != nil {
+		return false
+	}
+	return cau.IsAdmin
 }
 
 func HasPermissionDeletingUserInChannel(userId uint32, workspaceId int, ch models.Channel) bool {
 	if ch.IsPrivate {
-		return models.IsExistCAUByChannelIdAndUserId(ch.ID, userId)
+		cau, err := models.GetCAUByChannelIdAndUserId(db, ch.ID, userId)
+		if err != nil {
+			return false
+		}
+		return cau.IsAdmin
 	}
-	roleId, err := models.GetRoleIdByWorkspaceIdAndUserId(workspaceId, userId)
+	wau, err := models.GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 	if err != nil {
 		return false
 	}
-	return roleId == 1 || roleId == 2 || roleId == 3
+	return wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3
 }
 
 func HasPermissionDeletingChannel(wau models.WorkspaceAndUsers) bool { 
@@ -51,7 +59,7 @@ func HasPermissionDeletingChannel(wau models.WorkspaceAndUsers) bool {
 }
 
 func HasPermissionEditDM(dmId uint, userId uint32) bool {
-	dm, err := models.GetDMById(dmId)
+	dm, err := models.GetDMById(db, dmId)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			fmt.Println(err.Error())

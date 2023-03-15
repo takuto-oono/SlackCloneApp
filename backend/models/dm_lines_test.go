@@ -14,9 +14,9 @@ func TestCreateDMLine(t *testing.T) {
 	}
 
 	dl := NewDMLine(int(rand.Uint64()), rand.Uint32(), rand.Uint32())
-	res := dl.Create()
+	res := dl.Create(db)
 	assert.NotEqual(t, 0, dl.ID)
-	assert.Empty(t, res.Error)
+	assert.Empty(t, res)
 }
 
 func TestGetByUserIds(t *testing.T) {
@@ -29,19 +29,19 @@ func TestGetByUserIds(t *testing.T) {
 		userId2 := rand.Uint32()
 		workspaceId := int(rand.Uint64())
 		dl := NewDMLine(workspaceId, userId1, userId2)
-		res := dl.Create()
+		res := dl.Create(db)
 		assert.NotEqual(t, uint(0), dl.ID)
-		assert.Empty(t, res.Error)
-		dm_line, err := GetDLByUserIdsAndWorkspaceId(userId1, userId2, workspaceId)
+		assert.Empty(t, res)
+		dm_line, err := GetDLByUserIdsAndWorkspaceId(db, userId1, userId2, workspaceId)
 		assert.Empty(t, err)
 		assert.Equal(t, dl.ID, dm_line.ID)
-		dm_line, err = GetDLByUserIdsAndWorkspaceId(userId2, userId1, workspaceId)
+		dm_line, err = GetDLByUserIdsAndWorkspaceId(db, userId2, userId1, workspaceId)
 		assert.Empty(t, err)
 		assert.Equal(t, dl.ID, dm_line.ID)
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := GetDLByUserIdsAndWorkspaceId(rand.Uint32(), rand.Uint32(), int(rand.Uint64()))
+		_, err := GetDLByUserIdsAndWorkspaceId(db, rand.Uint32(), rand.Uint32(), int(rand.Uint64()))
 		assert.NotEmpty(t, err)
 	})
 }
@@ -53,9 +53,9 @@ func TestGetDLById(t *testing.T) {
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		dl := NewDMLine(rand.Int(), rand.Uint32(), rand.Uint32())
-		assert.Empty(t, dl.Create().Error)
+		assert.Empty(t, dl.Create(db))
 		assert.NotEqual(t, uint(0), dl.ID)
-		res, err := GetDLById(dl.ID)
+		res, err := GetDLById(db, dl.ID)
 		assert.Empty(t, err)
 		assert.Equal(t, dl.ID, res.ID)
 		assert.Equal(t, dl.WorkspaceId, res.WorkspaceId)
@@ -64,7 +64,7 @@ func TestGetDLById(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := GetDLById(uint(rand.Uint64()))
+		_, err := GetDLById(db, uint(rand.Uint64()))
 		assert.Equal(t, gorm.ErrRecordNotFound, err)
 	})
 }

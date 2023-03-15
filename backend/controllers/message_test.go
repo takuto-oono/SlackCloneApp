@@ -14,7 +14,6 @@ import (
 
 	"backend/controllerUtils"
 	"backend/models"
-	"backend/utils"
 )
 
 var messageRouter = SetupRouter()
@@ -89,7 +88,7 @@ func TestSendMessage(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), m)
 		assert.NotEmpty(t, m.ID)
 		assert.Equal(t, text, m.Text)
-		assert.NotEmpty(t, m.Date)
+		assert.NotEmpty(t, m.CreatedAt)
 		assert.Equal(t, ch.ID, m.ChannelId)
 		assert.Equal(t, lr.UserId, m.UserId)
 	})
@@ -268,10 +267,8 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		assert.Equal(t, messageCount, len(messages))
 
 		for i := 0; i < messageCount-1; i++ {
-			d1, err1 := utils.TimeFromString(messages[i].Date)
-			d2, err2 := utils.TimeFromString(messages[i+1].Date)
-			assert.Empty(t, err1)
-			assert.Empty(t, err2)
+			d1 := messages[i].CreatedAt
+			d2 := messages[i+1].CreatedAt
 			assert.True(t, d2.Before(d1))
 		}
 

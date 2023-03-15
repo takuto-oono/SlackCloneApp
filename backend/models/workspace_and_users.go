@@ -1,15 +1,13 @@
 package models
 
 import (
-	"fmt"
-
-	"backend/config"
+	"gorm.io/gorm"
 )
 
 type WorkspaceAndUsers struct {
-	WorkspaceId int    `json:"workspace_id"`
-	UserId      uint32 `json:"user_id"`
-	RoleId      int    `json:"role_id"`
+	WorkspaceId int    `json:"workspace_id" gorm:"primaryKey"`
+	UserId      uint32 `json:"user_id" gorm:"primaryKey"`
+	RoleId      int    `json:"role_id" gorm:"not null"`
 }
 
 func NewWorkspaceAndUsers(workspaceId int, userId uint32, roleId int) *WorkspaceAndUsers {
@@ -20,69 +18,52 @@ func NewWorkspaceAndUsers(workspaceId int, userId uint32, roleId int) *Workspace
 	}
 }
 
-func (wau *WorkspaceAndUsers) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (workspace_id, user_id, role_id) VALUES ($1, $2, $3)", config.Config.WorkspaceAndUserTableName)
-	_, err := DbConnection.Exec(cmd, wau.WorkspaceId, wau.UserId, wau.RoleId)
-	return err
+func (wau *WorkspaceAndUsers) Create(tx *gorm.DB) error {
+	return tx.Create(wau).Error
 }
 
-func GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId int, userId uint32) (WorkspaceAndUsers, error) {
-	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = $1 AND user_id = $2", config.Config.WorkspaceAndUserTableName)
-	row := DbConnection.QueryRow(cmd, workspaceId, userId)
-	var wau WorkspaceAndUsers
-	err := row.Scan(&wau.WorkspaceId, &wau.UserId, &wau.RoleId)
+func GetWAUByWorkspaceIdAndUserId(tx *gorm.DB, workspaceId int, userId uint32) (WorkspaceAndUsers, error) {
+	var result WorkspaceAndUsers
+	err := tx.Model(&WorkspaceAndUsers{}).Where("workspace_id = ? AND user_id = ?", workspaceId, userId).Take(&result).Error
+	return result, err
+}
+
+func (wau WorkspaceAndUsers) DeleteWorkspaceAndUser(tx *gorm.DB) error {
+	return tx.Where("workspace_id = ? AND user_id = ?", wau.WorkspaceId, wau.UserId).Delete(&wau).Error
+}
+
+func GetWAUsByUserId(tx *gorm.DB, userId uint32) ([]WorkspaceAndUsers, error) {
+	var result []WorkspaceAndUsers
+	rows, err := tx.Model(&WorkspaceAndUsers{}).Where("user_id = ?", userId).Rows()
 	if err != nil {
-		return WorkspaceAndUsers{}, err
-	}
-	return wau, err
-}
-
-func (wau *WorkspaceAndUsers) DeleteWorkspaceAndUser() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE workspace_id = $1 AND user_id = $2 AND role_id = $3", config.Config.WorkspaceAndUserTableName)
-	_, err := DbConnection.Exec(cmd, wau.WorkspaceId, wau.UserId, wau.RoleId)
-	return err
-}
-
-func GetRoleIdByWorkspaceIdAndUserId(workspaceId int, userId uint32) (int, error) {
-	cmd := fmt.Sprintf("SELECT role_id FROM %s WHERE workspace_id = $1 AND user_id = $2", config.Config.WorkspaceAndUserTableName)
-	row := DbConnection.QueryRow(cmd, workspaceId, userId)
-	var roleId int
-	err := row.Scan(&roleId)
-	return roleId, err
-}
-
-func GetWAUsByUserId(userId uint32) ([]WorkspaceAndUsers, error) {
-	res := make([]WorkspaceAndUsers, 0)
-	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE user_id = $1", config.Config.WorkspaceAndUserTableName)
-	rows, err := DbConnection.Query(cmd, userId)
-	if err != nil {
-		return res, err
+		return result, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var wau WorkspaceAndUsers
-		if err := rows.Scan(&wau.WorkspaceId, &wau.UserId, &wau.RoleId); err != nil {
-			return res, err
+		if err := tx.ScanRows(rows, &wau); err != nil {
+			return result, err
 		}
-		res = append(res, wau)
+		result = append(result, wau)
 	}
-	return res, nil
+	return result, nil
 }
 
-func GetWAUsByWorkspaceId(workspaceId int) ([]WorkspaceAndUsers, error) {
-	res := make([]WorkspaceAndUsers, 0)
-	cmd := fmt.Sprintf("SELECT workspace_id, user_id, role_id FROM %s WHERE workspace_id = $1", config.Config.WorkspaceAndUserTableName)
-	rows, err := DbConnection.Query(cmd, workspaceId)
+func GetWAUsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]WorkspaceAndUsers, error) {
+	var result []WorkspaceAndUsers
+	rows, err := tx.Model(&WorkspaceAndUsers{}).Where("workspace_id = ?", workspaceId).Rows()
 	if err != nil {
-		return res, err
+		return result, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var wau WorkspaceAndUsers
-		if err := rows.Scan(&wau.WorkspaceId, &wau.UserId, &wau.RoleId); err != nil {
-			return res, err
+		if err := tx.ScanRows(rows, &wau); err != nil {
+			return result, err
 		}
-		res = append(res, wau)
+		result = append(result, wau)
 	}
-	return res, nil
+	return result, nil
 }

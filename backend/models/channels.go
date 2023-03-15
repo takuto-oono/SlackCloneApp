@@ -1,23 +1,20 @@
 package models
 
 import (
-	"fmt"
-
-	"backend/config"
+	"gorm.io/gorm"
 )
 
 type Channel struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IsPrivate   bool   `json:"is_private"`
-	IsArchive   bool   `json:"is_archive"`
-	WorkspaceId int    `json:"workspace_id"`
+	ID          int    `json:"id" gorm:"primaryKey"`
+	Name        string `json:"name" gorm:"not null"`
+	Description string `json:"description" gorm:"not null"`
+	IsPrivate   bool   `json:"is_private" gorm:"default:false"`
+	IsArchive   bool   `json:"is_archive" gorm:"default:false"`
+	WorkspaceId int    `json:"workspace_id" gorm:"not null"`
 }
 
-func NewChannel(id int, name, description string, isPrivate, isArchive bool, workspaceId int) *Channel {
+func NewChannel(name, description string, isPrivate, isArchive bool, workspaceId int) *Channel {
 	return &Channel{
-		ID:          id,
 		Name:        name,
 		Description: description,
 		IsPrivate:   isPrivate,
@@ -26,103 +23,41 @@ func NewChannel(id int, name, description string, isPrivate, isArchive bool, wor
 	}
 }
 
-func (c *Channel) SetId() error {
-	cmd := fmt.Sprintf("SELECT id FROM %s", config.Config.ChannelsTableName)
-	rows, err := DbConnection.Query(cmd)
+func (c *Channel) Create(tx *gorm.DB) error {
+	return tx.Model(&Channel{}).Create(c).Error
+}
+
+func GetChannelById(tx *gorm.DB, channelId int) (Channel, error) {
+	var result Channel
+	err := tx.Model(&Channel{}).Where("id = ?", channelId).Take(&result).Error
+	return result, err
+}
+
+func (c Channel) Delete(tx *gorm.DB) error {
+	return tx.Where("id = ?", c.ID).Delete(&Channel{}).Error
+}
+
+
+func GetChannelByIdAndWorkspaceId(tx *gorm.DB, id, workspaceId int) (Channel, error) {
+	var result Channel
+	err := tx.Model(&Channel{}).Where("id = ? AND workspace_id = ?", id, workspaceId).Take(&result).Error
+	return result, err
+}
+
+func GetChannelsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]Channel, error) {
+	var result []Channel
+	rows, err := tx.Model(&Channel{}).Where("workspace_id = ?", workspaceId).Rows()
 	if err != nil {
-		return err
+		return result, err
 	}
 	defer rows.Close()
-	maxId := 0
+	
 	for rows.Next() {
-		var id int
-		rows.Scan(&id)
-		if id > maxId {
-			maxId = id
+		var c Channel
+		if err := tx.ScanRows(rows, &c); err != nil {
+			return result, err
 		}
+		result = append(result, c)
 	}
-	c.ID = maxId + 1
-	return nil
-}
-
-func (c *Channel) Create() error {
-	if err := c.SetId(); err != nil {
-		return err
-	}
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name, description, is_private, is_archive, workspace_id) VALUES ($1, $2, $3, $4, $5, $6)", config.Config.ChannelsTableName)
-	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
-	return err
-}
-
-func (c *Channel) IsExistSameNameChannelInWorkspace(workspaceId int) (bool, error) {
-	cmd := fmt.Sprintf("SELECT name FROM %s WHERE workspace_id = $1", config.Config.ChannelsTableName)
-	rows, err := DbConnection.Query(cmd, c.WorkspaceId)
-	if err != nil {
-		return false, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var channelName string
-		if err := rows.Scan(&channelName); err != nil {
-			return false, err
-		}
-		if channelName == c.Name {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func GetChannelById(channelId int) (Channel, error) {
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE id = $1", config.Config.ChannelsTableName)
-	row := DbConnection.QueryRow(cmd, channelId)
-	var c Channel
-	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive, &c.WorkspaceId)
-	return c, err
-}
-
-func (c *Channel) Delete() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND name = $2 AND description = $3 AND is_private = $4 AND is_archive = $5 AND workspace_id = $6", config.Config.ChannelsTableName)
-	_, err := DbConnection.Exec(cmd, c.ID, c.Name, c.Description, c.IsPrivate, c.IsArchive, c.WorkspaceId)
-	return err
-}
-
-func IsExistChannelByChannelIdAndWorkspaceId(channelId, workspaceId int) (bool, error) {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND workspace_id = $2", config.Config.ChannelsTableName)
-	rows, err := DbConnection.Query(cmd, channelId, workspaceId)
-	if err != nil {
-		return false, err
-	}
-	defer rows.Close()
-	cnt := 0
-	for rows.Next() {
-		cnt++
-	}
-	return cnt == 1, nil
-}
-
-func (c *Channel) GetChannelByIdAndWorkspaceId() error {
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive FROM %s WHERE id = $1 AND workspace_id = $2", config.Config.ChannelsTableName)
-	row := DbConnection.QueryRow(cmd, c.ID, c.WorkspaceId)
-	err := row.Scan(&c.ID, &c.Name, &c.Description, &c.IsPrivate, &c.IsArchive)
-	return err
-}
-
-func GetChannelsByWorkspaceId(workspaceId int) ([]Channel, error) {
-	channels := make([]Channel, 0)
-	cmd := fmt.Sprintf("SELECT id, name, description, is_private, is_archive, workspace_id FROM %s WHERE workspace_id = $1", config.Config.ChannelsTableName)
-	rows, err := DbConnection.Query(cmd, workspaceId)
-	if err != nil {
-		return channels, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var ch Channel
-		if err := rows.Scan(&ch.ID, &ch.Name, &ch.Description, &ch.IsPrivate, &ch.IsArchive, &ch.WorkspaceId); err != nil {
-			return channels, err
-		}
-		channels = append(channels, ch)
-	}
-	return channels, nil
+	return result, nil
 }

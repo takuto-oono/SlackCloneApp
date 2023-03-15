@@ -1,15 +1,13 @@
 package models
 
 import (
-	"fmt"
-
-	"backend/config"
+	"gorm.io/gorm"
 )
 
 type ChannelsAndUsers struct {
-	ChannelId int    `json:"channel_id"`
-	UserId    uint32 `json:"user_id"`
-	IsAdmin   bool   `json:"is_admin"`
+	ChannelId int    `json:"channel_id" gorm:"primaryKey"`
+	UserId    uint32 `json:"user_id" gorm:"primaryKey"`
+	IsAdmin   bool   `json:"is_admin" gorm:"not null"`
 }
 
 func NewChannelsAndUses(channelId int, userId uint32, isAdmin bool) *ChannelsAndUsers {
@@ -20,76 +18,56 @@ func NewChannelsAndUses(channelId int, userId uint32, isAdmin bool) *ChannelsAnd
 	}
 }
 
-func (cau *ChannelsAndUsers) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (channel_id, user_id, is_admin) VALUES ($1, $2, $3)", config.Config.ChannelsAndUserTableName)
-	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId, cau.IsAdmin)
-	return err
+func (cau *ChannelsAndUsers) Create(tx *gorm.DB) error {
+	return tx.Model(&ChannelsAndUsers{}).Create(cau).Error
 }
 
-func GetCAUByChannelIdAndUserId(channelId int, userId uint32) (ChannelsAndUsers, error) {
-	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
-	row := DbConnection.QueryRow(cmd, channelId, userId)
-	var cau ChannelsAndUsers
-	if err := row.Scan(&cau.ChannelId, &cau.UserId, &cau.IsAdmin); err != nil {
-		return ChannelsAndUsers{}, err
-	}
-	return cau, nil
+func GetCAUByChannelIdAndUserId(tx *gorm.DB, channelId int, userId uint32) (ChannelsAndUsers, error) {
+	var result ChannelsAndUsers
+	err := tx.Model(&ChannelsAndUsers{}).Where("channel_id = ? AND user_id = ?", channelId, userId).Take(&result).Error
+	return result, err
 }
 
-func IsExistCAUByChannelIdAndUserId(channelId int, userId uint32) bool {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
-	rows, err := DbConnection.Query(cmd, channelId, userId)
+func (cau ChannelsAndUsers) Delete(tx *gorm.DB) error {
+	return tx.Where("channel_id = ? AND user_id = ?", cau.ChannelId, cau.UserId).Delete(&ChannelsAndUsers{}).Error
+}
+
+func DeleteCAUsByChannelId(tx *gorm.DB, channelId int) error {
+	return tx.Where("channel_id = ?", channelId).Delete(&ChannelsAndUsers{}).Error
+}
+
+func GetCAUsByUserId(tx *gorm.DB, userId uint32) ([]ChannelsAndUsers, error) {
+	var result []ChannelsAndUsers
+	rows, err := tx.Model(&ChannelsAndUsers{}).Where("user_id = ?", userId).Rows()
 	if err != nil {
-		return false
+		return result, err
 	}
 	defer rows.Close()
-	cnt := 0
-	for rows.Next() {
-		cnt++
-	}
-	return cnt == 1
-}
 
-func IsAdminUserInChannel(channelId int, userId uint32) bool {
-	cmd := fmt.Sprintf("SELECT * FROM %s WHERE channel_id = $1 AND user_id = $2 AND is_admin = $3", config.Config.ChannelsAndUserTableName)
-	rows, err := DbConnection.Query(cmd, channelId, userId, true)
-	if err != nil {
-		return false
-	}
-	defer rows.Close()
-	cnt := 0
-	for rows.Next() {
-		cnt++
-	}
-	return cnt == 1
-}
-
-func (cau *ChannelsAndUsers) Delete() error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = $1 AND user_id = $2", config.Config.ChannelsAndUserTableName)
-	_, err := DbConnection.Exec(cmd, cau.ChannelId, cau.UserId)
-	return err
-}
-
-func DeleteCAUByChannelId(channelId int) error {
-	cmd := fmt.Sprintf("DELETE FROM %s WHERE channel_id = $1", config.Config.ChannelsAndUserTableName)
-	_, err := DbConnection.Exec(cmd, channelId)
-	return err
-}
-
-func GetCAUsByUserId(userId uint32) ([]ChannelsAndUsers, error) {
-	caus := make([]ChannelsAndUsers, 0)
-	cmd := fmt.Sprintf("SELECT channel_id, user_id, is_admin FROM %s WHERE user_id = $1", config.Config.ChannelsAndUserTableName)
-	rows, err := DbConnection.Query(cmd, userId)
-	if err != nil {
-		return caus, err
-	}
-	defer rows.Close()
 	for rows.Next() {
 		var cau ChannelsAndUsers
-		if err := rows.Scan(&cau.ChannelId, &cau.UserId, &cau.IsAdmin); err != nil {
-			return caus, err
+		if err := tx.ScanRows(rows, &cau); err != nil {
+			return result, err
 		}
-		caus = append(caus, cau)
+		result = append(result, cau)
 	}
-	return caus, err
+	return result, nil
+}
+
+func GetCAUsByChannelId(tx *gorm.DB, channelId int) ([]ChannelsAndUsers, error) {
+	var result []ChannelsAndUsers
+	rows, err := tx.Model(&ChannelsAndUsers{}).Where("channel_id = ?", channelId).Rows()
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cau ChannelsAndUsers
+		if err := tx.ScanRows(rows, &cau); err != nil {
+			return result, err
+		}
+		result = append(result, cau)
+	}
+	return result, nil
 }

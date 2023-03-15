@@ -42,7 +42,7 @@ func SignUp(c *gin.Context) {
 	}
 
 	// dbに登録
-	if err := u.Create(); err != nil {
+	if err := u.Create(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -61,7 +61,7 @@ func Login(c *gin.Context) {
 	}
 
 	// usernameとpasswordからIDを特定
-	u, err := models.GetUserByNameAndPassword(input.Name, input.Password)
+	u, err := models.GetUserByNameAndPassword(db, input.Name, input.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
@@ -85,7 +85,7 @@ func GetCurrentUser(c *gin.Context) {
 		return
 	}
 
-	user, err := models.GetUserById(userId)
+	user, err := models.GetUserById(db, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
