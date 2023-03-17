@@ -15,14 +15,14 @@ func GetWorkspacesByUserId(userId uint32) ([]models.Workspace, error) {
 	workspaces := make([]models.Workspace, 0)
 
 	// workspaces_and_users tableからuserIdが等しいものをすべて取得
-	waus, err := models.GetWAUsByUserId(userId)
+	waus, err := models.GetWAUsByUserId(db, userId)
 	if err != nil {
 		return workspaces, err
 	}
 
 	// workspaces tableからidが等しいworkspaceの情報を取得する。
 	for _, wau := range waus {
-		workspace, err := models.GetWorkspaceById(wau.WorkspaceId)
+		workspace, err := models.GetWorkspaceById(db, wau.WorkspaceId)
 		if err != nil {
 			return workspaces, err
 		}
@@ -37,13 +37,13 @@ func GetChannelsByUserIdAndWorkspaceId(userId uint32, workspaceId int) ([]models
 	res := make([]models.Channel, 0)
 
 	// 指定されたworkspaceに存在するすべてのchannelを取得(userが所属していないchannelも含まれている)
-	chs, err := models.GetChannelsByWorkspaceId(workspaceId)
+	chs, err := models.GetChannelsByWorkspaceId(db, workspaceId)
 	if err != nil {
 		return res, err
 	}
 
 	// 指定されたuserが所属しているChannelAndUsersをすべて取得(他のworkspaceの物も含まれている)
-	caus, err := models.GetCAUsByUserId(userId)
+	caus, err := models.GetCAUsByUserId(db, userId)
 	if err != nil {
 		return res, err
 	}
@@ -68,13 +68,13 @@ func GetUserInWorkspace(workspaceId int) ([]UserInfoInWorkspace, error) {
 	res := make([]UserInfoInWorkspace, 0)
 
 	// workspaces_and_users tableからworkspace_idが等しいものをすべて取得する
-	waus, err := models.GetWAUsByWorkspaceId(workspaceId)
+	waus, err := models.GetWAUsByWorkspaceId(db, workspaceId)
 	if err != nil {
 		return res, err
 	}
 
 	// users tableの全情報を取得する
-	users, err := models.GetUsers()
+	users, err := models.GetUsers(db)
 	if err != nil {
 		return res, err
 	}

@@ -16,7 +16,7 @@ func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 	}
 
 	cau := models.NewChannelsAndUses(rand.Int(), rand.Uint32(), false)
-	assert.Empty(t, cau.Create())
+	assert.Empty(t, cau.Create(db))
 
 	b, err := IsExistCAUByChannelIdAndUserId(cau.ChannelId, cau.UserId)
 	assert.Equal(t, true, b)
@@ -24,7 +24,7 @@ func TestIsExistCAUByChannelIdAndUserId(t *testing.T) {
 
 	b, err = IsExistCAUByChannelIdAndUserId(rand.Int(), cau.UserId)
 	assert.Equal(t, false, b)
-	assert.NotEmpty(t, err)
+	assert.Empty(t, err)
 }
 
 func TestIsExistUserSameUsernameAndPassword(t *testing.T) {
@@ -38,7 +38,7 @@ func TestIsExistUserSameUsernameAndPassword(t *testing.T) {
 
 	for _, name := range names {
 		u := models.NewUser(rand.Uint32(), name, "pass")
-		assert.Empty(t, u.Create())
+		assert.Empty(t, u.Create(db))
 	}
 
 	for _, name := range names {
@@ -52,8 +52,8 @@ func TestIsExistWorkspaceAndUser(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	w := models.NewWorkspace(0, randomstring.EnglishFrequencyString(30), 4)
-	w.Create()
+	w := models.NewWorkspace(randomstring.EnglishFrequencyString(30), rand.Uint32())
+	w.Create(db)
 	assert.Equal(t, true, IsExistWorkspaceById(w.ID))
 	assert.Equal(t, false, IsExistWorkspaceById(rand.Int()))
 }
@@ -68,7 +68,7 @@ func TestIsExistWAUByWorkspaceIdAndUserId(t *testing.T) {
 		waus[i] = *models.NewWorkspaceAndUsers(int(rand.Uint32()), rand.Uint32(), rand.Int()%4+1)
 	}
 	for _, wau := range waus {
-		assert.Empty(t, wau.Create())
+		assert.Empty(t, wau.Create(db))
 	}
 
 	for _, wau := range waus {

@@ -17,8 +17,8 @@ func TestCreateChannel(t *testing.T) {
 	is_private := true
 	is_archive := false
 	workspaceId := rand.Int()
-	c := NewChannel(0, name, description, is_private, is_archive, workspaceId)
-	assert.Empty(t, c.Create())
+	c := NewChannel(name, description, is_private, is_archive, workspaceId)
+	assert.Empty(t, c.Create(db))
 }
 
 func TestGetChannelById(t *testing.T) {
@@ -30,14 +30,14 @@ func TestGetChannelById(t *testing.T) {
 	is_private := true
 	is_archive := false
 	workspaceId := rand.Int()
-	c := NewChannel(0, name, description, is_private, is_archive, workspaceId)
-	assert.Empty(t, c.Create())
+	c := NewChannel(name, description, is_private, is_archive, workspaceId)
+	assert.Empty(t, c.Create(db))
 	assert.NotEqual(t, 0, c.ID)
-	c2, err := GetChannelById(c.ID)
+	c2, err := GetChannelById(db, c.ID)
 	assert.Empty(t, err)
 	assert.Equal(t, *c, c2)
 
-	_, err = GetChannelById(-1)
+	_, err = GetChannelById(db, -1)
 	assert.NotEmpty(t, err)
 }
 
@@ -45,12 +45,12 @@ func TestDeleteChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	c := NewChannel(0, randomstring.EnglishFrequencyString(30), "", true, false, rand.Int())
-	assert.Empty(t, c.Create())
+	c := NewChannel(randomstring.EnglishFrequencyString(30), "", true, false, rand.Int())
+	assert.Empty(t, c.Create(db))
 	channelId := c.ID
-	assert.Empty(t, c.Delete())
+	assert.Empty(t, c.Delete(db))
 
-	_, err := GetChannelById(channelId)
+	_, err := GetChannelById(db, channelId)
 	assert.NotEmpty(t, err)
 }
 
@@ -68,11 +68,11 @@ func TestGetChannelsByWorkspaceId(t *testing.T) {
 		channels := make([]Channel, channelCount)
 		for i := 0; i < channelCount; i++ {
 			channelName := randomstring.EnglishFrequencyString(30)
-			ch := NewChannel(0, channelName, "des", false, false, workspaceId)
-			assert.Empty(t, ch.Create())
+			ch := NewChannel(channelName, "des", false, false, workspaceId)
+			assert.Empty(t, ch.Create(db))
 			channels[i] = *ch
 		}
-		chs, err := GetChannelsByWorkspaceId(workspaceId)
+		chs, err := GetChannelsByWorkspaceId(db, workspaceId)
 		assert.Empty(t, err)
 		assert.Equal(t, len(channels), len(chs))
 		for _, ch := range channels {
@@ -81,7 +81,7 @@ func TestGetChannelsByWorkspaceId(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		chs, err := GetChannelsByWorkspaceId(int(rand.Uint64()))
+		chs, err := GetChannelsByWorkspaceId(db, int(rand.Uint64()))
 		assert.Empty(t, err)
 		assert.Equal(t, 0, len(chs))
 	})
