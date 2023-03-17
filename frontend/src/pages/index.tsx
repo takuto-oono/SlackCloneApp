@@ -5,12 +5,9 @@ export default function Home() {
   return (
       <main>
         <h2>Login</h2>
-        < LoginForm />
-        <p>---</p>
-        <Link href="/component/workspace_index">
-          WorkspaceIndex &gt;&gt;
-        </Link>
-        <Link href="component/signUp_form">
+      < LoginForm />
+      <br></br>
+        <Link href="signUp_form">
           <button>まだアカウントを持っていませんか？</button>
         </Link>
       </main>

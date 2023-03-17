@@ -28,7 +28,6 @@ function LoginForm() {
     login(user).then((currentUser: currentUser) => { 
       setCookie("token", currentUser.token);
       setCookie("user_id", currentUser.user_id);
-      router.replace('/workspace_index')
     });
     
   };
