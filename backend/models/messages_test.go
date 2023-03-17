@@ -6,8 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
-
-	"backend/utils"
 )
 
 func TestCreateMessage(t *testing.T) {
@@ -18,19 +16,19 @@ func TestCreateMessage(t *testing.T) {
 	channelId := rand.Int()
 	userId := rand.Uint32()
 	m := NewMessage(text, channelId, userId)
-	assert.Empty(t, m.Create())
+	assert.Empty(t, m.Create(db))
 	assert.NotEqual(t, 0, m.ID)
-	assert.NotEqual(t, "", m.Date)
+	assert.NotEqual(t, "", m.CreatedAt)
 	m = NewMessage(text, channelId, userId)
-	assert.Empty(t, m.Create())
+	assert.Empty(t, m.Create(db))
 	assert.NotEqual(t, 0, m.ID)
-	assert.NotEqual(t, "", m.Date)
+	assert.NotEqual(t, "", m.CreatedAt)
 }
 
 func TestGetMessagesByChannelId(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	t.Run("1 messageが存在する場合", func(t *testing.T) {
 		testNum := 100
@@ -43,18 +41,14 @@ func TestGetMessagesByChannelId(t *testing.T) {
 
 		for _, text := range texts {
 			m := NewMessage(text, channelId, userId)
-			assert.Empty(t, m.Create())
+			assert.Empty(t, m.Create(db))
 		}
 
-		messages, err := GetMessagesByChannelId(channelId)
+		messages, err := GetMessagesByChannelId(db, channelId)
 		assert.Empty(t, err)
 		assert.Equal(t, testNum, len(messages))
 		for i := 0; i < testNum-1; i++ {
-			d1, err1 := utils.TimeFromString(messages[i].Date)
-			d2, err2 := utils.TimeFromString(messages[i+1].Date)
-			assert.Empty(t, err1)
-			assert.Empty(t, err2)
-			assert.True(t, d2.Before(d1))
+			assert.True(t, messages[i+1].CreatedAt.Before(messages[i].CreatedAt))
 		}
 		for _, m := range messages {
 			assert.Equal(t, channelId, m.ChannelId)
@@ -64,7 +58,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 	})
 
 	t.Run("2 messageが存在しない場合", func(t *testing.T) {
-		messages, err := GetMessagesByChannelId(-1)
+		messages, err := GetMessagesByChannelId(db, -1)
 		assert.Empty(t, err)
 		assert.Equal(t, 0, len(messages))
 	})

@@ -34,10 +34,10 @@ func TestCreate(t *testing.T) {
 			userId := rand.Uint32()
 			roleId := j%4 + 1
 			wau := NewWorkspaceAndUsers(workspaceId, userId, roleId)
-			assert.Empty(t, wau.Create())
-			assert.NotEmpty(t, wau.Create())
+			assert.Empty(t, wau.Create(db))
+			assert.NotEmpty(t, wau.Create(db))
 			wau = NewWorkspaceAndUsers(workspaceId, userId, (roleId+1)%4)
-			assert.NotEmpty(t, wau.Create())
+			assert.NotEmpty(t, wau.Create(db))
 		}
 	}
 }
@@ -52,14 +52,14 @@ func TestGetWorkspaceAndUserByWorkspaceIdAndUserId(t *testing.T) {
 			userId := rand.Uint32()
 			roleId := j%4 + 1
 			wau := NewWorkspaceAndUsers(workspaceId, userId, roleId)
-			wau.Create()
-			getWau, err := GetWorkspaceAndUserByWorkspaceIdAndUserId(workspaceId, userId)
+			wau.Create(db)
+			getWau, err := GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 			assert.Empty(t, err)
 			assert.Equal(t, workspaceId, getWau.WorkspaceId)
 			assert.Equal(t, userId, getWau.UserId)
 			assert.Equal(t, roleId, getWau.RoleId)
 
-			_, err = GetWorkspaceAndUserByWorkspaceIdAndUserId(rand.Int(), userId)
+			_, err = GetWAUByWorkspaceIdAndUserId(db, rand.Int(), userId)
 			assert.NotEmpty(t, err)
 		}
 	}
@@ -75,31 +75,17 @@ func TestDeleteWorkspaceAndUser(t *testing.T) {
 			userId := rand.Uint32()
 			roleId := j%4 + 1
 			wau := NewWorkspaceAndUsers(workspaceId, userId, roleId)
-			assert.Empty(t, wau.Create())
-			_, err := GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
+			assert.Empty(t, wau.Create(db))
+			_, err := GetWAUByWorkspaceIdAndUserId(db, wau.WorkspaceId, wau.UserId)
 			assert.Empty(t, err)
-			err = wau.DeleteWorkspaceAndUser()
+			err = wau.DeleteWorkspaceAndUser(db)
 			assert.Empty(t, err)
-			_, err = GetWorkspaceAndUserByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
+			_, err = GetWAUByWorkspaceIdAndUserId(db, wau.WorkspaceId, wau.UserId)
 			assert.NotEmpty(t, err)
-			err = wau.DeleteWorkspaceAndUser()
+			err = wau.DeleteWorkspaceAndUser(db)
 			assert.Empty(t, err)
 		}
 	}
-}
-
-func TestGetRoleIdByWorkspaceIdAndUserId(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	wau := NewWorkspaceAndUsers(rand.Int(), rand.Uint32(), 3)
-	wau.Create()
-	roleId, err := GetRoleIdByWorkspaceIdAndUserId(wau.WorkspaceId, wau.UserId)
-	assert.Equal(t, wau.RoleId, roleId)
-	assert.Empty(t, err)
-
-	_, err = GetRoleIdByWorkspaceIdAndUserId(rand.Int(), wau.UserId)
-	assert.NotEmpty(t, err)
 }
 
 func TestGetWAUsByUserId(t *testing.T) {
@@ -113,10 +99,10 @@ func TestGetWAUsByUserId(t *testing.T) {
 		workspaceIds := make([]int, testCases)
 		for i := 0; i < testCases; i++ {
 			wau := NewWorkspaceAndUsers(int(rand.Uint64()), userId, rand.Int()%4+1)
-			assert.Empty(t, wau.Create())
+			assert.Empty(t, wau.Create(db))
 			workspaceIds[i] = wau.WorkspaceId
 		}
-		res, err := GetWAUsByUserId(userId)
+		res, err := GetWAUsByUserId(db, userId)
 		assert.Empty(t, err)
 		assert.Equal(t, testCases, len(res))
 		for _, wau := range res {
@@ -126,7 +112,7 @@ func TestGetWAUsByUserId(t *testing.T) {
 		}
 	})
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		res, err := GetWAUsByUserId(rand.Uint32())
+		res, err := GetWAUsByUserId(db, rand.Uint32())
 		assert.Empty(t, err)
 		assert.Equal(t, 0, len(res))
 	})
@@ -143,10 +129,10 @@ func TestGetWAUsByWorkspaceId(t *testing.T) {
 		waus := make([]WorkspaceAndUsers, testCases)
 		for i := 0; i < testCases; i++ {
 			wau := NewWorkspaceAndUsers(workspaceId, rand.Uint32(), rand.Int()%4+1)
-			assert.Empty(t, wau.Create())
+			assert.Empty(t, wau.Create(db))
 			waus[i] = *wau
 		}
-		res, err := GetWAUsByWorkspaceId(workspaceId)
+		res, err := GetWAUsByWorkspaceId(db, workspaceId)
 		assert.Empty(t, err)
 		assert.Equal(t, testCases, len(res))
 		for _, wau := range waus {
@@ -154,8 +140,8 @@ func TestGetWAUsByWorkspaceId(t *testing.T) {
 		}
 	})
 
-	t.Run("2 データがぞんざいしない場合", func(t *testing.T) {
-		res, err := GetWAUsByWorkspaceId(int(rand.Uint64()))
+	t.Run("2 データが存在しない場合", func(t *testing.T) {
+		res, err := GetWAUsByWorkspaceId(db, int(rand.Uint64()))
 		assert.Empty(t, err)
 		assert.Equal(t, 0, len(res))
 	})

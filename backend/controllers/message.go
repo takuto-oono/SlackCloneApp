@@ -41,7 +41,7 @@ func SendMessage(c *gin.Context) {
 	}
 
 	// message情報をDBに登録
-	if err := m.Create(); err != nil {
+	if err := m.Create(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -71,7 +71,7 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 	}
 
 	// DBからデータを取得
-	messages, err := models.GetMessagesByChannelId(channelId)
+	messages, err := models.GetMessagesByChannelId(db, channelId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

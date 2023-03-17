@@ -467,7 +467,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspace_and_users.workspace_id, workspace_and_users.user_id\"}", rr.Body.String())
 
 	})
 }
@@ -689,11 +689,11 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		rr = deleteUserFromWorkspaceTestFunc(w.ID, 441553453, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 
 		rr = deleteUserFromWorkspaceTestFunc(5934759792, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 }
 

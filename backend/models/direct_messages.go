@@ -23,35 +23,37 @@ func NewDirectMessage(text string, sendUserId uint32, dmLineId uint) *DirectMess
 	}
 }
 
-func (dm *DirectMessage) Create() *gorm.DB {
-	return db.Create(dm)
+func (dm *DirectMessage) Create(tx *gorm.DB) error {
+	return tx.Create(dm).Error
 }
 
-func GetAllDMsByDLId(dmLineId uint) ([]DirectMessage, error) {
+func GetAllDMsByDLId(tx *gorm.DB, dmLineId uint) ([]DirectMessage, error) {
 	var result []DirectMessage
-	rows, err := db.Model(&DirectMessage{}).Where("dm_line_id = ?", dmLineId).Order("created_at desc").Rows()
+	rows, err := tx.Model(&DirectMessage{}).Where("dm_line_id = ?", dmLineId).Order("created_at desc").Rows()
 	if err != nil {
 		return result, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var dm DirectMessage
-		db.ScanRows(rows, &dm)
+		if err := tx.ScanRows(rows, &dm); err != nil {
+			return result, err
+		}
 		result = append(result, dm)
 	}
 	return result, nil
 }
 
-func GetDMById(id uint) (DirectMessage, error) {
+func GetDMById(tx *gorm.DB, id uint) (DirectMessage, error) {
 	var result DirectMessage
-	err := db.Model(&DirectMessage{}).Where("id = ?", id).First(
+	err := tx.Model(&DirectMessage{}).Where("id = ?", id).Take(
 		&result).Error
 	return result, err
 }
 
-func UpdateDM(id uint, text string) (DirectMessage, error) {
+func UpdateDM(tx *gorm.DB, id uint, text string) (DirectMessage, error) {
 	var result DirectMessage
-	err := db.Model(&DirectMessage{}).Where("id = ?", id).Update("text", text).Row().Scan(
+	err := tx.Model(&DirectMessage{}).Where("id = ?", id).Update("text", text).Row().Scan(
 		&result.ID,
 		&result.Text,
 		&result.SendUserId,
@@ -60,4 +62,8 @@ func UpdateDM(id uint, text string) (DirectMessage, error) {
 		&result.UpdatedAt,
 	)
 	return result, err
+}
+
+func (dm DirectMessage) DeleteDM(tx *gorm.DB) error {
+	return tx.Where("id = ?", dm.ID).Delete(&DirectMessage{}).Error
 }
