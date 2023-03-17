@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { signUp } from "pages/fetchAPI/signUp";
+import { signUp } from "src/fetchAPI/signUp";
 import Link from "next/link";
 
 const SignUpForm = () => {
