@@ -1,6 +1,7 @@
 package controllerUtils
 
 import (
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -91,4 +92,15 @@ func IsExistSameNameChannelInWorkspace(channelName string, workspaceId int) (boo
 		}
 	}
 	return false, nil
+}
+
+func IsExistMessageById(id int) (bool, error) {
+	_, err := models.GetMessageById(db, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

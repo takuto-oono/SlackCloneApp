@@ -67,5 +67,14 @@ func HasPermissionEditDM(dmId uint, userId uint32) bool {
 		return false
 	}
 	return dm.SendUserId == userId
+}
 
+func HasPermissionEditMessage(messageId int, userId uint32) bool {
+	// 作成したuserと編集アクセスをしたuserが同じかを判定
+	
+	m, err := models.GetMessageById(db, messageId)
+	if err != nil {
+		return false
+	}
+	return m.UserId == userId
 }
