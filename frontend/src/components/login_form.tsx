@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import router from "next/router";
+import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { currentUser, login } from 'pages/fetchAPI/login'
-
+import { currentUser, login } from 'src/fetchAPI/login'
 
 function LoginForm() {
 

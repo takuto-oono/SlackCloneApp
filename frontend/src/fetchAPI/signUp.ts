@@ -1,3 +1,5 @@
+import router from "next/router";
+
 export interface User {
   name: string;
   password: string;
@@ -18,6 +20,10 @@ export async function signUp(user: User) {
         password: user.password,
       }),
     });
+    if (res.status == 200) {
+        console.log("redirect");
+        router.replace('/')
+      }
   } catch (err) {
     console.log(err);
   }
