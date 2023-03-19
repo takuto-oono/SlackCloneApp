@@ -44,3 +44,15 @@ func GetMessagesByChannelId(tx *gorm.DB, channelId int) ([]Message, error) {
 	}
 	return result, nil
 }
+
+func GetMessageById(tx *gorm.DB, id int) (Message, error) {
+	var result Message
+	err := tx.Model(&Message{}).Where("id = ?", id).Take(&result).Error
+	return result, err
+}
+
+func UpdateMessageText(tx *gorm.DB, id int, text string) (Message, error) {
+	var result Message
+	err := tx.Model(&Message{}).Where("id = ?", id).Update("text", text).Take(&result).Error
+	return result, err
+}

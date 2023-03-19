@@ -77,3 +77,23 @@ func TestIsExistWAUByWorkspaceIdAndUserId(t *testing.T) {
 		assert.False(t, IsExistWAUByWorkspaceIdAndUserId(wau.WorkspaceId, rand.Uint32()))
 	}
 }
+
+func TestIsExistMessageById(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		m := models.NewMessage(randomstring.EnglishFrequencyString(100), int(rand.Uint32()), rand.Uint32())
+		assert.Empty(t, m.Create(db))
+		b, err := IsExistMessageById(m.ID)
+		assert.Empty(t, err)
+		assert.True(t, b)
+	})
+
+	t.Run("2 データが存在しない場合", func(t *testing.T) {
+		b, err := IsExistMessageById(int(rand.Uint32()))
+		assert.Empty(t, err)
+		assert.False(t, b)
+	})
+}

@@ -49,6 +49,10 @@ type SendMessageInput struct {
 	ChannelId int    `json:"channel_id"`
 }
 
+type EditMessageInput struct {
+	Text string `json:"text"`
+}
+
 type SendDMInput struct {
 	ReceiveUserId uint32 `json:"received_user_id"`
 	Text          string `json:"text"`
@@ -172,6 +176,17 @@ func InputAndValidateSendMessage(c *gin.Context) (SendMessageInput, error) {
 	}
 	if in.Text == "" {
 		return in, fmt.Errorf("text not found")
+	}
+	return in, nil
+}
+
+func InputAndValidateEditMessage(c *gin.Context) (EditMessageInput, error) {
+	var in EditMessageInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		return in, err
+	}
+	if in.Text == "" {
+		return in, fmt.Errorf("text nof found")
 	}
 	return in, nil
 }
