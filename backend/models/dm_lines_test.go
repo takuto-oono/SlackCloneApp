@@ -19,6 +19,20 @@ func TestCreateDMLine(t *testing.T) {
 	assert.Empty(t, res)
 }
 
+func TestGetDLsByUserIdAndWorkspaceId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		
+	})
+
+	t.Run("2 データが存在しない場合", func(t *testing.T) {
+
+	})
+}
+
 func TestGetByUserIds(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")

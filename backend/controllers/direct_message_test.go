@@ -46,6 +46,17 @@ func getDMsInLineTestFunc(dlId uint, jwtToken string) *httptest.ResponseRecorder
 	return rr
 }
 
+func getDMLinesTestFunc(workspaceId int, jwtToken string) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", "/api/dm/dm_lines/"+strconv.Itoa(workspaceId), nil)
+	if err != nil {
+		return rr
+	}
+	req.Header.Set("Authorization", jwtToken)
+	dmRouter.ServeHTTP(rr, req)
+	return rr
+}
+
 func editDMTestFunc(dmId uint, jwtToken, text string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(controllerUtils.EditDMInput{
@@ -415,6 +426,17 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"you don't access this page\"}", rr.Body.String())
 	})
+}
+
+func TestGetDMLines(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	// 1. 正常な場合 データが存在する場合 200
+	// 2. 正常な場合 データが存在しない場合 200
+
+	
 }
 
 func TestEditDM(t *testing.T) {
