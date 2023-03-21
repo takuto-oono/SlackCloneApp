@@ -90,9 +90,9 @@ func GetUsersInWorkspaceTestFunc(workspaceId int, jwtToken string) *httptest.Res
 }
 
 func TestCreateWorkspace(t *testing.T) {
-	// if testing.Short() {
-		// t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
 	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
