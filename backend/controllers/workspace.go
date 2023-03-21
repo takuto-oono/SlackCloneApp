@@ -34,6 +34,10 @@ func CreateWorkspace(c *gin.Context) {
 
 	// dbに保存
 	if err := w.Create(db); err != nil {
+		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
+			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
