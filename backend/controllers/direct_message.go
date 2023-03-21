@@ -38,16 +38,25 @@ func SendDM(c *gin.Context) {
 		return
 	}
 
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
 	// 2人のuserのdm_line_idを取得する(存在しなければ作成する)
 	dl, err := models.GetDLByUserIdsAndWorkspaceId(db, userId, in.ReceiveUserId, in.WorkspaceId)
 	if err != nil {
 		ndm := models.NewDMLine(in.WorkspaceId, userId, in.ReceiveUserId)
-		if err := ndm.Create(db); err != nil {
+		if err := ndm.Create(tx); err != nil {
+			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
-		dl, err = models.GetDLByUserIdsAndWorkspaceId(db, userId, in.ReceiveUserId, in.WorkspaceId)
+		dl, err = models.GetDLByUserIdsAndWorkspaceId(tx, userId, in.ReceiveUserId, in.WorkspaceId)
 		if err != nil {
+			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
@@ -55,11 +64,13 @@ func SendDM(c *gin.Context) {
 
 	// direct_messages tableにデータを保存する
 	dm := models.NewDirectMessage(in.Text, userId, dl.ID)
-	if err := dm.Create(db); err != nil {
+	if err := dm.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
+	tx.Commit()
 	c.JSON(http.StatusOK, dm)
 }
 

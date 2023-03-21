@@ -27,13 +27,6 @@ func initRoleTable(db *gorm.DB) error {
 	}
 
 	tx := db.Begin()
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	if err := tx.Error; err != nil {
 		return err
 	}

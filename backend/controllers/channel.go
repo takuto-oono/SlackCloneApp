@@ -49,21 +49,29 @@ func CreateChannel(c *gin.Context) {
 		return
 	}
 
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
 	// channels tableに情報を保存
-	if err := ch.Create(db); err != nil {
+	if err := ch.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	// channels_and_users tableに保存する情報を作成し保存
 	cau := models.NewChannelsAndUses(ch.ID, userId, true)
-	if err := cau.Create(db); err != nil {
-		// TODO DeleteChannel funcを実行する
-
+	if err := cau.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
+	tx.Commit()
 	c.JSON(http.StatusOK, ch)
 }
 
@@ -81,7 +89,7 @@ func AddUserInChannel(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	// とりあえず管理権限はなし
 	cau := models.NewChannelsAndUses(in.ChannelId, in.UserId, false)
 
@@ -273,18 +281,28 @@ func DeleteChannel(c *gin.Context) {
 		return
 	}
 
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
 	// channels tableからデータを削除
-	if err := ch.Delete(db); err != nil {
+	if err := ch.Delete(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	// channel_and_users tableからデータを削除
-	if err := models.DeleteCAUsByChannelId(db, ch.ID); err != nil {
+	if err := models.DeleteCAUsByChannelId(tx, ch.ID); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
+	tx.Commit()
 	c.JSON(http.StatusOK, ch)
 }
 
