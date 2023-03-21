@@ -3,6 +3,13 @@ import { getToken,getUserId } from "./cookie";
 
 const baseUrl = "http://localhost:8080/api/channel/";
 
+export interface currentChannel {
+  name: string;
+  description: string;
+  is_private: boolean;
+  workspace_id: number;
+}
+
 export async function getChannels(): Promise<Channel[]> {
   const url = baseUrl + "get_by_user";
   console.log("getToken()");
@@ -38,7 +45,7 @@ export async function getChannels(): Promise<Channel[]> {
   return channels;
 }
 
-export async function postChannel(channelName: string) {
+export async function postChannel(current: currentChannel) {
   const url = baseUrl + "create";
   let channel: Channel;
   try {
@@ -48,8 +55,10 @@ export async function postChannel(channelName: string) {
         Authorization: getToken(),
       },
       body: JSON.stringify({
-        name: channelName,
-        user_id: getUserId(),
+        name: current.name,
+        description: current.description,
+        is_private: current.is_private,
+        workspace_id: current.workspace_id,
       }),
     });
     console.log(res);

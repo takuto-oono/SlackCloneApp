@@ -36,6 +36,11 @@ function WorkspaceIndex() {
       <div>
         {list}
       </div>
+
+      {/* テスト用 */}
+      <Link href="/">
+        <button>ログイン画面へ</button>
+      </Link>
     </div>
   );
 }

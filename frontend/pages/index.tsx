@@ -10,9 +10,6 @@ export default function Home() {
       <Link href="/component/workspace_index">
         WorkspaceIndex &gt;&gt;
       </Link><br />
-      <Link href="/component/create_channel">
-        CreateChannel &gt;&gt;
-      </Link><br />
       <Link href="component/signUp_form">
         <button>まだアカウントを持っていませんか？</button>
       </Link>

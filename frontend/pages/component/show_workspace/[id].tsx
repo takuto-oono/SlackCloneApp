@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getChannelsByWorkspaceId, Channel } from 'pages/fetchAPI/channel';
 import { useRouter } from "next/router";
+import CreateChannel from '../create_channel';
 import Link from 'next/link'
 
 
@@ -36,6 +37,7 @@ function ShowWorkspace() {
       <p>workspace_id:{router.query.id}</p>
       <p>---</p>
       {list}
+      <CreateChannel workspace_id={Number(router.query.id)} />
     </div>
   )
 }
