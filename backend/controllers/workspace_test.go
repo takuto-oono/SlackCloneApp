@@ -97,6 +97,7 @@ func TestCreateWorkspace(t *testing.T) {
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
 	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
 	// 3. bodyにNameかPrimaryOwnerIdが含まれていない場合 400
+	// 4. 既に同じ名前のworkspaceが存在する場合 409
 
 	// 1
 	t.Run("correctCase", func(t *testing.T) {
@@ -223,6 +224,25 @@ func TestCreateWorkspace(t *testing.T) {
 			}
 			assert.Equal(t, http.StatusBadRequest, rr.Code)
 		}
+	})
+
+	t.Run("4 同じ名前のworkspaceが存在している場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), &lr)
+
+		assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId).Code)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusConflict, rr.Code)
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces.name\"}", rr.Body.String())
 	})
 }
 
