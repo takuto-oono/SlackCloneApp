@@ -29,47 +29,52 @@ func CreateWorkspace(c *gin.Context) {
 		return
 	}
 
-	// はじめはidを0にしておく
-	w := models.NewWorkspace(in.Name, in.RequestUserId)
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 
 	// dbに保存
+	w := models.NewWorkspace(in.Name, in.RequestUserId)
 	if err := w.Create(db); err != nil {
 		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
+      tx.Rollback()
 			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+    tx.Rollback()
 		return
 	}
 
 	// workspace_and_users tableにもuserを保存する
 	wau := models.NewWorkspaceAndUsers(w.ID, w.PrimaryOwnerId, 1)
-	err = wau.Create(db)
+	err = wau.Create(tx)
 	if err != nil {
-		// TODO deleteWorkspaceを実行する
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	// general channelを作成する
 	ch := models.NewChannel("general", "all users join", false, false, w.ID)
-	if err := ch.Create(db); err != nil {
+	if err := ch.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
 		return
 	}
 
 	// general channelにuserを追加する
 	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
-	if err := cau.Create(db); err != nil {
+	if err := cau.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
-		// TODO delete general channel
 		return
 	}
 
+	tx.Commit()
 	c.IndentedJSON(http.StatusOK, w)
 }
 
