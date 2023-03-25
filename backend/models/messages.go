@@ -9,7 +9,6 @@ import (
 type Message struct {
 	ID        int       `json:"id" gorm:"primaryKey"`
 	Text      string    `json:"text" gorm:"not null"`
-	Date      string    `json:"date" gorm:"not null"`
 	ChannelId int       `json:"channel_id" gorm:"not null"`
 	UserId    uint32    `json:"user_id" gorm:"not null"`
 	CreatedAt time.Time `json:"created_at" gorm:"not null"`
