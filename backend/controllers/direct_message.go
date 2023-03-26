@@ -112,7 +112,7 @@ type DMLineInfo struct {
 	ToName string `json:"to_name"`
 }
 
-func GetDMLines(c *gin.Context) {	
+func GetDMLines(c *gin.Context) {
 	var response []DMLineInfo
 
 	setToName := func(userId1, userId2, requestUserId uint32) (string, error) {
@@ -141,9 +141,15 @@ func GetDMLines(c *gin.Context) {
 	}
 
 	// urlからworkspace_idを取得する
-	workspaceId, err := strconv.Atoi(c.Param("workspaceId"))
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// userがworkspaceに存在しているかを確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
 		return
 	}
 

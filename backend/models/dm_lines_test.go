@@ -25,11 +25,30 @@ func TestGetDLsByUserIdAndWorkspaceId(t *testing.T) {
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		
+		userId := rand.Uint32()
+		userId2s := make([]uint32, 10)
+		workspaceId := int(rand.Uint32())
+		for i := 0; i < 10; i++ {
+			userId2s[i] = rand.Uint32()
+		}
+		for i := 0; i < 10; i++ {
+			dl := NewDMLine(workspaceId, userId, userId2s[i])
+			dl.Create(db)
+		}
+		res, err := GetDLsByUserIdAndWorkspaceId(db, userId, workspaceId)
+		assert.Empty(t, err)
+		assert.Equal(t, 10, len(res))
+
+		for _, r := range res {
+			assert.Equal(t, workspaceId, r.WorkspaceId)
+			assert.True(t, r.UserId1 == userId || r.UserId2 == userId)
+		}
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-
+		res, err := GetDLsByUserIdAndWorkspaceId(db, rand.Uint32(), int(rand.Uint32()))
+		assert.Empty(t, err)
+		assert.Equal(t, 0, len(res))
 	})
 }
 

@@ -435,8 +435,115 @@ func TestGetDMLines(t *testing.T) {
 
 	// 1. 正常な場合 データが存在する場合 200
 	// 2. 正常な場合 データが存在しない場合 200
+	// 3. userがworkspaceに存在していない場合 404
 
-	
+	t.Run("1 正常な場合 データが存在する場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		toUserNames := make([]string, 10)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		for i := 0; i < 10; i++ {
+			toUserNames[i] = randomstring.EnglishFrequencyString(30)
+		}
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		tlrs := make([]LoginResponse, 10)
+		for i, userName := range toUserNames {
+			assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+			rr := loginTestFunc(userName, "pass")
+			assert.Equal(t, http.StatusOK, rr.Code)
+			byteArray, _ := io.ReadAll(rr.Body)
+			tlr := new(LoginResponse)
+			json.Unmarshal(([]byte)(byteArray), tlr)
+			tlrs[i] = *tlr
+		}
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		for _, tlr := range tlrs {
+			assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, tlr.UserId, lr.Token).Code)
+		}
+
+		for _, tlr := range tlrs {
+			assert.Equal(t, http.StatusOK, sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, tlr.UserId, w.ID).Code)
+		}
+
+		rr = getDMLinesTestFunc(w.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		response := new([]DMLineInfo)
+		json.Unmarshal(([]byte)(byteArray), response)
+
+		assert.Equal(t, 10, len(*response))
+
+		for _, res := range *response {
+			assert.Contains(t, toUserNames, res.ToName)
+		}
+	})
+
+	t.Run("2 正常な場合 データが存在しない場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = getDMLinesTestFunc(w.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		response := new([]DMLineInfo)
+		json.Unmarshal(([]byte)(byteArray), response)
+
+		assert.Equal(t, 0, len(*response))
+	})
+
+	t.Run("3 userがworkspaceに存在していない場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		requestUserName := randomstring.EnglishFrequencyString(30)
+		
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
+		rr = loginTestFunc(requestUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusNotFound, getDMLinesTestFunc(w.ID, rlr.Token).Code)
+	})
+
 }
 
 func TestEditDM(t *testing.T) {
@@ -579,7 +686,7 @@ func TestDeleteDM(t *testing.T) {
 		byteArray, _ := io.ReadAll(rr.Body)
 		lr := new(LoginResponse)
 		json.Unmarshal(([]byte)(byteArray), lr)
-		
+
 		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
@@ -593,7 +700,7 @@ func TestDeleteDM(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = deleteDMTestFunc(dm.ID, lr.Token)
-		assert.Equal(t, http.StatusOK, rr.Code)	
+		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		var res models.DirectMessage
 		json.Unmarshal(([]byte)(byteArray), &res)
@@ -603,21 +710,21 @@ func TestDeleteDM(t *testing.T) {
 		assert.Equal(t, dm.DMLineId, res.DMLineId)
 		assert.Equal(t, dm.CreatedAt, res.CreatedAt)
 		assert.Equal(t, dm.UpdatedAt, res.UpdatedAt)
-		
-	})	
-	
+
+	})
+
 	t.Run("2 対象のDMが存在しない場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
-		
+
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
-		
+
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ := io.ReadAll(rr.Body)
 		lr := new(LoginResponse)
 		json.Unmarshal(([]byte)(byteArray), lr)
-		
+
 		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
@@ -627,16 +734,16 @@ func TestDeleteDM(t *testing.T) {
 		rr = deleteDMTestFunc(uint(rand.Uint64()), lr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"dm not found\"}", rr.Body.String())
-	})	
-	
+	})
+
 	t.Run("3 対象のDMは別のuserの場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
-		requestUserName := randomstring.EnglishFrequencyString(30)	
-		
+		requestUserName := randomstring.EnglishFrequencyString(30)
+
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 		assert.Equal(t, http.StatusOK, signUpTestFunc(requestUserName, "pass").Code)
-		
+
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ := io.ReadAll(rr.Body)
@@ -664,7 +771,7 @@ func TestDeleteDM(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = deleteDMTestFunc(dm.ID, rlr.Token)
-		assert.Equal(t, http.StatusForbidden, rr.Code)	
+		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"no permission\"}", rr.Body.String())
 	})
 }
