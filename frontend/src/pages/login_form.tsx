@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useCookies } from "react-cookie";
 import { LoginForm } from "@components/login";
 import { Link } from 'react-router-dom';
+import router from "next/router";
+
 function Login() {
+  const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
+  useEffect(() => {
+    if (cookies.token) {
+      console.log(cookies.token)
+      router.push("/")
+      
+    }
+  })
   return <div>
     <h2>Login</h2>
     < LoginForm />

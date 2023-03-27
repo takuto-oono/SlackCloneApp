@@ -1,3 +1,5 @@
+import { useCookies } from "react-cookie";
+
 //Cookieに保存されているjwtTokenを取り出す
 export function getToken(): string{
   if (typeof document !== 'undefined') {
@@ -30,3 +32,14 @@ export function getUserId() {
     }
   }
 }
+
+// Cookieをリセットする
+const resetCookie = () => {
+  if (typeof document !== 'undefined') {
+    document.cookie = "token=; max-age=0";
+    document.cookie = "user_id=; max-age=0";
+  }
+  return;
+}
+
+export {resetCookie};

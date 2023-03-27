@@ -1,13 +1,24 @@
 import classes from '@styles/Header.module.css'
 import { Logout } from "@components/login";
+import { useCookies } from 'react-cookie';
 
-const Header=()=> {
-  return (
-    <div className={classes.header}>
-      <h1>header</h1>
-      <Logout />
-    </div>
-	);
+const Header = () => {
+  const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
+  if (cookies.token) {
+    console.log(cookies.token)
+    return (
+      <header className={classes.header}>
+        <h1>header</h1>
+        <Logout />
+      </header>
+    );
+  } else {
+    return (
+      <header className={classes.header}>
+        <h1>header</h1>
+      </header>
+    );
+  }
 };
 
 export default Header;

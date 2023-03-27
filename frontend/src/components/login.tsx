@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login'
+import { resetCookie } from "@src/fetchAPI/cookie";
+
 
 const LoginForm = () => {
   const [name, setName] = useState("");
@@ -39,11 +41,9 @@ const LoginForm = () => {
 export { LoginForm };
   
 const Logout = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const handleLogout = () => {
     console.log("logout");
-    removeCookie("token", {path: '/' });
-    removeCookie("user_id", {path: '/'});
+    resetCookie();
   };
 
   return (
