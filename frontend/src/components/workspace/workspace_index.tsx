@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace } from '@src/fetchAPI/workspace'
+import { getWorkspaces, Workspace } from '@fetchAPI/workspace'
 import router from "next/router";
 import { Link } from 'react-router-dom';
 

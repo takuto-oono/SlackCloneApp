@@ -1,5 +1,3 @@
-import { useCookies } from "react-cookie";
-
 //Cookieに保存されているjwtTokenを取り出す
 export function getToken(): string{
   if (typeof document !== 'undefined') {

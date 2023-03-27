@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getChannelsByWorkspaceId, Channel } from 'src/fetchAPI/channel';
-import { getToken } from "@src/fetchAPI/cookie";
+import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
 import { useParams } from "react-router-dom";
 
 
