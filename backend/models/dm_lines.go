@@ -26,6 +26,26 @@ func (dl *DMLine) Create(tx *gorm.DB) error {
 	return tx.Create(dl).Error
 }
 
+func GetDLsByUserIdAndWorkspaceId(tx *gorm.DB, userId uint32, workspaceId int) ([]DMLine, error) {
+	var result []DMLine
+	rows, err := tx.Model(&DMLine{}).Where("workspace_id = ?", workspaceId).Rows()
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var dl DMLine
+		if err := tx.ScanRows(rows, &dl); err != nil {
+			return result, err
+		}
+		if dl.UserId1 == userId || dl.UserId2 == userId {
+			result = append(result, dl)
+		}
+	}
+	return result, nil
+}
+
 func GetDLByUserIdsAndWorkspaceId(tx *gorm.DB, userId1, userId2 uint32, workspaceId int) (DMLine, error) {
 	var result DMLine
 	if !(userId1 <= userId2) {
