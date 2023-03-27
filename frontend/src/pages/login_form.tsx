@@ -1,5 +1,5 @@
 import React from "react";
-import LoginForm from "@src/components/login_form";
+import { LoginForm } from "@components/login";
 import { Link } from 'react-router-dom';
 function Login() {
   return <div>

@@ -1,12 +1,12 @@
-import '@/styles/globals.css'
+import '@styles/globals.css'
 import { Routes, Route } from "react-router-dom";
-import Login from '@src/pages/login_form';
-import SignUp from '@src/pages/signUp_form';
-import { Home } from '@src/pages/Home';
-import IndexW from '@src/pages/workspace/workspace';
-import CreateW from '@src/pages/workspace/create';
-import ShowW from '@src/pages/workspace/show/[id]';
-import Header from '@src/pages/header';
+import Login from '@pages/login_form';
+import SignUp from '@pages/signUp_form';
+import { Home } from '@pages/Home';
+import IndexW from '@pages/workspace/workspace';
+import CreateW from '@pages/workspace/create';
+import ShowW from '@pages/workspace/show/[id]';
+import Header from '@pages/header';
 
 function App() {
   return (
