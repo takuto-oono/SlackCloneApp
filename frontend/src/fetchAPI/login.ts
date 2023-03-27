@@ -35,7 +35,7 @@ export async function login(user: User): Promise<currentUser> {
       const User = await res.json();
       if (res.status == 200) {
         console.log("redirect");
-        router.replace('/workspace_index')
+        router.push('/')
       }
       return new Promise((resolve) => {
         const currentUser: currentUser = {

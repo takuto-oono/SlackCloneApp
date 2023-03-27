@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
 
 
-export default function Home() {
+export default function Index() {
   if (typeof window === 'object') {
     const rootElement = document.getElementById('__next')!;
     const root = createRoot(rootElement);

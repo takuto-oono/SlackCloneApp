@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { getChannelsByWorkspaceId, Channel } from 'src/fetchAPI/channel';
-import { useRouter } from "next/router";
-import { getToken } from "@/src/fetchAPI/cookie";
+import { getToken } from "@src/fetchAPI/cookie";
+import { useParams } from "react-router-dom";
 
 
 function ShowWorkspace() {
-  const router = useRouter();
   const [channelList, setChannelList] = useState<Channel[]>([]);
-  const workspaceId = router.query.id as string;
+  const { id } = useParams<{ id: string }>();
 
   const list = channelList.map((item, index) => (
     <div key={index}>
@@ -21,7 +20,7 @@ function ShowWorkspace() {
   ));
 
   useEffect(() => {
-    getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
+    getChannelsByWorkspaceId(parseInt(id)).then((channels: Channel[]) => {
     if (Array.isArray(channels)) {
       setChannelList(channels)
     }
@@ -34,7 +33,7 @@ function ShowWorkspace() {
   return (
     <div>
       <h2>Channel Index</h2>
-      <p>workspace_id:{router.query.id}</p>
+      <p>workspace_id:{id}</p>
       <p>---</p>
       {list}
     </div>
