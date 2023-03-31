@@ -1,5 +1,5 @@
 import router from "next/router";
-import { getToken,getUserId } from "./cookie";
+import { getToken,resetCookie,getUserId } from "./cookie";
 
 export interface Workspace {
     id: number;
@@ -30,7 +30,8 @@ export async function getWorkspaces(): Promise<Workspace[]> {
         },
       })
     // 認証エラーの時のみリダイレクトする
-      if (res.status == 401) {
+    if (res.status == 401) {
+        resetCookie();
         console.log("redirect");
         router.replace('/')
       }
@@ -69,11 +70,11 @@ export async function postWorkspace(workspaceName:string){
       console.log(res.status);
       
       if (res.status == 401) {
-        console.log("redirect");
-        router.replace('/')
+        console.log("作成失敗");
+        router.push('/')
       } else if (res.status == 200) {
         console.log("redirect");
-        router.replace('/workspace_index')
+        router.push('/')
       }
       
     } catch (err) {

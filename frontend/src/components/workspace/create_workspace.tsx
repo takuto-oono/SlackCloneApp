@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { postWorkspace } from 'src/fetchAPI/workspace';
+import { postWorkspace } from '@fetchAPI/workspace';
 function CreateWorkspace() {
   const [name, setName] = useState("");
   const nameChange = (e: any) => {

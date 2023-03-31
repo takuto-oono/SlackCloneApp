@@ -1,26 +1,19 @@
-import router from "next/router";
 import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { currentUser, login } from 'src/fetchAPI/login'
+import { currentUser, login } from '@fetchAPI/login'
+import { resetCookie } from "@src/fetchAPI/cookie";
 
-function LoginForm() {
 
+const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
-  
 
   const nameChange = (e: any) => {
     setName(e.target.value);
   };
   const passwordChange = (e: any) => {
     setPassword(e.target.value);
-  };
-
-  const handleLogout = () => {
-    console.log("logout");
-    removeCookie("token", {path: '/' });
-    removeCookie("user_id", {path: '/'});
   };
   const handleLogin = () => {
     console.log("login");
@@ -41,9 +34,23 @@ function LoginForm() {
           <input type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} />
         </label><br />
         <button onClick={handleLogin} >ログイン</button>
-      <button onClick={handleLogout}>ログアウト</button>
     </div>
   );
 }
 
-export default LoginForm;
+export { LoginForm };
+  
+const Logout = () => {
+  const handleLogout = () => {
+    console.log("logout");
+    resetCookie();
+  };
+
+  return (
+    <div>
+    <button onClick={handleLogout}>ログアウト</button>
+    </div>
+  );
+}
+
+export { Logout };

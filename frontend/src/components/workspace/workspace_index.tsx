@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace } from 'src/fetchAPI/workspace'
-import Link from 'next/link'
+import { getWorkspaces, Workspace } from '@fetchAPI/workspace'
 import router from "next/router";
+import { Link } from 'react-router-dom';
+
 
 
 function WorkspaceIndex() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const list = workspaceList.map((item, index) => (
     <div key={index}>
-      <Link href={{ pathname: "/workspace_show/" + item.id, query: { id: item.id, name: item.name, primary_owner_id: item.primary_owner_id } }} as={"/workspace_show/"+item.id}>
-          {item.name} &gt;&gt;
-      </Link><br></br>
+      {/* workspaceオブジェクトも渡したい（未） */}
+      <Link to={`show/${item.id}`}>
+        {item.name}
+        </Link>
+      <br></br>
     </div>
   ));
 
