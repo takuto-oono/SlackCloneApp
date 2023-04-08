@@ -1,31 +1,13 @@
-import '@styles/globals.css'
-import { Routes, Route } from "react-router-dom";
-import Login from '@pages/login_form';
-import SignUp from '@pages/signUp_form';
-import  Home  from '@pages/Home';
-import IndexW from '@pages/workspace/workspace';
-import CreateW from '@pages/workspace/create';
-import ShowW from '@pages/workspace/show/[id]';
-import Header from '@pages/header';
+import { AppProps } from "next/app";
+import { createContext } from "react";
+import { CookiesProvider } from "react-cookie";
+import { Link } from "react-router-dom";
+import 'src/styles/globals.css'
 
-function App() {
+export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className="App">
-      <Header />
-      <Routes >
-        <Route path="/">
-          <Route index element={<Home />} />
-          <Route path="login_form" element={<Login />} />
-          <Route path="signUp_form" element={<SignUp />} />
-          <Route path="workspace" >
-            <Route index element={<IndexW />} />
-            <Route path="create" element={<CreateW />} />
-            <Route path={"show/:id"} element={<ShowW />}/>
-          </Route>
-        </Route>
-      </Routes>
-    </div>
+    <CookiesProvider>
+      <Component {...pageProps} />
+    </CookiesProvider>
   )
 }
-
-export default App;
