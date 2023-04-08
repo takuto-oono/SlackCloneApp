@@ -84,7 +84,7 @@ func TestIsExistMessageById(t *testing.T) {
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		m := models.NewMessage(randomstring.EnglishFrequencyString(100), int(rand.Uint32()), rand.Uint32())
+		m := models.NewChannelMessage(randomstring.EnglishFrequencyString(100), int(rand.Uint32()), rand.Uint32())
 		assert.Empty(t, m.Create(db))
 		b, err := IsExistMessageById(m.ID)
 		assert.Empty(t, err)
@@ -92,7 +92,7 @@ func TestIsExistMessageById(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		b, err := IsExistMessageById(int(rand.Uint32()))
+		b, err := IsExistMessageById(uint(rand.Uint32()))
 		assert.Empty(t, err)
 		assert.False(t, b)
 	})
