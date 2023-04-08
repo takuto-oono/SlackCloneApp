@@ -97,6 +97,7 @@ func TestCreateWorkspace(t *testing.T) {
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
 	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
 	// 3. bodyにNameかPrimaryOwnerIdが含まれていない場合 400
+	// 4. 既に同じ名前のworkspaceが存在する場合 409
 
 	// 1
 	t.Run("correctCase", func(t *testing.T) {
@@ -223,6 +224,25 @@ func TestCreateWorkspace(t *testing.T) {
 			}
 			assert.Equal(t, http.StatusBadRequest, rr.Code)
 		}
+	})
+
+	t.Run("4 同じ名前のworkspaceが存在している場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := ioutil.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), &lr)
+
+		assert.Equal(t, http.StatusOK, createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId).Code)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusConflict, rr.Code)
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces.name\"}", rr.Body.String())
 	})
 }
 
@@ -467,7 +487,7 @@ func TestAddUserInWorkspace(t *testing.T) {
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces_and_users.workspace_id, workspaces_and_users.user_id\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspace_and_users.workspace_id, workspace_and_users.user_id\"}", rr.Body.String())
 
 	})
 }
@@ -689,11 +709,11 @@ func TestDeleteUserFromWorkSpace(t *testing.T) {
 
 		rr = deleteUserFromWorkspaceTestFunc(w.ID, 441553453, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 
 		rr = deleteUserFromWorkspaceTestFunc(5934759792, dlr.UserId, olr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 }
 

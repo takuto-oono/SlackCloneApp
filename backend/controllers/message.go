@@ -41,7 +41,7 @@ func SendMessage(c *gin.Context) {
 	}
 
 	// message情報をDBに登録
-	if err := m.Create(); err != nil {
+	if err := m.Create(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -71,11 +71,61 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 	}
 
 	// DBからデータを取得
-	messages, err := models.GetMessagesByChannelId(channelId)
+	messages, err := models.GetMessagesByChannelId(db, channelId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, messages)
+}
+
+func EditMessage(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// path parameterからmessage_idを取得する
+	messageId, err := strconv.Atoi(c.Param("message_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// bodyからtextを取得する
+	in, err := controllerUtils.InputAndValidateEditMessage(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// 対象のmessageが存在するか確認する
+	b, err := controllerUtils.IsExistMessageById(messageId)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if !b {
+		c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
+		return
+	}
+
+	// messageの編集権限があるかを確認
+	if !controllerUtils.HasPermissionEditMessage(messageId, userId) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "no permission"})
+		return
+	}
+
+	// DBを更新
+	m, err := models.UpdateMessageText(db, messageId, in.Text)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, m)
 }

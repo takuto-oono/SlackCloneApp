@@ -1,33 +1,24 @@
 package models
 
 import (
-	"fmt"
-
-	"backend/config"
+	"gorm.io/gorm"
 )
 
 type Role struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   int    `json:"id" gorm:"primaryKey"`
+	Name string `json:"name" gorm:"not null"`
 }
 
 func NewRole(id int, name string) *Role {
 	return &Role{ID: id, Name: name}
 }
 
-func (r *Role) Create() error {
-	cmd := fmt.Sprintf("INSERT INTO %s (id, name) VALUES ($1, $2)", config.Config.RoleTableName)
-	_, err := DbConnection.Exec(cmd, r.ID, r.Name)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	return err
+func (r *Role) Create(tx *gorm.DB) error {
+	return tx.Create(r).Error
 }
 
-func GetRoleById(id int) (Role, error) {
-	cmd := fmt.Sprintf("SELECT id, name FROM %s WHERE id = $1", config.Config.RoleTableName)
-	row := DbConnection.QueryRow(cmd, id)
-	var r Role
-	err := row.Scan(&r.ID, &r.Name)
-	return r, err
+func GetRoleById(tx *gorm.DB, id int) (Role, error) {
+	var result Role
+	err := tx.Model(&Role{}).Where("id = ?", id).Take(&result).Error
+	return result, err
 }

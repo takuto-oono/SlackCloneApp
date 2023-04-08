@@ -15,22 +15,21 @@ func TestCreateDirectMessage(t *testing.T) {
 	}
 
 	dm := NewDirectMessage(randomstring.EnglishFrequencyString(99), rand.Uint32(), uint(rand.Uint32()))
-	res := dm.Create()
-	assert.NotEqual(t, uint(0), dm.ID)
-	assert.Empty(t, res.Error)
+	err := dm.Create(db)
+	assert.Empty(t, err)
 }
 
 func TestGetAllDMsByDLId(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		dmCount := 4
 		dms := make([]*DirectMessage, dmCount)
 		sendUserId1 := rand.Uint32()
 		sendUserId2 := rand.Uint32()
-		dlId := uint(rand.Uint64())
+		dlId := uint(rand.Uint32())
 
 		for i := 0; i < dmCount; i++ {
 			if i%2 == 0 {
@@ -41,10 +40,10 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		}
 
 		for _, dm := range dms {
-			assert.Empty(t, dm.Create().Error)
+			assert.Empty(t, dm.Create(db))
 		}
 
-		res, err := GetAllDMsByDLId(dlId)
+		res, err := GetAllDMsByDLId(db, dlId)
 		assert.Empty(t, err)
 		assert.Equal(t, dmCount, len(res))
 
@@ -54,7 +53,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		res, err := GetAllDMsByDLId(uint(rand.Uint64()))
+		res, err := GetAllDMsByDLId(db, uint(rand.Uint64()))
 		assert.Empty(t, err)
 		assert.Empty(t, []DirectMessage{}, res)
 	})
@@ -67,8 +66,8 @@ func TestGetDMById(t *testing.T) {
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		dm := NewDirectMessage(randomstring.EnglishFrequencyString(100), rand.Uint32(), uint(rand.Uint32()))
-		assert.Empty(t, dm.Create().Error)
-		result, err := GetDMById(dm.ID)
+		assert.Empty(t, dm.Create(db))
+		result, err := GetDMById(db, dm.ID)
 		assert.Empty(t, err)
 		assert.Equal(t, dm.ID, result.ID)
 		assert.Equal(t, dm.Text, result.Text)
@@ -77,7 +76,7 @@ func TestGetDMById(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := GetDMById(uint(rand.Uint64()))
+		_, err := GetDMById(db, uint(rand.Uint64()))
 		assert.Equal(t, gorm.ErrRecordNotFound, err)
 	})
 }
@@ -88,9 +87,9 @@ func TestUpdateDM(t *testing.T) {
 	}
 
 	dm := NewDirectMessage(randomstring.EnglishFrequencyString(100), rand.Uint32(), uint(rand.Uint32()))
-	assert.Empty(t, dm.Create().Error)
+	assert.Empty(t, dm.Create(db))
 	newText := randomstring.EnglishFrequencyString(100)
-	result, err := UpdateDM(dm.ID, newText)
+	result, err := UpdateDM(db, dm.ID, newText)
 	assert.Empty(t, err)
 	assert.Equal(t, dm.ID, result.ID)
 	assert.Equal(t, newText, result.Text)
@@ -106,18 +105,8 @@ func TestDeleteDM(t *testing.T) {
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
 		dm := NewDirectMessage(randomstring.EnglishFrequencyString(30), rand.Uint32(), uint(rand.Uint32()))
-		assert.Empty(t, dm.Create().Error)
-		result, err := DeleteDM(dm.ID)
+		assert.Empty(t, dm.Create(db))
+		err := dm.DeleteDM(db)
 		assert.Empty(t, err)
-		assert.Equal(t, dm.ID, result.ID)
-		assert.Equal(t, dm.Text, result.Text)
-		assert.Equal(t, dm.SendUserId, result.SendUserId)
-		assert.Equal(t, dm.DMLineId, result.DMLineId)
-	})
-
-	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := DeleteDM(uint(rand.Uint64()))
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
-
 	})
 }

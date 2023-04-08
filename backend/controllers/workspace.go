@@ -29,43 +29,52 @@ func CreateWorkspace(c *gin.Context) {
 		return
 	}
 
-	// はじめはidを0にしておく
-	w := models.NewWorkspace(0, in.Name, in.RequestUserId)
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
 
 	// dbに保存
-	if err := w.Create(); err != nil {
+	w := models.NewWorkspace(in.Name, in.RequestUserId)
+	if err := w.Create(db); err != nil {
+		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
+      tx.Rollback()
+			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+    tx.Rollback()
 		return
 	}
 
 	// workspace_and_users tableにもuserを保存する
 	wau := models.NewWorkspaceAndUsers(w.ID, w.PrimaryOwnerId, 1)
-	err = wau.Create()
+	err = wau.Create(tx)
 	if err != nil {
-		// TODO deleteWorkspaceを実行する
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	// general channelを作成する
-	ch := models.NewChannel(0, "general", "all users join", false, false, w.ID)
-	if err := ch.Create(); err != nil {
+	ch := models.NewChannel("general", "all users join", false, false, w.ID)
+	if err := ch.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
 		return
 	}
 
 	// general channelにuserを追加する
 	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
-	if err := cau.Create(); err != nil {
+	if err := cau.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		// TODO deleteWorkspaceを実行する
-		// TODO deleteWorkspaceAndUsersを実行する
-		// TODO delete general channel
 		return
 	}
 
+	tx.Commit()
 	c.IndentedJSON(http.StatusOK, w)
 }
 
@@ -106,7 +115,7 @@ func AddUserInWorkspace(c *gin.Context) {
 	}
 
 	// dbに保存する
-	err = wau.Create()
+	err = wau.Create(db)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -135,10 +144,9 @@ func RenameWorkspaceName(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	w := models.NewWorkspace(workspaceId, in.WorkspaceName, userId)
 
 	// requestしているuserがそのworkspaceのrole = 1 or role = 2 or role = 3かどうかを判定
-	b, err := controllerUtils.HasPermissionRenamingWorkspaceName(w.ID, userId)
+	b, err := controllerUtils.HasPermissionRenamingWorkspaceName(workspaceId, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -149,7 +157,8 @@ func RenameWorkspaceName(c *gin.Context) {
 	}
 
 	// データベースをupdate
-	if err := w.RenameWorkspaceName(); err != nil {
+	w, err := models.UpdateWorkspaceName(db, workspaceId, in.WorkspaceName)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -173,7 +182,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 	}
 
 	// 削除されるuserがワークスペースに存在するかを確認
-	wau, err := models.GetWorkspaceAndUserByWorkspaceIdAndUserId(in.WorkspaceId, in.UserId)
+	wau, err := models.GetWAUByWorkspaceIdAndUserId(db, in.WorkspaceId, in.UserId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
@@ -196,7 +205,7 @@ func DeleteUserFromWorkSpace(c *gin.Context) {
 		return
 	}
 
-	if err := wau.DeleteWorkspaceAndUser(); err != nil {
+	if err := wau.DeleteWorkspaceAndUser(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}

@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD:frontend/pages/component/show_workspace/[id].tsx
 import { getChannelsByWorkspaceId, Channel } from 'pages/fetchAPI/channel';
 import { useRouter } from "next/router";
 import CreateChannel from '../create_channel';
 import Link from 'next/link'
+=======
+import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
+import { useParams } from "react-router-dom";
+>>>>>>> main:frontend/src/components/workspace/show_workspace/[id].tsx
 
 
 function ShowWorkspace() {
-  const router = useRouter();
   const [channelList, setChannelList] = useState<Channel[]>([]);
+  const { id } = useParams<{ id: string }>();
 
   const list = channelList.map((item, index) => (
     <div key={index}>
@@ -21,12 +26,12 @@ function ShowWorkspace() {
   ));
 
   useEffect(() => {
-      getChannelsByWorkspaceId(parseInt(router.query.id)).then((channels: Channel[]) => {
-      if (Array.isArray(channels)) {
-        setChannelList(channels)
-      }
+    getChannelsByWorkspaceId(parseInt(id)).then((channels: Channel[]) => {
+    if (Array.isArray(channels)) {
+      setChannelList(channels)
+    }
       console.log(channelList)
-      });
+    });
   },[]);
 
     
@@ -34,7 +39,7 @@ function ShowWorkspace() {
   return (
     <div>
       <h2>Channel Index</h2>
-      <p>workspace_id:{router.query.id}</p>
+      <p>workspace_id:{id}</p>
       <p>---</p>
       {list}
       <CreateChannel workspace_id={Number(router.query.id)} />

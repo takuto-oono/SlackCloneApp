@@ -1,7 +1,11 @@
 import React, { useState } from "react";
+<<<<<<< HEAD:frontend/pages/component/create_workspace.tsx
 import { postWorkspace } from "pages/fetchAPI/workspace";
 import Link from "next/link";
 
+=======
+import { postWorkspace } from '@fetchAPI/workspace';
+>>>>>>> main:frontend/src/components/workspace/create_workspace.tsx
 function CreateWorkspace() {
   const [name, setName] = useState("");
   const nameChange = (e: any) => {
@@ -11,7 +15,11 @@ function CreateWorkspace() {
   const handleCreate = () => {
     console.log("create");
     let workspaceName = name;
+<<<<<<< HEAD:frontend/pages/component/create_workspace.tsx
     postWorkspace(workspaceName);
+=======
+    postWorkspace(workspaceName)
+>>>>>>> main:frontend/src/components/workspace/create_workspace.tsx
   };
 
   return (

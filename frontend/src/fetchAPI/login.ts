@@ -1,3 +1,5 @@
+import router from "next/router";
+
 export interface User {
     name: string;
     password: string;
@@ -31,7 +33,10 @@ export async function login(user: User): Promise<currentUser> {
         })
       console.log(res);
       const User = await res.json();
-
+      if (res.status == 200) {
+        console.log("redirect");
+        router.push('/')
+      }
       return new Promise((resolve) => {
         const currentUser: currentUser = {
           token: User.token,

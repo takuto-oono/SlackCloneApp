@@ -1,68 +1,49 @@
 package models
 
 import (
-	"fmt"
-
-	"backend/config"
+	"gorm.io/gorm"
 )
 
 type User struct {
-	ID       uint32 `json:"id"`
-	Name     string `json:"name"`
-	PassWord string `json:"password"`
+	ID       uint32 `json:"id" gorm:"primaryKey"`
+	Name     string `json:"name" gorm:"not null"`
+	PassWord string `json:"password" gorm:"not null; column:password"`
 }
 
 func NewUser(id uint32, name, password string) *User {
 	return &User{ID: id, Name: name, PassWord: password}
 }
 
-func (user *User) Create() error {
-	cmd := fmt.Sprintf(`INSERT INTO %s (id, name, password) VALUES ($1, $2, $3)`, config.Config.UserTableName)
-	_, err := DbConnection.Exec(cmd, user.ID, user.Name, user.PassWord)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return err
+func (u *User) Create(tx *gorm.DB) error {
+	return tx.Create(u).Error
 }
 
-func GetUserById(id uint32) (User, error) {
-	cmd := fmt.Sprintf(`SELECT id, name, password FROM %s WHERE id = $1`, config.Config.UserTableName)
-	row := DbConnection.QueryRow(cmd, id)
-	var user User
-	err := row.Scan(&user.ID, &user.Name, &user.PassWord)
-	if err != nil {
-		return User{}, err
-	}
-	if user.Name == "" || user.PassWord == "" {
-		err = fmt.Errorf("not found id")
-		return User{}, err
-	}
-	return user, nil
+func GetUserById(tx *gorm.DB, id uint32) (User, error) {
+	var result User
+	err := tx.Model(&User{}).Where("id = ?", id).Take(&result).Error
+	return result, err
 }
 
-func GetUserByNameAndPassword(username, password string) (User, error) {
-	cmd := fmt.Sprintf("SELECT id, name, password FROM %s WHERE name = $1 AND password = $2", config.Config.UserTableName)
-	row := DbConnection.QueryRow(cmd, username, password)
-	var u User
-	err := row.Scan(&u.ID, &u.Name, &u.PassWord)
-	return u, err
+func GetUserByNameAndPassword(tx *gorm.DB, username, password string) (User, error) {
+	var result User
+	err := tx.Model(&User{}).Where("name = ? AND password = ?", username, password).Take(&result).Error
+	return result, err
 }
 
-func GetUsers() ([]User, error) {
-	users := make([]User, 0)
-	cmd := fmt.Sprintf("SELECT id, name FROM %s", config.Config.UserTableName)
-	rows, err := DbConnection.Query(cmd)
+func GetUsers(tx *gorm.DB) ([]User, error) {
+	var result []User
+	rows, err := tx.Model(&User{}).Rows()
 	if err != nil {
-		return users, err
+		return result, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var u User
-		if err := rows.Scan(&u.ID, &u.Name); err != nil {
-			return users, err
+		if err := tx.ScanRows(rows, &u); err != nil {
+			return result, err
 		}
-		users = append(users, u)
+		result = append(result, u)
 	}
-	return users, nil
+	return result, nil
 }

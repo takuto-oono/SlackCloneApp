@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-import { signUp } from "pages/fetchAPI/signUp";
-import Link from "next/link";
+import { signUp } from "src/fetchAPI/signUp";
+import { Link } from 'react-router-dom';
 
 const SignUpForm = () => {
   const [name, setName] = useState("");
@@ -37,8 +37,9 @@ const SignUpForm = () => {
         作成
       </button><br />
 
-      <Link href="/">
-        <button>既に作成してある方はこちらへ</button>
+      <Link to="/login_form">
+        <button>既に作成してある方はこちらへ
+        </button>
       </Link>
     </div>
   );

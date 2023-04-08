@@ -14,18 +14,6 @@ import (
 func SignUp(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 
-	// bodyの情報を取得
-	// if err := c.ShouldBindJSON(&u); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-	// 	return
-	// }
-
-	// // 必要な項目が取得できているか確認
-	// if u.Name == "" || u.PassWord == "" {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "username pr password is blank"})
-	// 	return
-	// }
-
 	ui, err := controllerUtils.InputSignUpAndLogin(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
@@ -42,7 +30,7 @@ func SignUp(c *gin.Context) {
 	}
 
 	// dbに登録
-	if err := u.Create(); err != nil {
+	if err := u.Create(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -52,8 +40,8 @@ func SignUp(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	// bodyの情報を取得
 
+	// bodyの情報を取得
 	input, err := controllerUtils.InputSignUpAndLogin(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
@@ -61,7 +49,7 @@ func Login(c *gin.Context) {
 	}
 
 	// usernameとpasswordからIDを特定
-	u, err := models.GetUserByNameAndPassword(input.Name, input.Password)
+	u, err := models.GetUserByNameAndPassword(db, input.Name, input.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
@@ -85,7 +73,7 @@ func GetCurrentUser(c *gin.Context) {
 		return
 	}
 
-	user, err := models.GetUserById(userId)
+	user, err := models.GetUserById(db, userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

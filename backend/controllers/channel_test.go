@@ -52,7 +52,8 @@ func deleteUserFromChannelTestFunc(channelId, workspaceId int, userId uint32, jw
 
 func deleteChannelTestFunc(channelId, workspaceId int, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	ch := models.NewChannel(channelId, "", "", false, false, workspaceId)
+	ch := models.NewChannel("", "", false, false, workspaceId)
+	ch.ID = channelId
 	jsonInput, _ := json.Marshal(ch)
 	req, _ := http.NewRequest("DELETE", "/api/channel/delete", bytes.NewBuffer(jsonInput))
 	req.Header.Set("Authorization", jwtToken)
@@ -785,7 +786,7 @@ func TestDeleteUserFromChannel(t *testing.T) {
 
 		rr = deleteUserFromChannelTestFunc(-1, w.ID, dlr.UserId, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 
 	t.Run("7", func(t *testing.T) {
@@ -1186,7 +1187,7 @@ func TestDeleteChannel(t *testing.T) {
 
 		rr = deleteChannelTestFunc(c.ID, -1, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 
 	t.Run("4", func(t *testing.T) {
@@ -1262,7 +1263,7 @@ func TestDeleteChannel(t *testing.T) {
 
 		rr = deleteChannelTestFunc(-1, w.ID, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 
 	t.Run("6", func(t *testing.T) {
@@ -1312,7 +1313,7 @@ func TestDeleteChannel(t *testing.T) {
 
 		rr = deleteChannelTestFunc(c.ID, w.ID, rlr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"sql: no rows in result set\"}", rr.Body.String())
+		assert.Equal(t, "{\"message\":\"record not found\"}", rr.Body.String())
 	})
 }
 

@@ -1,3 +1,4 @@
+import router from "next/router";
 import { getToken } from "./cookie";
 
 export interface Channel {
@@ -35,6 +36,7 @@ export async function getChannelsByWorkspaceId(
     },
   ];
   try {
+<<<<<<< HEAD:frontend/pages/fetchAPI/channel.ts
     const res = await fetch(url, {
       method: "GET",
       headers: {
@@ -46,6 +48,24 @@ export async function getChannelsByWorkspaceId(
     return new Promise((resolve) => {
       resolve(res_channels);
     });
+=======
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+              'Authorization': getToken(),
+          },
+      })
+    console.log(res)
+    if (res.status == 401) {
+        console.log("redirect");
+        router.replace('/')
+      }
+      res_channels = await res.json()
+      return new Promise((resolve) => {
+        const channels: Channel[] = res_channels;
+        resolve(channels);
+      });
+>>>>>>> main:frontend/src/fetchAPI/channel.ts
   } catch (err) {
     console.log("err");
     console.log(err);

@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -38,16 +40,25 @@ func SendDM(c *gin.Context) {
 		return
 	}
 
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
 	// 2人のuserのdm_line_idを取得する(存在しなければ作成する)
-	dl, err := models.GetDLByUserIdsAndWorkspaceId(userId, in.ReceiveUserId, in.WorkspaceId)
+	dl, err := models.GetDLByUserIdsAndWorkspaceId(db, userId, in.ReceiveUserId, in.WorkspaceId)
 	if err != nil {
 		ndm := models.NewDMLine(in.WorkspaceId, userId, in.ReceiveUserId)
-		if err := ndm.Create().Error; err != nil {
+		if err := ndm.Create(tx); err != nil {
+			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
-		dl, err = models.GetDLByUserIdsAndWorkspaceId(userId, in.ReceiveUserId, in.WorkspaceId)
+		dl, err = models.GetDLByUserIdsAndWorkspaceId(tx, userId, in.ReceiveUserId, in.WorkspaceId)
 		if err != nil {
+			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
@@ -55,11 +66,13 @@ func SendDM(c *gin.Context) {
 
 	// direct_messages tableにデータを保存する
 	dm := models.NewDirectMessage(in.Text, userId, dl.ID)
-	if err := dm.Create().Error; err != nil {
+	if err := dm.Create(tx); err != nil {
+		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
+	tx.Commit()
 	c.JSON(http.StatusOK, dm)
 }
 
@@ -79,7 +92,7 @@ func GetDMsInLine(c *gin.Context) {
 	}
 
 	// dm_lineの情報を取得する
-	dl, err := models.GetDLById(dmLineId)
+	dl, err := models.GetDLById(db, dmLineId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
@@ -96,13 +109,82 @@ func GetDMsInLine(c *gin.Context) {
 	}
 
 	// direct_messages tableから情報を取得
-	dms, err := models.GetAllDMsByDLId(dl.ID)
+	dms, err := models.GetAllDMsByDLId(db, dl.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, dms)
+}
+
+type DMLineInfo struct {
+	ID     uint   `json:"id"`
+	ToName string `json:"to_name"`
+}
+
+func GetDMLines(c *gin.Context) {
+	var response []DMLineInfo
+
+	setToName := func(userId1, userId2, requestUserId uint32) (string, error) {
+		var toId uint32
+		if userId1 == requestUserId && userId2 == requestUserId {
+			toId = requestUserId
+		} else if userId1 == requestUserId && userId2 != requestUserId {
+			toId = userId2
+		} else if userId1 != requestUserId && userId2 == requestUserId {
+			toId = userId1
+		} else {
+			return "", fmt.Errorf("request_user not found")
+		}
+		u, err := models.GetUserById(db, toId)
+		if err != nil {
+			return "", err
+		}
+		return u.Name, nil
+	}
+
+	c.Header("Access-Control-Allow-Origin", "*")
+	userId, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからworkspace_idを取得する
+	workspaceId, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// userがworkspaceに存在しているかを確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceId, userId) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in workspace"})
+		return
+	}
+
+	// userが所属しているDMLineをすべて取得
+	dls, err := models.GetDLsByUserIdAndWorkspaceId(db, userId, workspaceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// 取得した情報をDMLineInfoに変換する
+	for _, dl := range dls {
+		toName, err := setToName(dl.UserId1, dl.UserId2, userId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		response = append(response, DMLineInfo{
+			ID:     dl.ID,
+			ToName: toName,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func EditDM(c *gin.Context) {
@@ -145,7 +227,7 @@ func EditDM(c *gin.Context) {
 	}
 
 	// direct_messages tableをupdate
-	dm, err := models.UpdateDM(dmId, in.Text)
+	dm, err := models.UpdateDM(db, dmId, in.Text)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -187,8 +269,12 @@ func DeleteDM(c *gin.Context) {
 	}
 
 	// direct_messages tableをdelete
-	dm, err := models.DeleteDM(dmId)
+	dm, err := models.GetDMById(db, dmId)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if err = dm.DeleteDM(db); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
