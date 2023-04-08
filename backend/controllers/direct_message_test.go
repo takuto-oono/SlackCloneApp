@@ -124,28 +124,25 @@ func TestSendDM(t *testing.T) {
 		rr = sendDMTestFunc(text1, slr.Token, rlr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		dm1 := new(models.DirectMessage)
+		dm1 := new(models.Message)
 		json.Unmarshal(([]byte)(byteArray), dm1)
 		assert.Equal(t, text1, dm1.Text)
-		assert.Equal(t, slr.UserId, dm1.SendUserId)
 		assert.NotEqual(t, uint(0), dm1.DMLineId)
 
 		rr = sendDMTestFunc(text2, slr.Token, rlr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		dm2 := new(models.DirectMessage)
+		dm2 := new(models.Message)
 		json.Unmarshal(([]byte)(byteArray), dm2)
 		assert.Equal(t, text2, dm2.Text)
-		assert.Equal(t, slr.UserId, dm2.SendUserId)
 		assert.NotEqual(t, uint(0), dm2.DMLineId)
 
 		rr = sendDMTestFunc(text3, rlr.Token, slr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		dm3 := new(models.DirectMessage)
+		dm3 := new(models.Message)
 		json.Unmarshal(([]byte)(byteArray), dm3)
 		assert.Equal(t, text3, dm3.Text)
-		assert.Equal(t, rlr.UserId, dm3.SendUserId)
 		assert.NotEqual(t, uint(0), dm3.DMLineId)
 
 		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
@@ -175,23 +172,20 @@ func TestSendDM(t *testing.T) {
 		rr = sendDMTestFunc(text1, lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		dm1 := new(models.DirectMessage)
+		dm1 := new(models.Message)
 		json.Unmarshal(([]byte)(byteArray), dm1)
 		assert.Equal(t, text1, dm1.Text)
-		assert.Equal(t, lr.UserId, dm1.SendUserId)
 		assert.NotEqual(t, uint(0), dm1.DMLineId)
 
 		rr = sendDMTestFunc(text2, lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		dm2 := new(models.DirectMessage)
+		dm2 := new(models.Message)
 		json.Unmarshal(([]byte)(byteArray), dm2)
 		assert.Equal(t, text2, dm2.Text)
-		assert.Equal(t, lr.UserId, dm2.SendUserId)
 		assert.NotEqual(t, uint(0), dm2.DMLineId)
 
 		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
-
 	})
 
 	t.Run("3 bodyに不足がある場合", func(t *testing.T) {
@@ -314,7 +308,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		messageCount := 3
 		username := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
-		dms := make([]models.DirectMessage, messageCount)
+		dms := make([]models.Message, messageCount)
 		text := randomstring.EnglishFrequencyString(100)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(username, "pass").Code)
@@ -335,14 +329,14 @@ func TestGetAllDMsByDLId(t *testing.T) {
 			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
 			assert.Equal(t, http.StatusOK, rr.Code)
 			byteArray, _ = io.ReadAll(rr.Body)
-			var dm models.DirectMessage
+			var dm models.Message
 			json.Unmarshal(([]byte)(byteArray), &dm)
 			dms[i] = dm
 		}
 
 		rr = getDMsInLineTestFunc(dms[0].DMLineId, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		res := make([]models.DirectMessage, messageCount)
+		res := make([]models.Message, messageCount)
 		byteArray, _ = io.ReadAll(rr.Body)
 		json.Unmarshal(([]byte)(byteArray), &res)
 		assert.Equal(t, messageCount, len(res))
@@ -354,7 +348,6 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		for _, dm := range res {
 			assert.Equal(t, dms[0].DMLineId, dm.DMLineId)
 			assert.Equal(t, text, dm.Text)
-			assert.Equal(t, lr.UserId, dm.SendUserId)
 		}
 
 	})
@@ -387,7 +380,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		username := randomstring.EnglishFrequencyString(30)
 		requestUserName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
-		dms := make([]models.DirectMessage, messageCount)
+		dms := make([]models.Message, messageCount)
 		text := randomstring.EnglishFrequencyString(100)
 
 		assert.Equal(t, http.StatusOK, signUpTestFunc(username, "pass").Code)
@@ -415,7 +408,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
 			assert.Equal(t, http.StatusOK, rr.Code)
 			byteArray, _ = io.ReadAll(rr.Body)
-			var dm models.DirectMessage
+			var dm models.Message
 			json.Unmarshal(([]byte)(byteArray), &dm)
 			dms[i] = dm
 		}
@@ -579,18 +572,17 @@ func TestEditDM(t *testing.T) {
 		rr = sendDMTestFunc(oldText, lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var dm models.DirectMessage
+		var dm models.Message
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = editDMTestFunc(dm.ID, lr.Token, newText)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var res models.DirectMessage
+		var res models.Message
 		json.Unmarshal(([]byte)(byteArray), &res)
 
 		assert.Equal(t, dm.ID, res.ID)
 		assert.Equal(t, newText, res.Text)
-		assert.Equal(t, dm.SendUserId, res.SendUserId)
 		assert.Equal(t, dm.DMLineId, res.DMLineId)
 		assert.Equal(t, dm.CreatedAt, res.CreatedAt)
 		assert.True(t, res.UpdatedAt.After(dm.UpdatedAt))
@@ -657,7 +649,7 @@ func TestEditDM(t *testing.T) {
 		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var dm models.DirectMessage
+		var dm models.Message
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = editDMTestFunc(dm.ID, rlr.Token, randomstring.EnglishFrequencyString(100))
@@ -696,17 +688,16 @@ func TestDeleteDM(t *testing.T) {
 		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var dm models.DirectMessage
+		var dm models.Message
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = deleteDMTestFunc(dm.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var res models.DirectMessage
+		var res models.Message
 		json.Unmarshal(([]byte)(byteArray), &res)
 		assert.Equal(t, dm.ID, res.ID)
 		assert.Equal(t, dm.Text, res.Text)
-		assert.Equal(t, dm.SendUserId, res.SendUserId)
 		assert.Equal(t, dm.DMLineId, res.DMLineId)
 		assert.Equal(t, dm.CreatedAt, res.CreatedAt)
 		assert.Equal(t, dm.UpdatedAt, res.UpdatedAt)
@@ -767,7 +758,7 @@ func TestDeleteDM(t *testing.T) {
 		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		var dm models.DirectMessage
+		var dm models.Message
 		json.Unmarshal(([]byte)(byteArray), &dm)
 
 		rr = deleteDMTestFunc(dm.ID, rlr.Token)

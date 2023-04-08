@@ -58,18 +58,18 @@ func HasPermissionDeletingChannel(wau models.WorkspaceAndUsers) bool {
 	return (wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3)	
 }
 
-func HasPermissionEditDM(dmId uint, userId uint32) bool {
-	dm, err := models.GetDMById(db, dmId)
+func HasPermissionEditDM(messageId uint, userId uint32) bool {
+	dm, err := models.GetMessageById(db, messageId)
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
 			fmt.Println(err.Error())
 		}
 		return false
 	}
-	return dm.SendUserId == userId
+	return dm.UserId == userId
 }
 
-func HasPermissionEditMessage(messageId int, userId uint32) bool {
+func HasPermissionEditMessage(messageId uint, userId uint32) bool {
 	// 作成したuserと編集アクセスをしたuserが同じかを判定
 	
 	m, err := models.GetMessageById(db, messageId)

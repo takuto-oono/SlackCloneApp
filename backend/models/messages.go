@@ -1,29 +1,44 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type Message struct {
-	ID        int       `json:"id" gorm:"primaryKey"`
+	ID        uint      `json:"id" gorm:"primaryKey"`
 	Text      string    `json:"text" gorm:"not null"`
-	ChannelId int       `json:"channel_id" gorm:"not null"`
+	ChannelId int       `json:"channel_id"`
+	DMLineId  uint      `json:"dm_line_id" gorm:"column:dm_line_id"`
 	UserId    uint32    `json:"user_id" gorm:"not null"`
 	CreatedAt time.Time `json:"created_at" gorm:"not null"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"not null"`
 }
 
-func NewMessage(text string, channelId int, userId uint32) *Message {
+func NewChannelMessage(text string, channelId int, userId uint32) *Message {
 	return &Message{
 		Text:      text,
 		ChannelId: channelId,
 		UserId:    userId,
+		DMLineId:  uint(0),
+	}
+}
+
+func NewDMMessage(text string, dmLineId uint, userId uint32) *Message {
+	return &Message{
+		Text:      text,
+		DMLineId:  dmLineId,
+		UserId:    userId,
+		ChannelId: 0,
 	}
 }
 
 func (m *Message) Create(tx *gorm.DB) error {
+	if m.ChannelId != 0 && m.DMLineId != uint(0) {
+		return fmt.Errorf("channelId and dmLineId equal 0")
+	}
 	return tx.Model(&Message{}).Create(m).Error
 }
 
@@ -44,14 +59,35 @@ func GetMessagesByChannelId(tx *gorm.DB, channelId int) ([]Message, error) {
 	return result, nil
 }
 
-func GetMessageById(tx *gorm.DB, id int) (Message, error) {
+func GetMessagesByDLId(tx *gorm.DB, dlId uint) ([]Message, error) {
+	var result []Message
+	rows, err := tx.Model(&Message{}).Where("dm_line_id = ?", dlId).Order("created_at desc").Rows()
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var m Message
+		if err := tx.ScanRows(rows, &m); err != nil {
+			return result, err
+		}
+		result = append(result, m)
+	}
+	return result, nil
+}
+
+func GetMessageById(tx *gorm.DB, id uint) (Message, error) {
 	var result Message
 	err := tx.Model(&Message{}).Where("id = ?", id).Take(&result).Error
 	return result, err
 }
 
-func UpdateMessageText(tx *gorm.DB, id int, text string) (Message, error) {
+func UpdateMessageText(tx *gorm.DB, id uint, text string) (Message, error) {
 	var result Message
 	err := tx.Model(&Message{}).Where("id = ?", id).Update("text", text).Take(&result).Error
 	return result, err
+}
+
+func (m Message) Delete(tx *gorm.DB) error {
+	return tx.Where("id = ?", m.ID).Delete(&Message{}).Error
 }

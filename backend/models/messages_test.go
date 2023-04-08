@@ -13,17 +13,34 @@ func TestCreateMessage(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	text := randomstring.EnglishFrequencyString(30)
-	channelId := rand.Int()
-	userId := rand.Uint32()
-	m := NewMessage(text, channelId, userId)
-	assert.Empty(t, m.Create(db))
-	assert.NotEqual(t, 0, m.ID)
-	assert.NotEqual(t, "", m.CreatedAt)
-	m = NewMessage(text, channelId, userId)
-	assert.Empty(t, m.Create(db))
-	assert.NotEqual(t, 0, m.ID)
-	assert.NotEqual(t, "", m.CreatedAt)
+
+	t.Run("1 create channel message", func(t *testing.T) {
+		text := randomstring.EnglishFrequencyString(30)
+		channelId := rand.Int()
+		userId := rand.Uint32()
+		m := NewChannelMessage(text, channelId, userId)
+		assert.Empty(t, m.Create(db))
+		assert.NotEqual(t, 0, m.ID)
+		assert.NotEqual(t, "", m.CreatedAt)
+		m = NewChannelMessage(text, channelId, userId)
+		assert.Empty(t, m.Create(db))
+		assert.NotEqual(t, 0, m.ID)
+		assert.NotEqual(t, "", m.CreatedAt)
+	})
+
+	t.Run("2 create direct message", func(t *testing.T) {
+		text := randomstring.EnglishFrequencyString(30)
+		dmLineId := uint(rand.Uint32())
+		userId := rand.Uint32()
+		m := NewDMMessage(text, dmLineId, userId)
+		assert.Empty(t, m.Create(db))
+		assert.NotEqual(t, 0, m.ID)
+		assert.NotEqual(t, "", m.CreatedAt)
+		m = NewDMMessage(text, dmLineId, userId)
+		assert.Empty(t, m.Create(db))
+		assert.NotEqual(t, 0, m.ID)
+		assert.NotEqual(t, "", m.CreatedAt)
+	})
 }
 
 func TestGetMessagesByChannelId(t *testing.T) {
@@ -41,7 +58,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 		userId := rand.Uint32()
 
 		for _, text := range texts {
-			m := NewMessage(text, channelId, userId)
+			m := NewChannelMessage(text, channelId, userId)
 			assert.Empty(t, m.Create(db))
 		}
 
@@ -65,13 +82,53 @@ func TestGetMessagesByChannelId(t *testing.T) {
 	})
 }
 
+func TestGetMessagesByDlId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 messageが存在する場合", func(t *testing.T) {
+		testNum := 100
+		texts := make([]string, testNum)
+		for i := 0; i < testNum; i++ {
+			texts[i] = randomstring.EnglishFrequencyString(30)
+		}
+		dlId := uint(rand.Uint32())
+		userId := rand.Uint32()
+
+		for _, text := range texts {
+			m := NewDMMessage(text, dlId, userId)
+			assert.Empty(t, m.Create(db))
+		}
+
+		messages, err := GetMessagesByDLId(db, dlId)
+		assert.Empty(t, err)
+		assert.Equal(t, testNum, len(messages))
+		for i := 0; i < testNum-1; i++ {
+			assert.True(t, messages[i+1].CreatedAt.Before(messages[i].CreatedAt))
+		}
+		for _, m := range messages {
+			assert.Equal(t, dlId, m.DMLineId)
+			assert.Equal(t, userId, m.UserId)
+			assert.Contains(t, texts, m.Text)
+		}
+	})
+
+	t.Run("2 messageが存在しない場合", func(t *testing.T) {
+		messages, err := GetMessagesByDLId(db, uint(rand.Uint32()))
+		assert.Empty(t, err)
+		assert.Equal(t, 0, len(messages))
+	})
+
+}
+
 func TestGetMessageById(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		m := NewMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
+		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
 		assert.Empty(t, m.Create(db))
 		res, err := GetMessageById(db, m.ID)
 		assert.Empty(t, err)
@@ -84,7 +141,7 @@ func TestGetMessageById(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := GetMessageById(db, rand.Int())
+		_, err := GetMessageById(db, uint(rand.Uint32()))
 		assert.Equal(t, gorm.ErrRecordNotFound, err)
 	})
 }
@@ -95,7 +152,7 @@ func TestUpdateMessageText(t *testing.T) {
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		m := NewMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
+		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
 		assert.Empty(t, m.Create(db))
 
 		newText := randomstring.EnglishFrequencyString(100)
@@ -119,7 +176,7 @@ func TestUpdateMessageText(t *testing.T) {
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
-		_, err := UpdateMessageText(db, rand.Int(), randomstring.EnglishFrequencyString(100))
+		_, err := UpdateMessageText(db, uint(rand.Uint32()), randomstring.EnglishFrequencyString(100))
 		assert.Equal(t, gorm.ErrRecordNotFound, err)
 	})
 

@@ -83,10 +83,6 @@ func init() {
 		fmt.Println(err)
 	}
 
-	if err := db.AutoMigrate(&DirectMessage{}); err != nil {
-		fmt.Println(err)
-	}
-
 	if err := db.AutoMigrate(&DMLine{}); err != nil {
 		fmt.Println(err)
 	}

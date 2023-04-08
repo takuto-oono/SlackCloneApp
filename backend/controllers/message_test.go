@@ -15,6 +15,7 @@ import (
 
 	"backend/controllerUtils"
 	"backend/models"
+	"backend/utils"
 )
 
 var messageRouter = SetupRouter()
@@ -45,12 +46,12 @@ func getMessagesByChannelIdTestFunc(channelId int, jwtToken string) *httptest.Re
 	return rr
 }
 
-func editMessageTestFunc(messageId int, text, jwtToken string) *httptest.ResponseRecorder {
+func editMessageTestFunc(messageId uint, text, jwtToken string) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(controllerUtils.EditMessageInput{
 		Text: text,
 	})
-	req, err := http.NewRequest("PATCH", "/api/message/edit/"+strconv.Itoa(messageId), bytes.NewBuffer(jsonInput))
+	req, err := http.NewRequest("PATCH", "/api/message/edit/"+utils.UintToString(messageId), bytes.NewBuffer(jsonInput))
 	if err != nil {
 		return rr
 	}
@@ -497,7 +498,7 @@ func TestEditMessage(t *testing.T) {
 		ch := new(models.Channel)
 		json.Unmarshal(([]byte)(byteArray), ch)
 
-		rr = editMessageTestFunc(int(rand.Uint32()), newText, lr.Token)
+		rr = editMessageTestFunc(uint(rand.Uint32()), newText, lr.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"message not found\"}", rr.Body.String())
 	})
