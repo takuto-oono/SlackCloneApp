@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { postChannel, currentChannel } from "../fetchAPI/create_channel";
-import { getChannelsByWorkspaceId, Channel } from "../fetchAPI/channel";
+import { postChannel, CurrentChannel } from "../fetchAPI/channel";
 import Link from "next/link";
 
 export default function CreateChannel(props: any) {
@@ -22,7 +21,7 @@ export default function CreateChannel(props: any) {
 
   const handleCreate = () => {
     console.log("create");
-    let channel: currentChannel = {
+    let channel: CurrentChannel = {
       name: name,
       description: description,
       is_private: isPrivate,
