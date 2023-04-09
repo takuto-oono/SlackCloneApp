@@ -3,13 +3,13 @@ import { useCookies } from "react-cookie";
 import router from 'next/router';
 
 
-export default function Home() {
+export default function Top() {
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
+  console.log(cookies.token)
   if (cookies.token) {
-    console.log(cookies.token)
+    
     return (
       <>
-        <h2>Home</h2>
         <nav>
           <ul>
             <li>
@@ -20,7 +20,6 @@ export default function Home() {
       </>)
   } else {
     return (<>
-      <h2>Home</h2>
       <nav>
         <ul>
           <li>

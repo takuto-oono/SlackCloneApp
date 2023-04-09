@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
-import { LoginForm } from "@components/login";
+import { LoginForm } from "@components/user";
 import { Link } from 'react-router-dom';
 import router from "next/router";
 
