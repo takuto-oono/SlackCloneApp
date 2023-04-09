@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from "react";
-<<<<<<< HEAD:frontend/pages/component/show_workspace/[id].tsx
-import { getChannelsByWorkspaceId, Channel } from 'pages/fetchAPI/channel';
 import { useRouter } from "next/router";
-import CreateChannel from '../create_channel';
+import { postChannel } from '@components/create_channel';
 import Link from 'next/link'
-=======
 import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
 import { useParams } from "react-router-dom";
->>>>>>> main:frontend/src/components/workspace/show_workspace/[id].tsx
 
 
 function ShowWorkspace() {
@@ -42,7 +38,7 @@ function ShowWorkspace() {
       <p>workspace_id:{id}</p>
       <p>---</p>
       {list}
-      <CreateChannel workspace_id={Number(router.query.id)} />
+      {/* <CreateChannel workspace_id={Number(router.query.id)} /> */}
     </div>
   )
 }
