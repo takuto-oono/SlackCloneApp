@@ -21,17 +21,17 @@ export default function Home() {
           <BrowserRouter>
             <p>index</p>
             <Routes >
-        <Route path="/">
-          <Route index element={<Top />} />
-          <Route path="login_form" element={<Login />} />
-          <Route path="signUp_form" element={<SignUp />} />
-          <Route path="workspace" >
-            <Route index element={<IndexW />} />
-            <Route path="create" element={<CreateW />} />
-            <Route path={"show/:id"} element={<ShowW />}/>
-          </Route>
-        </Route>
-      </Routes>
+              <Route path="/">
+                <Route index element={<Top />} />
+                <Route path="login_form" element={<Login />} />
+                <Route path="signUp_form" element={<SignUp />} />
+                <Route path="workspace" >
+                  <Route index element={<IndexW />} />
+                  <Route path="create" element={<CreateW />} />
+                  <Route path={"show/:id"} element={<ShowW />}/>
+                </Route>
+              </Route>
+            </Routes>
             {/* <App /> */}
           </BrowserRouter>
         </CookiesProvider>
