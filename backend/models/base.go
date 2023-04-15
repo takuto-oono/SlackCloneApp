@@ -90,4 +90,16 @@ func init() {
 	if err := db.AutoMigrate(&Message{}); err != nil {
 		fmt.Println(err)
 	}
+
+	if err := db.AutoMigrate(&Thread{}); err != nil {
+		fmt.Println(err)
+	}
+
+	if err := db.AutoMigrate(&ThreadAndMessage{}); err != nil {
+		fmt.Println(err)
+	}
+
+	if err := db.AutoMigrate(&ThreadAndUser{}); err != nil {
+		fmt.Println(err)
+	}
 }

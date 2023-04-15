@@ -104,3 +104,22 @@ func IsExistMessageById(messageId uint) (bool, error) {
 	}
 	return true, nil
 }
+
+func IsExistUserInDL(userId uint32, dlId uint) (bool, error) {
+	dl, err := models.GetDLById(db, dlId)
+	if err != nil {
+		return false, err
+	}
+	return dl.UserId1 == userId || dl.UserId2 == userId, nil
+}
+
+func IsExistThreadByMessageId(messageId uint) (bool, error) {
+	_, err := models.GetThreadByParentMessageId(db, messageId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}

@@ -55,5 +55,10 @@ func SetupRouter() *gin.Engine {
 	dm.GET("/dm_lines/:workspace_id", GetDMLines)
 	dm.PATCH("/:dm_id", EditDM)
 	dm.DELETE("/:dm_id", DeleteDM)
+
+	thread := api.Group("/thread")
+	thread.POST("/post", PostThread)
+	thread.GET("/by_user", GetThreadsByUser)
+	
 	return r
 }
