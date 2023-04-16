@@ -13,6 +13,7 @@ function CreateWorkspace() {
     let workspaceName = name;
     postWorkspace(workspaceName);
   };
+_
   return (
     <div className="CreateWorkspace">
         <h2>Create Workspace</h2>

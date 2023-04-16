@@ -37,7 +37,6 @@ function WorkspaceIndex() {
       <div>
         {list}
       </div><br></br>
-      
     </div>
     );
 }

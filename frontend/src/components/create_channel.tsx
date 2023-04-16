@@ -1,4 +1,4 @@
-import { getToken } from "@fetchAPI/cookie";
+import { getToken } from "./cookie";
 
 export interface Channel {
   id: number;

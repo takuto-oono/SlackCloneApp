@@ -1,5 +1,5 @@
 import classes from '@styles/Header.module.css'
-import { Logout } from "@components/main/user";
+import { Logout } from "@components/user";
 import { useCookies } from 'react-cookie';
 
 const Header = () => {
