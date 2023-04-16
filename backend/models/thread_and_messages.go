@@ -20,7 +20,13 @@ func (tam *ThreadAndMessage) Create(tx *gorm.DB) error {
 	return tx.Model(&ThreadAndMessage{}).Create(tam).Error
 }
 
-func GetTAMByThreadID(tx *gorm.DB, threadId uint) ([]ThreadAndMessage, error) {
+func GetTAMByThreadIdAndMessageId(tx *gorm.DB, threadId, messageId uint) (*ThreadAndMessage, error) {
+	var result *ThreadAndMessage
+	err := tx.Model(&ThreadAndMessage{}).Where("thread_id = ? AND message_id = ?", threadId, messageId).Take(result).Error
+	return result, err
+}
+
+func GetTAMByThreadId(tx *gorm.DB, threadId uint) ([]ThreadAndMessage, error) {
 	var result []ThreadAndMessage
 	rows, err := tx.Model(&ThreadAndMessage{}).Where("thread_id = ?", threadId).Order("created_at desc").Rows()
 	if err != nil {
