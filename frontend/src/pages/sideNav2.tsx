@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
-import ShowWorkspace from "@src/components/sideNav2/workspace/show_workspace/[id]";
+import ShowWorkspace from "@src/components/sideNav2/workspace/show/[id]";
 
 
 

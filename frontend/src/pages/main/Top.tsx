@@ -13,7 +13,7 @@ export default function Top() {
         <nav>
           <ul>
             <li>
-              <Link to="workspace">Workspace一覧</Link>
+              <p>main</p>
             </li>
           </ul>
         </nav>
