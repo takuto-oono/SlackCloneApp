@@ -1,15 +1,12 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './_app';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { CookiesProvider } from 'react-cookie';
-import Login from './login_form';
-import SignUp from './signUp_form';
-import IndexW from './workspace/workspace';
-import CreateW from './workspace/create';
-import ShowW from './workspace/show/[id]';
-import Top from './Top';
+import classes from '@styles/Home.module.css'
 
+import { createRoot } from 'react-dom/client';
+import { ProSidebarProvider } from 'react-pro-sidebar';
+import { RouterConfig } from './route';
+import Header from './header';
+import SideNav1 from './sideNav1';
+import SideNav2 from './sideNav2';
 
 export default function Home() {
   if (typeof window === 'object') {
@@ -17,24 +14,20 @@ export default function Home() {
     const root = createRoot(rootElement);
     root.render(
       <React.StrictMode>
-        <CookiesProvider>
-          <BrowserRouter>
-            <p>index</p>
-            <Routes >
-              <Route path="/">
-                <Route index element={<Top />} />
-                <Route path="login_form" element={<Login />} />
-                <Route path="signUp_form" element={<SignUp />} />
-                <Route path="workspace" >
-                  <Route index element={<IndexW />} />
-                  <Route path="create" element={<CreateW />} />
-                  <Route path={"show/:id"} element={<ShowW />}/>
-                </Route>
-              </Route>
-            </Routes>
-            {/* <App /> */}
-          </BrowserRouter>
-        </CookiesProvider>
+        <Header />
+        <div className={classes.container}>
+          <div className={classes.item}>
+            <SideNav1 />
+          </div>
+          <div className={classes.item}>
+            <ProSidebarProvider>
+              <SideNav2 />
+            </ProSidebarProvider>
+          </div>
+          <div className={classes.item}>
+            <RouterConfig />
+          </div>
+        </div>
       </React.StrictMode>
     );
   }

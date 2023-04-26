@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { postChannel } from '@components/create_channel';
+import { postChannel } from '@src/components/popUp/create_channel';
 import Link from 'next/link'
 import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
 import { useParams } from "react-router-dom";
