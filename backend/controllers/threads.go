@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,8 +24,6 @@ func PostThread(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("1")
-
 	// threadの元になるmessageを取得
 	parentMessage, err := models.GetMessageById(db, in.ParentMessageId)
 	if err != nil {
@@ -38,9 +35,7 @@ func PostThread(c *gin.Context) {
 	if parentMessage.ThreadId != uint(0) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
-
 	}
-	fmt.Println("2")
 
 	// トランザクションを宣言
 	tx := db.Begin()
@@ -48,7 +43,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println("3")
 
 	// threadを取得 or 作成
 	th, err := controllerUtils.CreateOrGetThreadByParentMessageId(tx, parentMessage.ID)
@@ -57,7 +51,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println("4")
 
 	// thread tableのupdated_atを更新
 	if err := th.EditUpdatedAt(tx); err != nil {
@@ -65,7 +58,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println("5")
 
 	// 新しいmessageを作成する
 	var m *models.Message
@@ -107,7 +99,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "wrong channel_id or dm_line_id"})
 		return
 	}
-	fmt.Println("6")
 	
 	// messageをdbに登録
 	m.ThreadId = th.ID
@@ -116,7 +107,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println("7")
 
 	// thread_and_message tableにデータを保存
 	tam := models.NewThreadAndMessage(th.ID, m.ID)
@@ -125,7 +115,6 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println("8")
 	b, err := controllerUtils.IsExistTAMByThreadIdAndMessageId(th.ID, parentMessage.ID)
 	if err != nil {
 		tx.Rollback()
@@ -140,7 +129,6 @@ func PostThread(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("9")
 
 	// threads_and_users tableにユーザーを追加
 	b, err = controllerUtils.IsExistTAUByUserIdAndThreadId(tx, userId, th.ID)
@@ -157,7 +145,6 @@ func PostThread(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println("10")
 
 	tx.Commit()
 	c.JSON(http.StatusOK, m)

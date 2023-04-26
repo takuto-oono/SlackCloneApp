@@ -111,7 +111,7 @@ func GetThreadsByUserSortedByEditedTime(userId uint32) ([]models.Thread, error) 
 		if err != nil {
 			return ths, err
 		}
-		ths = append(ths, *th)
+		ths = append(ths, th)
 	}
 
 	// 更新時間でソート

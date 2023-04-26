@@ -28,16 +28,15 @@ func (th *Thread) EditUpdatedAt(tx *gorm.DB) error {
 	return tx.Model(&Thread{}).Where("id = ?", th.ID).Update("updated_at", time.Now()).Error
 }
 
-func GetThreadById(tx *gorm.DB, id uint) (*Thread, error) {
-	var result *Thread
-	err := tx.Model(&Thread{}).Where("id = ?", id).Take(result).Error
+func GetThreadById(tx *gorm.DB, id uint) (Thread, error) {
+	var result Thread
+	err := tx.Model(&Thread{}).Where("id = ?", id).Take(&result).Error
 	return result, err
 }
 
-func GetThreadByParentMessageId(tx *gorm.DB, parentMessageId uint) (*Thread, error) {
+func GetThreadByParentMessageId(tx *gorm.DB, parentMessageId uint) (Thread, error) {
 	var result Thread
 	fmt.Println(1)
 	err := tx.Model(&Thread{}).Where("parent_message_id = ?", parentMessageId).Take(&result).Error
-	fmt.Println(err.Error())
-	return &result, err
+	return result, err
 }

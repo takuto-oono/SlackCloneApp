@@ -20,9 +20,9 @@ func (tau *ThreadAndUser) Create(tx *gorm.DB) error {
 	return tx.Model(&ThreadAndUser{}).Create(tau).Error
 }
 
-func GetTAUByThreadIdAndUserId(tx *gorm.DB, userId uint32, threadId uint) (*ThreadAndUser, error) {
-	var result *ThreadAndUser
-	err := tx.Model(&ThreadAndUser{}).Where("user_id = ? AND thread_id = ?", userId, threadId).Take(result).Error
+func GetTAUByThreadIdAndUserId(tx *gorm.DB, userId uint32, threadId uint) (ThreadAndUser, error) {
+	var result ThreadAndUser
+	err := tx.Model(&ThreadAndUser{}).Where("user_id = ? AND thread_id = ?", userId, threadId).Take(&result).Error
 	return result, err
 }
 
