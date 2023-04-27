@@ -119,7 +119,6 @@ func TestGetMessagesByDlId(t *testing.T) {
 		assert.Empty(t, err)
 		assert.Equal(t, 0, len(messages))
 	})
-
 }
 
 func TestGetMessageById(t *testing.T) {
@@ -180,4 +179,28 @@ func TestUpdateMessageText(t *testing.T) {
 		assert.Equal(t, gorm.ErrRecordNotFound, err)
 	})
 
+}
+
+func TestGetMessagesThreadId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
+	assert.Empty(t, m.Create(db))
+	message, _ := GetMessageById(db, m.ID)
+	assert.Equal(t, uint(0), message.ThreadId)
+}
+
+func TestUpdateMessageThreadId(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+	
+	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
+	assert.Empty(t, m.Create(db))
+	threadId := uint(rand.Uint32())
+	assert.Empty(t, m.UpdateMessageThreadId(db, threadId))
+	message, _ := GetMessageById(db, m.ID)
+	assert.Equal(t, threadId, message.ThreadId)
 }
