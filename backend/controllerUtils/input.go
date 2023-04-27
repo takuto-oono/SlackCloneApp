@@ -63,6 +63,11 @@ type EditDMInput struct {
 	Text string `json:"text"`
 }
 
+type PostThreadInput struct {
+	Text      string `json:"text"`
+	ParentMessageId uint   `json:"parent_message_id"`
+}
+
 func InputSignUpAndLogin(c *gin.Context) (SignUpAndLoginInput, error) {
 	var in SignUpAndLoginInput
 	if err := c.ShouldBindJSON(&in); err != nil {
@@ -218,3 +223,18 @@ func InputAndValidateEditDM(c *gin.Context) (EditDMInput, error) {
 	}
 	return in, nil
 }
+
+func InputAndValidatePostThread(c *gin.Context) (PostThreadInput, error) {
+	var in PostThreadInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		return in, err
+	}
+	if in.Text == "" {
+		return in, fmt.Errorf("text not found")
+	}
+	if in.ParentMessageId == uint(0) {
+		return in, fmt.Errorf("parent_message_id not found")
+	}
+	return in, nil
+}
+

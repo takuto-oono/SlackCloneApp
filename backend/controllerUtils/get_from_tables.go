@@ -1,6 +1,8 @@
 package controllerUtils
 
-import "backend/models"
+import (
+	"backend/models"
+)
 
 type UserInfoInWorkspace struct {
 	ID     uint32 `json:"id"`
@@ -93,4 +95,33 @@ func GetUserInWorkspace(workspaceId int) ([]UserInfoInWorkspace, error) {
 		}
 	}
 	return res, nil
+}
+
+func GetThreadsByUserSortedByEditedTime(userId uint32) ([]models.Thread, error) {
+	var ths []models.Thread
+	// userが所属しているthreadの情報を取得する
+	taus, err := models.GetTAUsByUserId(db, userId)
+	if err != nil {
+		return ths, err
+	}
+
+	// thread tableから情報を取得する
+	for _, tau := range taus {
+		th, err := models.GetThreadById(db, tau.ThreadId)
+		if err != nil {
+			return ths, err
+		}
+		ths = append(ths, th)
+	}
+
+	// 更新時間でソート
+	for i := 0; i < len(ths); i++ {
+		for j := i + 1; j < len(ths); j++ {
+			if ths[i].UpdatedAt.Before(ths[j].UpdatedAt) {
+				ths[i], ths[j] = ths[j], ths[i]
+			}
+		}
+	}
+
+	return ths, nil
 }
