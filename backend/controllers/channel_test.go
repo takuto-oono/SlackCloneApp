@@ -1382,9 +1382,9 @@ func TestGetChannelsByUser(t *testing.T) {
 		byteArray, _ = ioutil.ReadAll(rr.Body)
 		chs := make([]models.Channel, 0)
 		json.Unmarshal(([]byte)(byteArray), &chs)
-		assert.Equal(t, channelCount+1, len(chs))
+		assert.Equal(t, channelCount+2, len(chs))
 		for _, ch := range chs {
-			if ch.Name == "general" {
+			if ch.Name == "general" || ch.Name == "random" {
 				continue
 			}
 			assert.Contains(t, channelIds, ch.ID)
