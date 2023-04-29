@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace } from '@fetchAPI/workspace'
+import { getWorkspaces, Workspace } from "@fetchAPI/workspace";
 import router from "next/router";
-import { Link } from 'react-router-dom';
-
-
+import { Link } from "react-router-dom";
 
 function WorkspaceIndex() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
@@ -12,34 +10,31 @@ function WorkspaceIndex() {
       {/* workspaceオブジェクトも渡したい（未） */}
       <Link to={`show/${item.id}`}>
         {item.name}
-        </Link>
+      </Link>
       <br></br>
     </div>
   ));
-
 
   useEffect(() => {
     getWorkspaces().then((workspaces: Workspace[]) => {
       if (!Array.isArray(workspaces)) {
         console.log("redirect");
-        router.replace('/');
+        router.replace("/");
       } else {
-        setWorkspaceList(workspaces)
-        console.log(workspaceList)
+        setWorkspaceList(workspaces);
+        console.log(workspaceList);
       }
     });
-  },[]);
+  }, []);
 
   return (
     <div className="App">
       <h2>Workspace Index</h2>
       <br></br>
-      <div>
-        {list}
-      </div><br></br>
-      
+      <div>{list}</div>
+      <br></br>
     </div>
-    );
+  );
 }
 
 export default WorkspaceIndex;
