@@ -16,7 +16,7 @@ export const RouterConfig: React.FC = () => {
             <Route path="signUp_form" element={<SignUp />} />
           </Route>
           <Route path="main" element={<SideNav1 />} >
-            <Route path=":workspaceid" element={<SideNav2 />} />
+            <Route path=":workspaceId" element={<SideNav2 />} />
           </Route>
         </Routes>
       </BrowserRouter>
