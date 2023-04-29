@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
 import classes from '@styles/Home.module.css'
-import ChannelIndex from "@src/components/sideNav2/channel_index";
+import ChannelIndex from "@src/components/sideNav2/channel_index/[id]";
 import { Outlet } from "react-router-dom";
 
 
