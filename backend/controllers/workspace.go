@@ -40,12 +40,12 @@ func CreateWorkspace(c *gin.Context) {
 	w := models.NewWorkspace(in.Name, in.RequestUserId)
 	if err := w.Create(db); err != nil {
 		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
-      tx.Rollback()
+			tx.Rollback()
 			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-    tx.Rollback()
+		tx.Rollback()
 		return
 	}
 
@@ -68,6 +68,22 @@ func CreateWorkspace(c *gin.Context) {
 
 	// general channelにuserを追加する
 	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
+	if err := cau.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// random channelを作成する
+	ch = models.NewChannel("random", "all users join", false, false, w.ID)
+	if err := ch.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// random channelにuserを追加する
+	cau = models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
 	if err := cau.Create(tx); err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -113,13 +129,57 @@ func AddUserInWorkspace(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "Unauthorized add user in workspace"})
 		return
 	}
-
-	// dbに保存する
-	err = wau.Create(db)
-	if err != nil {
+	// トランザクションを宣言
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+
+	// dbに保存する
+	err = wau.Create(tx)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// workspace内のgeneral channel と random channelにuserを追加する
+	chs, err := models.GetChannelsByWorkspaceId(db, wau.WorkspaceId)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	var generalChannelId, randomChannelId int
+	for _, ch := range chs {
+		if generalChannelId != 0 && randomChannelId != 0 {
+			break
+		}
+		if ch.Name == "general" {
+			generalChannelId = ch.ID
+		}
+		if ch.Name == "random" {
+			randomChannelId = ch.ID
+		}
+	}
+
+	gcau := models.NewChannelsAndUses(generalChannelId, in.UserId, false)
+	if err := gcau.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	
+	rcau := models.NewChannelsAndUses(randomChannelId, in.UserId, false)
+	if err := rcau.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	tx.Commit()
 	c.IndentedJSON(http.StatusOK, wau)
 }
 
