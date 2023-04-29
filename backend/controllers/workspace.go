@@ -40,12 +40,12 @@ func CreateWorkspace(c *gin.Context) {
 	w := models.NewWorkspace(in.Name, in.RequestUserId)
 	if err := w.Create(db); err != nil {
 		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
-      tx.Rollback()
+			tx.Rollback()
 			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-    tx.Rollback()
+		tx.Rollback()
 		return
 	}
 
@@ -68,6 +68,22 @@ func CreateWorkspace(c *gin.Context) {
 
 	// general channelにuserを追加する
 	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
+	if err := cau.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// random channelを作成する
+	ch = models.NewChannel("random", "all users join", false, false, w.ID)
+	if err := ch.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	// random channelにuserを追加する
+	cau = models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
 	if err := cau.Create(tx); err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
