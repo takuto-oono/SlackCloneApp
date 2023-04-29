@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login'
 import { resetCookie } from "@src/fetchAPI/cookie";
+import router from "next/router";
 
 
 const LoginForm = () => {
@@ -46,11 +47,12 @@ const Logout = () => {
   const handleLogout = () => {
     console.log("logout");
     resetCookie();
+    router.push("/");
   };
 
   return (
     <div>
-    <button onClick={handleLogout}>ログアウト</button>
+      <button onClick={handleLogout}>ログアウト</button>
     </div>
   );
 }
