@@ -10,7 +10,7 @@ function Login() {
   useEffect(() => {
     if (cookies.token) {
       // console.log(cookies.token)
-      navigate("main");
+      navigate("workspace");
       
     }
   })

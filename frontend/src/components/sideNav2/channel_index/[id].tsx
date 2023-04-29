@@ -12,7 +12,7 @@ function ChannelIndex() {
   const list = channelList.map((item, index) => (
     <div key={index}>
       <MenuItem>
-        <Link to="${item.id}">
+        <Link to="tmp_main">
           <span>{item.name}</span>
         </Link>
       </MenuItem>
