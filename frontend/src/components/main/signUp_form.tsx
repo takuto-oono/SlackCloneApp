@@ -37,7 +37,7 @@ const SignUpForm = () => {
         作成
       </button><br />
 
-      <Link to="/login_form">
+      <Link to="/">
         <button>既に作成してある方はこちらへ
         </button>
       </Link>

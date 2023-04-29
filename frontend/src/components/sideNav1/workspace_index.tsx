@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getWorkspaces, Workspace } from '@fetchAPI/workspace'
 import router from "next/router";
 import { Link } from 'react-router-dom';
+import { MenuItem } from "react-pro-sidebar";
+
 
 
 
@@ -10,10 +12,11 @@ function WorkspaceIndex() {
   const list = workspaceList.map((item, index) => (
     <div key={index}>
       {/* workspaceオブジェクトも渡したい（未） */}
-      <Link to={`show/${item.id}`}>
-        {item.name}
+      <MenuItem>
+        <Link to={`${item.id}`}>
+          <span>{item.name}</span>
         </Link>
-      <br></br>
+      </ MenuItem>
     </div>
   ));
 
@@ -22,7 +25,6 @@ function WorkspaceIndex() {
     getWorkspaces().then((workspaces: Workspace[]) => {
       if (!Array.isArray(workspaces)) {
         console.log("redirect");
-        router.replace('/');
       } else {
         setWorkspaceList(workspaces)
         console.log(workspaceList)
@@ -32,12 +34,9 @@ function WorkspaceIndex() {
 
   return (
     <div className="App">
-      <h2>Workspace Index</h2>
-      <br></br>
       <div>
         {list}
-      </div><br></br>
-      
+      </div>      
     </div>
     );
 }

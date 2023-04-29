@@ -31,9 +31,8 @@ export async function getWorkspaces(): Promise<Workspace[]> {
       })
     // 認証エラーの時のみリダイレクトする
     if (res.status == 401) {
-        resetCookie();
-        console.log("redirect");
-        router.replace('/')
+      resetCookie();
+      console.log("redirect");
       }
       res_workspaces = await res.json()
       return new Promise((resolve) => {
@@ -71,10 +70,10 @@ export async function postWorkspace(workspaceName:string){
       
       if (res.status == 401) {
         console.log("作成失敗");
-        router.push('/')
+        // router.push('/')
       } else if (res.status == 200) {
         console.log("redirect");
-        router.push('/')
+        // router.push('/')
       }
       
     } catch (err) {

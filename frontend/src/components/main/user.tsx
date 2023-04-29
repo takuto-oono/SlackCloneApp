@@ -19,8 +19,10 @@ const LoginForm = () => {
     console.log("login");
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 
-      setCookie("token", currentUser.token);
-      setCookie("user_id", currentUser.user_id);
+      if (currentUser.token != "" && currentUser.token) {
+        setCookie("token", currentUser.token);
+        setCookie("user_id", currentUser.user_id);
+      }
     });
     
   };
