@@ -33,7 +33,8 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     if (res.status == 401) {
       resetCookie();
       console.log("redirect");
-      }
+      router.push("/")
+    }
       res_workspaces = await res.json()
       return new Promise((resolve) => {
       const workspaces: Workspace[] = res_workspaces;
