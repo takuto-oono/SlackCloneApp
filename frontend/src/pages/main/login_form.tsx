@@ -13,7 +13,7 @@ function Login() {
       navigate("workspace");
       
     }
-  })
+  },[cookies.token])
   return <div>
     <h2>Login</h2>
     < LoginForm />
