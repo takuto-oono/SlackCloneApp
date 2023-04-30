@@ -22,7 +22,7 @@ const LoginForm = () => {
     console.log("login");
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 
-      if (currentUser.token != "" && currentUser.token) {
+      if (currentUser.token) {
         setCookie("token", currentUser.token);
         setCookie("user_id", currentUser.user_id);
       }
