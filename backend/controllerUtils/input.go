@@ -45,8 +45,9 @@ type AddUserInChannelInput struct {
 }
 
 type SendMessageInput struct {
-	Text      string `json:"text"`
-	ChannelId int    `json:"channel_id"`
+	Text             string   `json:"text"`
+	ChannelId        int      `json:"channel_id"`
+	MentionedUserIDs []uint32 `json:"mentioned_user_ids"`
 }
 
 type EditMessageInput struct {
@@ -54,9 +55,10 @@ type EditMessageInput struct {
 }
 
 type SendDMInput struct {
-	ReceiveUserId uint32 `json:"received_user_id"`
-	Text          string `json:"text"`
-	WorkspaceId   int    `json:"workspace_id"`
+	ReceiveUserId    uint32   `json:"received_user_id"`
+	Text             string   `json:"text"`
+	WorkspaceId      int      `json:"workspace_id"`
+	MentionedUserIDs []uint32 `json:"mentioned_user_ids"`
 }
 
 type EditDMInput struct {
@@ -64,7 +66,7 @@ type EditDMInput struct {
 }
 
 type PostThreadInput struct {
-	Text      string `json:"text"`
+	Text            string `json:"text"`
 	ParentMessageId uint   `json:"parent_message_id"`
 }
 
@@ -237,4 +239,3 @@ func InputAndValidatePostThread(c *gin.Context) (PostThreadInput, error) {
 	}
 	return in, nil
 }
-
