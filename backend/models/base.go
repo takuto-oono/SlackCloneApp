@@ -102,4 +102,8 @@ func init() {
 	if err := db.AutoMigrate(&ThreadAndUser{}); err != nil {
 		fmt.Println(err)
 	}
+	
+	if err := db.AutoMigrate(&Mention{}); err != nil {
+		fmt.Println(err)
+	}
 }
