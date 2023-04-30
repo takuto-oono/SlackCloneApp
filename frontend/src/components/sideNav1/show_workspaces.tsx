@@ -23,10 +23,6 @@ function WorkspaceIndex() {
 
   useEffect(() => {
     getWorkspaces().then((workspaces: Workspace[]) => {
-      // if (Array.isArray(workspaces)) {
-      //   setWorkspaceList(workspaces);
-      // }
-      // console.log(workspaces);
       setWorkspaceList(workspaces);
     });
   },[]);

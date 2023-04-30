@@ -33,7 +33,7 @@ function ChannelIndex() {
 
   return (
     <div>
-      <SubMenu label="Channel Index">
+      <SubMenu label="Channels">
         {list}
       </SubMenu>
       
