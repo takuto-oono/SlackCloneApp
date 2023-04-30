@@ -8,8 +8,14 @@ const Header = () => {
     // console.log(cookies.token)
     return (
       <header className={classes.header}>
-        <h1>header</h1>
-        <Logout />
+        <div className={classes.container}>
+          <div className={classes.item}>
+            <h3>header</h3>
+          </div>
+          <div className={classes.item}>
+            <Logout />
+          </div>
+        </div>
       </header>
     );
   } else {

@@ -3,6 +3,8 @@ import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login'
 import { resetCookie } from "@src/fetchAPI/cookie";
 import router from "next/router";
+import Button from "@mui/material/Button";
+
 
 
 const LoginForm = () => {
@@ -52,7 +54,7 @@ const Logout = () => {
 
   return (
     <div>
-      <button onClick={handleLogout}>ログアウト</button>
+      <Button variant="contained" color="secondary" onClick={handleLogout}>ログアウト</Button>
     </div>
   );
 }
