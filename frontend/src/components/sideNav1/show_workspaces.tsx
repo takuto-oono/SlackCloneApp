@@ -23,12 +23,11 @@ function WorkspaceIndex() {
 
   useEffect(() => {
     getWorkspaces().then((workspaces: Workspace[]) => {
-      if (!Array.isArray(workspaces)) {
-        console.log("redirect");
-      } else {
-        setWorkspaceList(workspaces)
-        console.log(workspaceList)
-      }
+      // if (Array.isArray(workspaces)) {
+      //   setWorkspaceList(workspaces);
+      // }
+      // console.log(workspaces);
+      setWorkspaceList(workspaces);
     });
   },[]);
 

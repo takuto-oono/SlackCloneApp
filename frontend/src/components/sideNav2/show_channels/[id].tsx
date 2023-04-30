@@ -27,7 +27,7 @@ function ChannelIndex() {
     }
       console.log(channelList)
     });
-  },[]);
+  },[workspaceId]);
 
     
 
