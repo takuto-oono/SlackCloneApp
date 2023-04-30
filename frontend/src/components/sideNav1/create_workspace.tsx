@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
-import { postWorkspace } from '@fetchAPI/workspace';
+import { getWorkspaces, postWorkspace } from '@fetchAPI/workspace';
+import { useNavigate } from "react-router-dom";
 function CreateWorkspace() {
   const [name, setName] = useState("");
+  const navigate = useNavigate();
   const nameChange = (e: any) => {
     setName(e.target.value);
   };
@@ -12,6 +14,7 @@ function CreateWorkspace() {
     console.log("create");
     let workspaceName = name;
     postWorkspace(workspaceName);
+    // ワークスペースに移動する(未)
   };
   return (
     <div className="CreateWorkspace">
@@ -22,9 +25,9 @@ function CreateWorkspace() {
         <button onClick={handleCreate} >作成</button>
         
         {/* テスト用 */}
-        <Link href="/">
+        {/* <Link href="/">
           <button>ログイン画面へ</button>
-        </Link>
+        </Link> */}
     </div>
   );
 }

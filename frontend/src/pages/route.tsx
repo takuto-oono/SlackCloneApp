@@ -5,6 +5,7 @@ import SignUp from './main/signUp_form';
 import SideNav2 from './sideNav2';
 import SideNav1 from './sideNav1';
 import TmpMain from './main/tmp_main';
+import CreateW from './main/create_workspace';
 
 
 export const RouterConfig: React.FC = () => {
@@ -15,11 +16,12 @@ export const RouterConfig: React.FC = () => {
           <Route path="/">
             <Route index element={<Login />} />
             <Route path="signUp_form" element={<SignUp />} />
-          </Route>
-          <Route path="workspace" element={<SideNav1 />} >
-            <Route path=":workspaceId" element={<SideNav2 />} >
+            <Route path="workspace" element={<SideNav1 />} >
+              <Route path="create" element={<CreateW />} />
+              <Route path=":workspaceId" element={<SideNav2 />} >
               {/* ここでメインページのルーティングを設定する */}
-              <Route path="tmp_main" element={<TmpMain />} />
+                <Route path="tmp_main" element={<TmpMain />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

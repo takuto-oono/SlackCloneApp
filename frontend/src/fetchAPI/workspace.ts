@@ -12,7 +12,7 @@ const baseUrl = 'http://localhost:8080/api/workspace/'
 export async function getWorkspaces(): Promise<Workspace[]> {
   const url = baseUrl + 'get_by_user'
   console.log("getWorkspaces")
-  console.log(getToken());
+  // console.log(getToken());
   let res_workspaces: Workspace[]
   const workspaces = [
     {
@@ -43,7 +43,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
   } catch (err) {
     console.log(err)
   }
-  console.log(workspaces);
+  // console.log(workspaces);
   return workspaces;
 }
 
