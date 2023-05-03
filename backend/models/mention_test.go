@@ -17,6 +17,10 @@ func TestCreateMention(t *testing.T) {
 }
 
 func TestGetMentionsByMessageID(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	messageID := uint(rand.Uint32())
 	mentions := make([]Mention, 10)
 	for i := 0; i < 10; i++ {
@@ -40,6 +44,10 @@ func TestGetMentionsByMessageID(t *testing.T) {
 }
 
 func TestGetMentionsByUserID(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	userID := rand.Uint32()
 	mentions := make([]Mention, 10)
 	for i := 0; i < 10; i++ {
