@@ -12,7 +12,7 @@ const baseUrl = 'http://localhost:8080/api/workspace/'
 export async function getWorkspaces(): Promise<Workspace[]> {
   const url = baseUrl + 'get_by_user'
   console.log("getWorkspaces")
-  console.log(getToken());
+  // console.log(getToken());
   let res_workspaces: Workspace[]
   const workspaces = [
     {
@@ -31,10 +31,10 @@ export async function getWorkspaces(): Promise<Workspace[]> {
       })
     // 認証エラーの時のみリダイレクトする
     if (res.status == 401) {
-        resetCookie();
-        console.log("redirect");
-        router.replace('/')
-      }
+      resetCookie();
+      console.log("redirect");
+      router.push("/")
+    }
       res_workspaces = await res.json()
       return new Promise((resolve) => {
       const workspaces: Workspace[] = res_workspaces;
@@ -43,7 +43,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
   } catch (err) {
     console.log(err)
   }
-  console.log(workspaces);
+  // console.log(workspaces);
   return workspaces;
 }
 
@@ -71,10 +71,10 @@ export async function postWorkspace(workspaceName:string){
       
       if (res.status == 401) {
         console.log("作成失敗");
-        router.push('/')
+        // router.push('/')
       } else if (res.status == 200) {
         console.log("redirect");
-        router.push('/')
+        // router.push('/')
       }
       
     } catch (err) {

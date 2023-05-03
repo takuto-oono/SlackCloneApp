@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login'
 import { resetCookie } from "@src/fetchAPI/cookie";
+import router from "next/router";
+import Button from "@mui/material/Button";
+
 
 
 const LoginForm = () => {
@@ -19,8 +22,10 @@ const LoginForm = () => {
     console.log("login");
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 
-      setCookie("token", currentUser.token);
-      setCookie("user_id", currentUser.user_id);
+      if (currentUser.token) {
+        setCookie("token", currentUser.token);
+        setCookie("user_id", currentUser.user_id);
+      }
     });
     
   };
@@ -44,11 +49,12 @@ const Logout = () => {
   const handleLogout = () => {
     console.log("logout");
     resetCookie();
+    router.push("/");
   };
 
   return (
     <div>
-    <button onClick={handleLogout}>ログアウト</button>
+      <Button variant="contained" color="secondary" onClick={handleLogout}>ログアウト</Button>
     </div>
   );
 }

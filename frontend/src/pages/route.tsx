@@ -2,7 +2,10 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './main/login_form';
 import SignUp from './main/signUp_form';
-import Top from './main/Top';
+import SideNav2 from './sideNav2';
+import SideNav1 from './sideNav1';
+import TmpMain from './main/tmp_main';
+import CreateW from './main/create_workspace';
 
 
 export const RouterConfig: React.FC = () => {
@@ -11,9 +14,15 @@ export const RouterConfig: React.FC = () => {
      <BrowserRouter>
         <Routes >
           <Route path="/">
-            <Route index element={<Top />} />
-            <Route path="login_form" element={<Login />} />
+            <Route index element={<Login />} />
             <Route path="signUp_form" element={<SignUp />} />
+            <Route path="workspace" element={<SideNav1 />} >
+              <Route path="create" element={<CreateW />} />
+              <Route path=":workspaceId" element={<SideNav2 />} >
+              {/* ここでメインページのルーティングを設定する */}
+                <Route path="tmp_main" element={<TmpMain />} />
+              </Route>
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

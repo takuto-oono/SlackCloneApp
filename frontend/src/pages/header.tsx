@@ -5,11 +5,17 @@ import { useCookies } from 'react-cookie';
 const Header = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   if (cookies.token) {
-    console.log(cookies.token)
+    // console.log(cookies.token)
     return (
       <header className={classes.header}>
-        <h1>header</h1>
-        <Logout />
+        <div className={classes.container}>
+          <div className={classes.item}>
+            <h3>header</h3>
+          </div>
+          <div className={classes.item}>
+            <Logout />
+          </div>
+        </div>
       </header>
     );
   } else {

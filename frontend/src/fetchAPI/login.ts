@@ -35,18 +35,20 @@ export async function login(user: User): Promise<currentUser> {
       const User = await res.json();
       if (res.status == 200) {
         console.log("redirect");
-        router.push('/')
+        return new Promise((resolve) => {
+          const currentUser: currentUser = {
+            token: User.token,
+            user_id: User.user_id,
+            username: User.username
+          };
+          resolve(currentUser);
+        });
       }
-      return new Promise((resolve) => {
-        const currentUser: currentUser = {
-          token: User.token,
-          user_id: User.user_id,
-          username: User.username
-        };
-        console.log(currentUser);
-        resolve(currentUser);
-      });
-
+      else {
+        return new Promise((resolve) => {
+          resolve(currentUser);
+        });
+      }
 
     } catch (err) {
       console.log(err);

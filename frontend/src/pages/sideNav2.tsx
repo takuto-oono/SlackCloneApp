@@ -1,24 +1,35 @@
 import React from "react";
-import { Menu, MenuItem, Sidebar, SubMenu } from "react-pro-sidebar";
-import ShowWorkspace from "@src/components/sideNav2/workspace/show/[id]";
-
-
+import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
+import classes from '@styles/Home.module.css'
+import ChannelIndex from "@src/components/sideNav2/show_channels/[id]";
+import { Outlet } from "react-router-dom";
 
 export default function SideNav2() {
   return (
-    <div style={{ display: 'flex', height: '100%' ,backgroundColor: "gray"}}>
-      <Sidebar>
-        <Menu>
-          <SubMenu label="Channel Index">
-            <MenuItem> Channel 1 </MenuItem>
-            <MenuItem> Channel 2 </MenuItem>
-          </SubMenu>
-          <SubMenu label="DM Index">
-            <MenuItem> DM 1 </MenuItem>
-            <MenuItem> DM 2 </MenuItem>
-          </SubMenu>
-        </Menu>
-      </Sidebar>
+    <div className={classes.container}>
+      <div style={{ display: 'flex', height: '100%', backgroundColor: "rgb(63, 14, 64)" }}>
+        <div className={classes.item}>
+          <ProSidebarProvider>
+            <Sidebar>
+              <Menu
+                menuItemStyles={{
+                  button: () => {
+                      return {
+                        color: 'rgb(153, 133, 156)',
+                        backgroundColor: 'rgb(63, 14, 64)' 
+                      };
+                  },
+                }}
+              >
+                < ChannelIndex />
+              </Menu>
+            </Sidebar>
+          </ProSidebarProvider>
+        </div>
+      </div>
+      <div>
+        <Outlet />
+      </div>
     </div>
   );
 }

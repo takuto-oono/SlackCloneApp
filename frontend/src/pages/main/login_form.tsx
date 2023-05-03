@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { LoginForm } from "@src/components/main/user";
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import router from "next/router";
 
 function Login() {
-  const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
+  const navigate = useNavigate();
   useEffect(() => {
     if (cookies.token) {
-      console.log(cookies.token)
-      router.push("/")
+      // console.log(cookies.token)
+      navigate("workspace");
       
     }
-  })
+  },[cookies.token])
   return <div>
     <h2>Login</h2>
     < LoginForm />
