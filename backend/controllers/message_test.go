@@ -70,7 +70,7 @@ func TestSendMessage(t *testing.T) {
 	// 2. bodyに不足がある場合 400
 	// 3. userとchannelが同じworkspaceに存在していない場合 404
 	// 4. channelにuserが存在しない場合 404
-	// 5. mentionがある場合
+	// 5. mentionがある場合 200
 
 	t.Run("1 正常な場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
