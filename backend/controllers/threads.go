@@ -146,6 +146,16 @@ func PostThread(c *gin.Context) {
 		}
 	}
 
+	// mentionの処理をする
+	for _, userID := range in.MentionedUserIDs {
+		men := models.NewMention(userID, m.ID)
+		if err := men.Create(tx); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+	}
+
 	tx.Commit()
 	c.JSON(http.StatusOK, m)
 }

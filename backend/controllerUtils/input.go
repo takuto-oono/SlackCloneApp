@@ -66,8 +66,9 @@ type EditDMInput struct {
 }
 
 type PostThreadInput struct {
-	Text            string `json:"text"`
-	ParentMessageId uint   `json:"parent_message_id"`
+	Text             string   `json:"text"`
+	ParentMessageId  uint     `json:"parent_message_id"`
+	MentionedUserIDs []uint32 `json:"mentioned_user_ids"`
 }
 
 func InputSignUpAndLogin(c *gin.Context) (SignUpAndLoginInput, error) {
