@@ -143,3 +143,8 @@ func IsExistTAUByUserIdAndThreadId(tx *gorm.DB, userId uint32, threadId uint) (b
 	_, err := models.GetTAUByThreadIdAndUserId(tx, userId, threadId)
 	return errHandling(err)
 }
+
+func IsExistUserInWorkspace(tx *gorm.DB, userID uint32, workspaceID int) (bool, error) {
+	_, err := models.GetWAUByWorkspaceIdAndUserId(tx, workspaceID, userID)
+	return errHandling(err)
+}
