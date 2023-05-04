@@ -143,3 +143,27 @@ func IsExistTAUByUserIdAndThreadId(tx *gorm.DB, userId uint32, threadId uint) (b
 	_, err := models.GetTAUByThreadIdAndUserId(tx, userId, threadId)
 	return errHandling(err)
 }
+
+func IsExistThreadInWorkspace(tx *gorm.DB, thread models.Thread, channels []models.Channel, dls []models.DMLine) (bool, error) {
+	parentMessage, err := models.GetMessageById(db, thread.ParentMessageId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	if parentMessage.ChannelId != 0 && parentMessage.DMLineId == uint(0) {
+		for _, ch := range channels {
+			if parentMessage.ChannelId == ch.ID {
+				return true, nil
+			}
+		}
+	} else if parentMessage.ChannelId == 0 && parentMessage.DMLineId != uint(0) {
+		for _, dl := range dls {
+			if parentMessage.DMLineId == dl.ID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}

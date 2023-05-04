@@ -97,10 +97,23 @@ func GetUserInWorkspace(workspaceId int) ([]UserInfoInWorkspace, error) {
 	return res, nil
 }
 
-func GetThreadsByUserSortedByEditedTime(userId uint32) ([]models.Thread, error) {
+func GetThreadsByUserAndWorkspaceIDSortedByEditedTime(userID uint32, workspaceID int) ([]models.Thread, error) {
 	var ths []models.Thread
+
 	// userが所属しているthreadの情報を取得する
-	taus, err := models.GetTAUsByUserId(db, userId)
+	taus, err := models.GetTAUsByUserId(db, userID)
+	if err != nil {
+		return ths, err
+	}
+
+	// workspaceにあるchannelを取得する
+	chs, err := models.GetChannelsByWorkspaceId(db, workspaceID)
+	if err != nil {
+		return ths, err
+	}
+
+	// workspaceにあるかつ、userが参加しているdl_lineを取得
+	dls, err := models.GetDLsByUserIdAndWorkspaceId(db, userID, workspaceID)
 	if err != nil {
 		return ths, err
 	}
@@ -111,7 +124,13 @@ func GetThreadsByUserSortedByEditedTime(userId uint32) ([]models.Thread, error) 
 		if err != nil {
 			return ths, err
 		}
-		ths = append(ths, th)
+		b, err := IsExistThreadInWorkspace(db, th, chs, dls)
+		if err != nil {
+			return ths, err
+		}
+		if b {
+			ths = append(ths, th)
+		}
 	}
 
 	// 更新時間でソート

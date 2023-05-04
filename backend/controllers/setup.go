@@ -58,7 +58,7 @@ func SetupRouter() *gin.Engine {
 
 	thread := api.Group("/thread")
 	thread.POST("/post", PostThread)
-	thread.GET("/by_user", GetThreadsByUser)
+	thread.GET("/by_user/:workspace_id", GetThreadsByUser)
 	
 	return r
 }

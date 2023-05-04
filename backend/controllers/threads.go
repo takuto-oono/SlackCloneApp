@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -99,7 +100,7 @@ func PostThread(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "wrong channel_id or dm_line_id"})
 		return
 	}
-	
+
 	// messageをdbに登録
 	m.ThreadId = th.ID
 	if m.Create(tx); err != nil {
@@ -146,6 +147,22 @@ func PostThread(c *gin.Context) {
 		}
 	}
 
+	// threads_and_users tableにparentMessageのuserを追加
+	b, err = controllerUtils.IsExistTAUByUserIdAndThreadId(tx, parentMessage.UserId, th.ID)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if !b {
+		tau := models.NewThreadAndUser(parentMessage.UserId, th.ID)
+		if err := tau.Create(tx); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+	}
+
 	// mentionの処理をする
 	for _, userID := range in.MentionedUserIDs {
 		men := models.NewMention(userID, m.ID)
@@ -160,11 +177,12 @@ func PostThread(c *gin.Context) {
 	c.JSON(http.StatusOK, m)
 }
 
+type ThreadInfo struct {
+	ID       uint
+	Messages []models.Message
+}
+
 func GetThreadsByUser(c *gin.Context) {
-	type ThreadInfo struct {
-		ID       uint
-		Messages []models.Message
-	}
 	var res []ThreadInfo
 
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -174,8 +192,15 @@ func GetThreadsByUser(c *gin.Context) {
 		return
 	}
 
+	// urlからworkspace_idを取得
+	workspaceID, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
 	// userが所属しているthreadを取得
-	ths, err := controllerUtils.GetThreadsByUserSortedByEditedTime(userId)
+	ths, err := controllerUtils.GetThreadsByUserAndWorkspaceIDSortedByEditedTime(userId, workspaceID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -189,7 +214,7 @@ func GetThreadsByUser(c *gin.Context) {
 			return
 		}
 		res = append(res, ThreadInfo{
-			ID: th.ID,
+			ID:       th.ID,
 			Messages: messages,
 		})
 	}
