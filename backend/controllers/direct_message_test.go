@@ -19,12 +19,13 @@ import (
 
 var dmRouter = SetupRouter()
 
-func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int) *httptest.ResponseRecorder {
+func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(controllerUtils.SendDMInput{
 		Text:          text,
 		WorkspaceId:   workspaceId,
 		ReceiveUserId: receiveUserId,
+		MentionedUserIDs: mentionedUserIDs,
 	})
 	req, err := http.NewRequest("POST", "/api/dm/send", bytes.NewBuffer(jsonInput))
 	if err != nil {
@@ -89,6 +90,7 @@ func TestSendDM(t *testing.T) {
 	// 3. bodyに不足がある場合 400
 	// 4. requestしたuserがworkspaceに存在しない場合 404 (workspaceが存在しない場合も含まれる)
 	// 5. receiveするuserがworkspaceに存在しない場合 404
+	// 6 メンションがある場合 200
 
 	t.Run("1 正常な場合", func(t *testing.T) {
 		sendUserName := randomstring.EnglishFrequencyString(30)
@@ -121,7 +123,7 @@ func TestSendDM(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, slr.Token).Code)
 
-		rr = sendDMTestFunc(text1, slr.Token, rlr.UserId, w.ID)
+		rr = sendDMTestFunc(text1, slr.Token, rlr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		dm1 := new(models.Message)
@@ -129,7 +131,7 @@ func TestSendDM(t *testing.T) {
 		assert.Equal(t, text1, dm1.Text)
 		assert.NotEqual(t, uint(0), dm1.DMLineId)
 
-		rr = sendDMTestFunc(text2, slr.Token, rlr.UserId, w.ID)
+		rr = sendDMTestFunc(text2, slr.Token, rlr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		dm2 := new(models.Message)
@@ -137,7 +139,7 @@ func TestSendDM(t *testing.T) {
 		assert.Equal(t, text2, dm2.Text)
 		assert.NotEqual(t, uint(0), dm2.DMLineId)
 
-		rr = sendDMTestFunc(text3, rlr.Token, slr.UserId, w.ID)
+		rr = sendDMTestFunc(text3, rlr.Token, slr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		dm3 := new(models.Message)
@@ -169,7 +171,7 @@ func TestSendDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(text1, lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(text1, lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		dm1 := new(models.Message)
@@ -177,7 +179,7 @@ func TestSendDM(t *testing.T) {
 		assert.Equal(t, text1, dm1.Text)
 		assert.NotEqual(t, uint(0), dm1.DMLineId)
 
-		rr = sendDMTestFunc(text2, lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(text2, lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		dm2 := new(models.Message)
@@ -217,15 +219,15 @@ func TestSendDM(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, slr.Token).Code)
 
-		rr = sendDMTestFunc("", slr.Token, rlr.UserId, w.ID)
+		rr = sendDMTestFunc("", slr.Token, rlr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"text not found\"}", rr.Body.String())
 
-		rr = sendDMTestFunc(text, slr.Token, 0, w.ID)
+		rr = sendDMTestFunc(text, slr.Token, 0, w.ID, []uint32{})
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"received_user_id not found\"}", rr.Body.String())
 
-		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, 0)
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, 0, []uint32{})
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 		assert.Equal(t, "{\"message\":\"workspace_id not found\"}", rr.Body.String())
 	})
@@ -257,7 +259,7 @@ func TestSendDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID)
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"send user not found in workspace\"}", rr.Body.String())
 	})
@@ -289,9 +291,68 @@ func TestSendDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID)
+		rr = sendDMTestFunc(text, slr.Token, rlr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"receive user not found in workspace\"}", rr.Body.String())
+	})
+	
+	t.Run("6 メンションがある場合", func(t *testing.T) {
+		sendUserName := randomstring.EnglishFrequencyString(30)
+		receiveUserName := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		text1 := randomstring.EnglishFrequencyString(100)
+		text2 := randomstring.EnglishFrequencyString(100)
+		text3 := randomstring.EnglishFrequencyString(100)
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(sendUserName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(receiveUserName, "pass").Code)
+
+		rr := loginTestFunc(sendUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		slr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), slr)
+
+		rr = loginTestFunc(receiveUserName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		rlr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), rlr)
+
+		rr = createWorkSpaceTestFunc(workspaceName, slr.Token, slr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, slr.Token).Code)
+
+		rr = sendDMTestFunc(text1, slr.Token, rlr.UserId, w.ID, []uint32{rlr.UserId})
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm1 := new(models.Message)
+		json.Unmarshal(([]byte)(byteArray), dm1)
+		assert.Equal(t, text1, dm1.Text)
+		assert.NotEqual(t, uint(0), dm1.DMLineId)
+
+		rr = sendDMTestFunc(text2, slr.Token, rlr.UserId, w.ID, []uint32{slr.UserId})
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm2 := new(models.Message)
+		json.Unmarshal(([]byte)(byteArray), dm2)
+		assert.Equal(t, text2, dm2.Text)
+		assert.NotEqual(t, uint(0), dm2.DMLineId)
+
+		rr = sendDMTestFunc(text3, rlr.Token, slr.UserId, w.ID, []uint32{slr.UserId, rlr.UserId})
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		dm3 := new(models.Message)
+		json.Unmarshal(([]byte)(byteArray), dm3)
+		assert.Equal(t, text3, dm3.Text)
+		assert.NotEqual(t, uint(0), dm3.DMLineId)
+
+		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
+		assert.Equal(t, dm1.DMLineId, dm3.DMLineId)
 	})
 }
 
@@ -326,7 +387,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), w)
 
 		for i := 0; i < messageCount; i++ {
-			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
+			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID, []uint32{})
 			assert.Equal(t, http.StatusOK, rr.Code)
 			byteArray, _ = io.ReadAll(rr.Body)
 			var dm models.Message
@@ -405,7 +466,7 @@ func TestGetAllDMsByDLId(t *testing.T) {
 		json.Unmarshal(([]byte)(byteArray), w)
 
 		for i := 0; i < messageCount; i++ {
-			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID)
+			rr = sendDMTestFunc(text, lr.Token, lr.UserId, w.ID, []uint32{})
 			assert.Equal(t, http.StatusOK, rr.Code)
 			byteArray, _ = io.ReadAll(rr.Body)
 			var dm models.Message
@@ -467,7 +528,7 @@ func TestGetDMLines(t *testing.T) {
 		}
 
 		for _, tlr := range tlrs {
-			assert.Equal(t, http.StatusOK, sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, tlr.UserId, w.ID).Code)
+			assert.Equal(t, http.StatusOK, sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, tlr.UserId, w.ID, []uint32{}).Code)
 		}
 
 		rr = getDMLinesTestFunc(w.ID, lr.Token)
@@ -569,7 +630,7 @@ func TestEditDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(oldText, lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(oldText, lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		var dm models.Message
@@ -646,7 +707,7 @@ func TestEditDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		var dm models.Message
@@ -685,7 +746,7 @@ func TestDeleteDM(t *testing.T) {
 		w := new(models.Workspace)
 		json.Unmarshal(([]byte)(byteArray), w)
 
-		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		var dm models.Message
@@ -755,7 +816,7 @@ func TestDeleteDM(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, rlr.UserId, lr.Token).Code)
 
-		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID)
+		rr = sendDMTestFunc(randomstring.EnglishFrequencyString(100), lr.Token, lr.UserId, w.ID, []uint32{})
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
 		var dm models.Message
