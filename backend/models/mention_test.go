@@ -43,7 +43,7 @@ func TestGetMentionsByMessageID(t *testing.T) {
 	}
 }
 
-func TestGetMentionsByUserID(t *testing.T) {
+func TestGetMentionsByUserIDSortByCreatedAt(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
@@ -55,7 +55,7 @@ func TestGetMentionsByUserID(t *testing.T) {
 		mention.Create(db)
 		mentions[i] = *mention
 	}
-	res, err := GetMentionsByUserID(db, userID)
+	res, err := GetMentionsByUserIDSortedByCreatedAt(db, userID)
 	assert.Empty(t, err)
 	assert.Equal(t, 10, len(res))
 	for _, men := range mentions {

@@ -113,3 +113,20 @@ func (m *Message) UpdateMessageThreadId(tx *gorm.DB, threadId uint) error {
 func (m Message) Delete(tx *gorm.DB) error {
 	return tx.Where("id = ?", m.ID).Delete(&Message{}).Error
 }
+
+func GetAllMessages(tx *gorm.DB) ([]Message, error) {
+	var result []Message
+	rows, err := tx.Model(&Message{}).Rows()
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var m Message
+		if err := tx.ScanRows(rows, &m); err != nil {
+			return result, err
+		}
+		result = append(result, m)
+	}
+	return result, nil
+}
