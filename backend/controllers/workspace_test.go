@@ -250,13 +250,13 @@ func TestAddUserInWorkspace(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
+
 	// 1. 正常な場合 200
 	// 2. requestのbodyの情報に不足がある場合 400
 	// 3. 存在しないworkspaceIdだった場合 404
 	// 4. requestしたユーザーがrole = 1 or role = 2 or role = 3でない場合 403
 	// 5. 追加されるユーザーがrole = 1の場合 400
 	// 6. 既に登録されているユーザーを追加する場合 409
-	// テスト6は現状500を返している
 
 	// 1
 	t.Run("1", func(t *testing.T) {
@@ -485,10 +485,8 @@ func TestAddUserInWorkspace(t *testing.T) {
 		assert.Equal(t, addUserRoleId, wau.RoleId)
 
 		rr = addUserWorkspaceTestFunc(w.ID, 3, alr.UserId, olr.Token)
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-		// TODO 409 errorにする
-		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspace_and_users.workspace_id, workspace_and_users.user_id\"}", rr.Body.String())
-
+		assert.Equal(t, http.StatusConflict, rr.Code)
+		assert.Equal(t, "{\"message\":\"user already exist in workspace\"}", rr.Body.String())
 	})
 }
 

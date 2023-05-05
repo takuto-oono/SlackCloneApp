@@ -129,6 +129,18 @@ func AddUserInWorkspace(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "Unauthorized add user in workspace"})
 		return
 	}
+
+	// 追加されるuserが既にworkspaceに存在していないことを確認
+	b, err := controllerUtils.IsExistUserInWorkspace(db, in.UserId, in.WorkspaceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if b {
+		c.JSON(http.StatusConflict, gin.H{"message": "user already exist in workspace"})
+		return
+	}
+
 	// トランザクションを宣言
 	tx := db.Begin()
 	if err := tx.Error; err != nil {
@@ -171,7 +183,7 @@ func AddUserInWorkspace(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	rcau := models.NewChannelsAndUses(randomChannelId, in.UserId, false)
 	if err := rcau.Create(tx); err != nil {
 		tx.Rollback()
