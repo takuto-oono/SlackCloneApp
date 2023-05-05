@@ -166,6 +166,7 @@ func IsExistThreadInWorkspace(tx *gorm.DB, thread models.Thread, channels []mode
 		}
 	}
 	return false, nil
+}
 
 func IsExistUserInWorkspace(tx *gorm.DB, userID uint32, workspaceID int) (bool, error) {
 	_, err := models.GetWAUByWorkspaceIdAndUserId(tx, workspaceID, userID)
