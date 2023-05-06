@@ -144,3 +144,58 @@ func GetThreadsByUserAndWorkspaceIDSortedByEditedTime(userID uint32, workspaceID
 
 	return ths, nil
 }
+
+func GetMessagesMentionedByUserAndWorkspace(userID uint32, workspaceID int) ([]models.Message, error) {
+	var res []models.Message
+
+	mentions, err := models.GetMentionsByUserIDSortedByCreatedAt(db, userID)
+	if err != nil {
+		return res, err
+	}
+
+	messages, err := models.GetAllMessages(db)
+	if err != nil {
+		return res, err
+	}
+
+	// messagesをmapに変換(計算量対策)
+	messageMap := make(map[uint]models.Message, len(messages))
+	for _, message := range messages {
+		messageMap[message.ID] = message
+	}
+
+	// workspaceにあるchannelを取得する
+	chs, err := models.GetChannelsByWorkspaceId(db, workspaceID)
+	if err != nil {
+		return res, err
+	}
+
+	// workspaceにあるかつ、userが参加しているdl_lineを取得
+	dls, err := models.GetDLsByUserIdAndWorkspaceId(db, userID, workspaceID)
+	if err != nil {
+		return res, err
+	}
+
+	for _, mention := range mentions {
+		message, ok := messageMap[mention.MessageID]
+		if !ok {
+			continue
+		}
+		if message.ChannelId != 0 && message.DMLineId == uint(0) {
+			for _, ch := range chs {
+				if message.ChannelId == ch.ID {
+					res = append(res, message)
+					continue
+				}
+			}
+		} else if message.ChannelId == 0 && message.DMLineId != uint(0) {
+			for _, dl := range dls {
+				if message.DMLineId == dl.ID {
+					res = append(res, message)
+					continue
+				}
+			}
+		}
+	}
+	return res, nil
+}
