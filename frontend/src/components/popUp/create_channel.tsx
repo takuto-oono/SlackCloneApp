@@ -1,77 +1,79 @@
-import { getToken } from "@fetchAPI/cookie";
+import { postChannel } from "@src/fetchAPI/channel";
+import React, { useState } from "react";
+import { useParams } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 
-export interface Channel {
-  id: number;
-  name: string;
-  description: string;
-  is_private: boolean;
-  is_archive: boolean;
-  workspace_id: number;
-}
+const CreatChannelForm = () => {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
+  const { workspaceId } = useParams<{ workspaceId: string }>();
 
-export interface CurrentChannel {
-  name: string;
-  description: string;
-  is_private: boolean;
-  workspace_id: number;
-}
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-const baseUrl = "http://localhost:8080/api/channel/";
+  const nameChange = (e: any) => {
+    setName(e.target.value);
+  };
 
-export async function getChannelsByWorkspaceId(
-  workspace_id: number
-): Promise<Channel[]> {
-  const url = baseUrl + "get_by_user_and_workspace/" + workspace_id;
-  console.log(url);
-  // let res_channels: Channel[]
-  let res_channels = [
-    {
-      id: 0,
-      name: "",
-      description: "",
-      is_private: false,
-      is_archive: false,
-      workspace_id: 0,
-    },
-  ];
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    console.log(res);
-    res_channels = await res.json();
-    return new Promise((resolve) => {
-      resolve(res_channels);
-    });
-  } catch (err) {
-    console.log("err");
-    console.log(err);
-  }
-  return res_channels;
-}
+  const isPrivateChangeTrue = () => {
+    setIsPrivate(true);
+  };
+  const isPrivateChangeFalse = () => {
+    setIsPrivate(false);
+  };
 
-export async function postChannel(current: CurrentChannel) {
-  const url = baseUrl + "create";
-  let channel: Channel;
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        name: current.name,
-        description: current.description,
-        is_private: current.is_private,
-        workspace_id: current.workspace_id,
-      }),
-    });
-    channel = await res.json();
-  } catch (err) {
-    console.log(err);
-  }
-  return;
-}
+
+  const handleSubmit = () => {
+    console.log("create channel");
+    let channel = { name: name, description: description, is_private: isPrivate, workspace_id: parseInt(workspaceId) };
+    postChannel(channel);
+    setOpen(false);
+  };
+
+  return (
+    <div>
+      <div>
+        <Button onClick={handleClickOpen}>
+          <p style={{ color: 'black'}}>新しいチャンネルを作成</p>
+        </Button>
+      </div>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Create a channel</DialogTitle>
+        <DialogContent>
+          <label htmlFor="name">
+            名前<br />
+            <input type="text" value={name} name="name" onChange={nameChange} />
+          </label>
+
+          <fieldset>
+            <legend>可視性</legend>
+            <label htmlFor="is_private">
+              <input type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
+              プライベート : 特定のメンバーのみ
+            </label><br />
+            <label htmlFor="is_private">
+              <input type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked/>
+              パブリック : Slack 内の全員
+            </label>
+          </fieldset> 
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleClose}>閉じる</Button>
+          <Button variant="contained" color="success" onClick={handleSubmit}>作成</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
+
+export default CreatChannelForm;
