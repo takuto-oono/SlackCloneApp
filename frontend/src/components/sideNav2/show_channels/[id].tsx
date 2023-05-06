@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { MenuItem, SubMenu } from "react-pro-sidebar";
 import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
 import { useParams } from "react-router-dom";
-import CreatChannelForm from "@src/components/popUp/create_channel";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
+import CreateChannelForm from "@src/components/popUp/create_channel";
 
 
 function ChannelIndex() {
@@ -60,7 +60,7 @@ function ChannelIndex() {
                 horizontal: 'left',
               }}
             >
-            < CreatChannelForm />
+            < CreateChannelForm />
             <Button><p style={{ color: 'black'}}>チャンネル一覧</p></Button>
             {/* チャンネル一覧ページへの移動ボタンを設置する（未） */}
           </Popover>

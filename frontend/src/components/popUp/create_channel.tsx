@@ -7,7 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-const CreatChannelForm = () => {
+const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -76,4 +76,4 @@ const CreatChannelForm = () => {
   );
 };
 
-export default CreatChannelForm;
+export default CreateChannelForm;
