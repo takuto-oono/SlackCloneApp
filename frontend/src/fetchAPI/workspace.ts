@@ -7,6 +7,12 @@ export interface Workspace {
     primary_owner_id: number;
 }
 
+export interface UserInfo {
+  id: number;
+  name: string;
+  roleid: number;
+}
+
 const baseUrl = 'http://localhost:8080/api/workspace/'
 
 export async function getWorkspaces(): Promise<Workspace[]> {
@@ -81,4 +87,38 @@ export async function postWorkspace(workspaceName:string){
       console.log(err)
     }
     return
+}
+
+export async function getUsers(workspace_id: number): Promise<UserInfo[]> {
+  const url = baseUrl + "get_users/" + workspace_id;
+  console.log("getUserInWorkspace!!!!!!!!!!!!!!!!");
+  let res_user_in_workspaces: UserInfo[];
+  const user_in_workspaces = [{
+    id: 0,
+    name: "",
+    roleid: 0,
+  }];
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: getToken(),
+      },
+    });
+    // 認証エラーの時のみリダイレクトする
+    if (res.status == 401) {
+      resetCookie();
+      console.log("redirect");
+      router.replace("/");
+    }
+    res_user_in_workspaces = await res.json();
+    return new Promise((resolve) => {
+      const user_in_workspaces: UserInfo[] = res_user_in_workspaces;
+      resolve(user_in_workspaces);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+  return user_in_workspaces;
 }
