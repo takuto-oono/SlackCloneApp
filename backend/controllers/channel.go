@@ -336,3 +336,33 @@ func GetChannelsByUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, chs)
 }
+
+func GetChannelsByWorkspace(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userID, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからworkspace_idを取得
+	workspaceID, err := strconv.Atoi(c.Param("workspace_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// userがworkspaceに存在しているか確認
+	if !controllerUtils.IsExistWAUByWorkspaceIdAndUserId(workspaceID, userID) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "workspace or user not found"})
+		return
+	}
+
+	chs, err := models.GetChannelsByWorkspaceId(db, workspaceID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, chs)
+}

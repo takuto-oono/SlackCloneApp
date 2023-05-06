@@ -1440,3 +1440,10 @@ func TestGetChannelsByUser(t *testing.T) {
 		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 	})
 }
+
+func TestGetChannelsByWorkspace(t *testing.T) {
+	userName := randomstring.EnglishFrequencyString(30)
+	testCnt := 10
+	isPrivate := false
+	
+}
