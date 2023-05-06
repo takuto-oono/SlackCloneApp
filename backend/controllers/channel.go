@@ -358,7 +358,7 @@ func GetChannelsByWorkspace(c *gin.Context) {
 		return
 	}
 
-	chs, err := models.GetChannelsByWorkspaceId(db, workspaceID)
+	chs, err := controllerUtils.GetPublicAndJoinPrivateChannelInWorkspace(workspaceID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
