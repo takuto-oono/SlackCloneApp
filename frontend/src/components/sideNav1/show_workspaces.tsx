@@ -7,7 +7,7 @@ import { MenuItem } from "react-pro-sidebar";
 
 
 
-function WorkspaceIndex() {
+function ShowWorkspaces() {
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const list = workspaceList.map((item, index) => (
     <div key={index}>
@@ -36,4 +36,4 @@ function WorkspaceIndex() {
     );
 }
 
-export default WorkspaceIndex;
+export default ShowWorkspaces;
