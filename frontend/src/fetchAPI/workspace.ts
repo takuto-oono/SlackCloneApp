@@ -91,7 +91,6 @@ export async function postWorkspace(workspaceName:string){
 
 export async function getUsers(workspace_id: number): Promise<UserInfo[]> {
   const url = baseUrl + "get_users/" + workspace_id;
-  console.log("getUserInWorkspace!!!!!!!!!!!!!!!!");
   let res_user_in_workspaces: UserInfo[];
   const user_in_workspaces = [{
     id: 0,

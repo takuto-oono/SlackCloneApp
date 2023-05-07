@@ -21,14 +21,6 @@ function ChannelIndex() {
     </div>
   ));
 
-  const usersList = userList.map((item , index) => (
-    <div key={index}>
-      <MenuItem>
-        <span>{item.name}</span>
-      </MenuItem>
-    </div>
-  ));
-
   useEffect(() => {
     console.log(workspaceId);
     getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
@@ -52,11 +44,6 @@ function ChannelIndex() {
     <div>
       <SubMenu label="Channels">
         {list}
-      </SubMenu>
-
-      {/* テスト用 */}
-      <SubMenu label="UsersInWorkspace">
-        {usersList}
       </SubMenu>
     </div>
   )
