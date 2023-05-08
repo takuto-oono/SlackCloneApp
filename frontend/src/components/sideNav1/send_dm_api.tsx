@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { sendDM, SendDM } from "src/fetchAPI/send_dm_api";
 
 const SendDMForm = () => {
-  const [received_user_id, setReceived_user_id] = useState(0);
-  const [workspace_id, setWorkspace_id] = useState(0);
+  const [receivedUserId, setReceived_user_id] = useState(0);
+  const [workspaceId, setWorkspace_id] = useState(0);
   const [text, setText] = useState("");
   const [form, setForm] = useState({
-    received_user_id: 0,
-    workspace_id: 0,
+    receivedUserId: 0,
+    workspaceId: 0,
     text: "",
   });
 
   const doChangeReceiveUserId = (e: any) => {
-    setForm((preSetting) => ({ ...preSetting, received_user_id: Number(e.target.value) }));
+    setForm((preSetting) => ({ ...preSetting, receivedUserId: Number(e.target.value) }));
   };
 
   const doChangeWorkspaceId = (e: any) => {
-    setForm((prevState) => ({ ...prevState, workspace_id: Number(e.target.value) }));
+    setForm((prevState) => ({ ...prevState, workspaceId: Number(e.target.value) }));
   };
 
   const doChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +45,7 @@ const SendDMForm = () => {
 				workspace ID
 				<input
 					type="number"
-					name="workspace_id"
+					name="workspaceId"
 					onChange={doChangeWorkspaceId}
 				/>
 			</label>
