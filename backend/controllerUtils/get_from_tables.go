@@ -199,3 +199,31 @@ func GetMessagesMentionedByUserAndWorkspace(userID uint32, workspaceID int) ([]m
 	}
 	return res, nil
 }
+
+func GetPublicAndJoinPrivateChannelInWorkspace(workspaceID int, userID uint32) ([]models.Channel, error) {
+	var result []models.Channel
+
+	chs, err := models.GetChannelsByWorkspaceId(db, workspaceID)
+	if err != nil {
+		return result, err
+	}
+
+	caus, err := models.GetCAUsByUserId(db, userID)
+	if err != nil {
+		return result, err
+	}
+
+	for _, ch := range chs {
+		if !ch.IsPrivate {
+			result = append(result, ch)
+			continue
+		}
+		for _, cau := range caus {
+			if cau.ChannelId == ch.ID {
+				result = append(result, ch)
+				break
+			}
+		}
+	}
+	return result, nil
+}
