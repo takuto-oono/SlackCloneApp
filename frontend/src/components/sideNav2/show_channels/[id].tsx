@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { MenuItem, SubMenu } from "react-pro-sidebar";
 import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
 import { useParams } from "react-router-dom";
+
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
 
-
 function ChannelIndex() {
   const [open, setOpen] = useState(false);
   const [channelList, setChannelList] = useState<Channel[]>([]);
+  const [userList, setUserList] = useState<UserInfo[]>([]);
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const divRef = useRef(null);
 
@@ -27,21 +28,19 @@ function ChannelIndex() {
         <Link to="tmp_main">
           <span>{item.name}</span>
         </Link>
+
       </MenuItem>
     </div>
   ));
 
   useEffect(() => {
-    console.log(workspaceId);
-    getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
-    if (Array.isArray(channels)) {
-      setChannelList(channels)
-    }
-      console.log(channelList)
+    getUsers(parseInt(workspaceId)).then((userList: UserInfo[]) => {
+      if (Array.isArray(userList)) {
+        setUserList(userList);
+        console.log(userList)
+      }
     });
-  },[workspaceId]);
-
-    
+  },[workspaceId])
 
   return (
     <div>
@@ -66,7 +65,6 @@ function ChannelIndex() {
           </Popover>
         </div>
       </SubMenu>
-      
     </div>
   )
 }
