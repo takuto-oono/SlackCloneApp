@@ -12,6 +12,14 @@ export const usersInWState = atom<UserInWorkspace[]>({
 function WorkspaceIndex() {
   const [usersInW, setUsersInW] = useRecoilState(usersInWState);
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
+  
+  const getWorkspaceInfo = (workspaceId: number) =>{
+    getUsersInWorkspace(workspaceId).then(
+      (usersInW: UserInWorkspace[]) => {
+      setUsersInW(usersInW);
+    });
+  }
+
   const list = workspaceList.map((workspace, index) => (
     <div key={index}>
       <MenuItem>
@@ -21,15 +29,6 @@ function WorkspaceIndex() {
       </ MenuItem>
     </div>
   ));
-
-  const getWorkspaceInfo = (workspaceId: number) =>{
-    getUsersInWorkspace(workspaceId).then(
-      (usersInW: UserInWorkspace[]) => {
-      setUsersInW(usersInW);
-    });
-    // console.log(usersInW)
-  }
-
 
   useEffect(() => {
     getWorkspaces().then((workspaces: Workspace[]) => {
