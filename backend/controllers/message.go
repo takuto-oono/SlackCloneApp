@@ -43,7 +43,7 @@ func SendMessage(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in channel"})
 		return
 	}
-	
+
 	// トランザクションを宣言
 	tx := db.Begin()
 	if err := tx.Error; err != nil {
@@ -57,11 +57,31 @@ func SendMessage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	// mentionの処理をする
 	for _, userID := range in.MentionedUserIDs {
 		men := models.NewMention(userID, m.ID)
 		if err := men.Create(tx); err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+	}
+
+	// channelにいるuserをmessage_and_users tableに追加する
+	caus, err := models.GetCAUsByChannelId(tx, m.ChannelId)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	for _, cau := range caus {
+		if cau.UserId == userId {
+			continue
+		}
+		mau := models.NewMessageAndUser(m.ID, cau.UserId, false)
+		if err := mau.Create(tx); err != nil {
 			tx.Rollback()
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
@@ -202,7 +222,7 @@ func SendDM(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	// direct_messages tableにデータを保存する
 	dm := models.NewDMMessage(in.Text, dl.ID, userId)
 	if err := dm.Create(tx); err != nil {
@@ -210,7 +230,7 @@ func SendDM(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	// mentionの処理をする
 	for _, userID := range in.MentionedUserIDs {
 		men := models.NewMention(userID, dm.ID)
@@ -219,6 +239,14 @@ func SendDM(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
+	}
+
+	// message and users tableに保存する
+	mau := models.NewMessageAndUser(dm.ID, in.ReceiveUserId, false)
+	if err := mau.Create(tx); err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
 	}
 
 	tx.Commit()
