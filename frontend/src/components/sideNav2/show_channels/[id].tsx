@@ -34,10 +34,7 @@ function ChannelIndex() {
 
   useEffect(() => {
     getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
-    if (Array.isArray(channels)) {
       setChannelList(channels)
-    }
-      console.log(channelList)
     });
   },[workspaceId])
 
