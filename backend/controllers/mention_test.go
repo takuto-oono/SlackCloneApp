@@ -26,6 +26,10 @@ func getMessagesMentionedByUserTestFunc(workspaceID int, jwtToken string) *httpt
 }
 
 func TestGetMessagesMentionedByUser(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	userName1 := randomstring.EnglishFrequencyString(30)
 	userName2 := randomstring.EnglishFrequencyString(30)
 	isPrivate := false

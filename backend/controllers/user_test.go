@@ -22,12 +22,6 @@ type BadResponse struct {
 	Message string `json:"message"`
 }
 
-type LoginResponse struct {
-	Token    string `json:"token"`
-	UserId   uint32 `json:"user_id"`
-	Username string `json:"username"`
-}
-
 func signUpTestFunc(name, password string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	input := controllerUtils.SignUpAndLoginInput{

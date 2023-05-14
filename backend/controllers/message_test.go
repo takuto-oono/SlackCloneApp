@@ -23,8 +23,8 @@ var messageRouter = SetupRouter()
 func sendMessageTestFunc(text string, channelId int, jwtToken string, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(controllerUtils.SendMessageInput{
-		Text:      text,
-		ChannelId: channelId,
+		Text:             text,
+		ChannelId:        channelId,
 		MentionedUserIDs: mentionedUserIDs,
 	})
 	req, err := http.NewRequest("POST", "/api/message/send", bytes.NewBuffer(jsonInput))
@@ -594,5 +594,88 @@ func TestEditMessage(t *testing.T) {
 		rr = editMessageTestFunc(m.ID, newText, rlr.Token)
 		assert.Equal(t, http.StatusForbidden, rr.Code)
 		assert.Equal(t, "{\"message\":\"no permission\"}", rr.Body.String())
+	})
+}
+
+func TestReadMessageByUser(t *testing.T) {
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
+
+	// 1 channelのmessageの場合 200
+	// 2 dmのmessageの場合 200
+
+	t.Run("1 channelのmessageの場合 200", func(t *testing.T) {
+		rr, u1 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, u2 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, lr1 := loginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := loginTestFuncV2(u2.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		isPrivate := false
+		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, m := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr1.Token, []uint32{})
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+
+		rr, mau2 := readMessageByUserTestFunc(m.ID, lr2.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, m.ID, mau2.MessageID)
+		assert.Equal(t, lr2.UserId, mau2.UserID)
+		assert.True(t, mau2.IsRead)
+	})
+
+	t.Run("2 dmのmessageの場合 200", func(t *testing.T) {
+		rr, u1 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, u2 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, lr1 := loginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := loginTestFuncV2(u2.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		isPrivate := false
+		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, m := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr2.UserId, w.ID, []uint32{})
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+
+		rr, mau2 := readMessageByUserTestFunc(m.ID, lr2.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, m.ID, mau2.MessageID)
+		assert.Equal(t, lr2.UserId, mau2.UserID)
+		assert.True(t, mau2.IsRead)
 	})
 }

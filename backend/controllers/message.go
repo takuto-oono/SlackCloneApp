@@ -474,14 +474,15 @@ func ReadMessageByUser(c *gin.Context) {
 		return
 	}
 
-	// dmが存在するかどうかを確認
+	// messageが存在するかどうかを確認
 	b, err := controllerUtils.IsExistMessageById(messageID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+
 	if !b {
-		c.JSON(http.StatusNotFound, gin.H{"message": "dm not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
 		return
 	}
 
@@ -495,7 +496,7 @@ func ReadMessageByUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	
+
 	if err := mau.UpdateIsRead(db, true); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
