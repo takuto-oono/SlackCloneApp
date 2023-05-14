@@ -106,4 +106,8 @@ func init() {
 	if err := db.AutoMigrate(&Mention{}); err != nil {
 		fmt.Println(err)
 	}
+	
+	if err := db.AutoMigrate(&MessageAndUser{}); err != nil {
+		fmt.Println(err)
+	}
 }

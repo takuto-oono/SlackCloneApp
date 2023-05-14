@@ -7,7 +7,7 @@ export interface Workspace {
     primary_owner_id: number;
 }
 
-export interface UserInfo {
+export interface UserInWorkspace {
   id: number;
   name: string;
   roleid: number;
@@ -22,9 +22,9 @@ export async function getWorkspaces(): Promise<Workspace[]> {
   let res_workspaces: Workspace[]
   const workspaces = [
     {
-    id: 0,
-    name: "",
-    primary_owner_id: 0
+      id: 0,
+      name: "",
+      primary_owner_id: 0
     }
   ]
   
@@ -55,44 +55,35 @@ export async function getWorkspaces(): Promise<Workspace[]> {
 
 
 export async function postWorkspace(workspaceName:string){
-    const url = baseUrl + 'create'
-  let workspace: Workspace
+  const url = baseUrl + 'create'
   console.log(getUserId());
     try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': getToken(),
-            },
-            body: JSON.stringify({
-                name: workspaceName,
-                user_id: getUserId(),
-            })
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': getToken(),
+        },
+        body: JSON.stringify({
+          name: workspaceName,
+          user_id: getUserId(),
         })
+      })
       console.log(res)
-      workspace = await res.json()
-      console.log(workspace)
-      console.log("status-code")
-      console.log(res.status);
-      
       if (res.status == 401) {
-        console.log("作成失敗");
-        // router.push('/')
-      } else if (res.status == 200) {
+        resetCookie();
         console.log("redirect");
-        // router.push('/')
+        router.push("/")
       }
-      
     } catch (err) {
       console.log(err)
     }
-    return
+  return
 }
 
-export async function getUsers(workspaceId: number): Promise<UserInfo[]> {
+export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWorkspace[]> {
   const url = baseUrl + "get_users/" + workspaceId;
-  let resUserInWorkspaces: UserInfo[];
-  const userInWorkspaces = [{
+  let resUsersInWorkspace: UserInWorkspace[];
+  const usersInWorkspace = [{
     id: 0,
     name: "",
     roleid: 0,
@@ -111,13 +102,13 @@ export async function getUsers(workspaceId: number): Promise<UserInfo[]> {
       console.log("redirect");
       router.replace("/");
     }
-    resUserInWorkspaces = await res.json();
+    resUsersInWorkspace = await res.json();
     return new Promise((resolve) => {
-      const userInWorkspaces: UserInfo[] = resUserInWorkspaces;
-      resolve(userInWorkspaces);
+      const usersInWorkspace: UserInWorkspace[] = resUsersInWorkspace;
+      resolve(usersInWorkspace);
     });
   } catch (err) {
     console.log(err);
   }
-  return userInWorkspaces;
+  return usersInWorkspace;
 }
