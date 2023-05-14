@@ -82,8 +82,8 @@ export async function postWorkspace(workspaceName:string){
 
 export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWorkspace[]> {
   const url = baseUrl + "get_users/" + workspaceId;
-  let resUserInWorkspace: UserInWorkspace[];
-  const userInWorkspace = [{
+  let resUsersInWorkspace: UserInWorkspace[];
+  const usersInWorkspace = [{
     id: 0,
     name: "",
     roleid: 0,
@@ -102,13 +102,13 @@ export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWo
       console.log("redirect");
       router.replace("/");
     }
-    resUserInWorkspace = await res.json();
+    resUsersInWorkspace = await res.json();
     return new Promise((resolve) => {
-      const userInWorkspace: UserInWorkspace[] = resUserInWorkspace;
-      resolve(userInWorkspace);
+      const usersInWorkspace: UserInWorkspace[] = resUsersInWorkspace;
+      resolve(usersInWorkspace);
     });
   } catch (err) {
     console.log(err);
   }
-  return userInWorkspace;
+  return usersInWorkspace;
 }
