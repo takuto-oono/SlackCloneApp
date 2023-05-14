@@ -458,3 +458,48 @@ func DeleteDM(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dm)
 }
+
+func ReadMessageByUser(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userID, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからdm_idを取得
+	messageID, err := utils.StringToUint(c.Param("message_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// dmが存在するかどうかを確認
+	b, err := controllerUtils.IsExistMessageById(messageID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	if !b {
+		c.JSON(http.StatusNotFound, gin.H{"message": "dm not found"})
+		return
+	}
+
+	// message_and_users tableにデータがあるか確認、あれば更新
+	mau, err := models.GetMAUByMessageIDAndUserID(db, messageID, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	
+	if err := mau.UpdateIsRead(db, true); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, mau)
+}

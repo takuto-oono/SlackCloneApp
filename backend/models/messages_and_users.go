@@ -40,6 +40,12 @@ func GetMAUByUserIDAndIsRead(tx *gorm.DB, userID uint32, isRead bool) ([]Message
 	return result, nil
 }
 
+func GetMAUByMessageIDAndUserID(tx *gorm.DB, messageID uint, userID uint32) (MessageAndUser, error) {
+	var result MessageAndUser
+	err := tx.Model(&MessageAndUser{}).Where("message_id = ? AND user_id = ?", messageID, userID).Take(&result).Error
+	return result, err
+}
+
 func (mau *MessageAndUser) UpdateIsRead(tx *gorm.DB, newIsRead bool) error {
 	return tx.Model(&MessageAndUser{}).Where("message_id = ? AND user_id = ?", mau.MessageID, mau.UserID).Update("is_read", newIsRead).Take(mau).Error
 }
