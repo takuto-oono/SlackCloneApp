@@ -11,7 +11,7 @@ import CreateChannelForm from "@src/components/popUp/create_channel";
 function ChannelIndex() {
   const [open, setOpen] = useState(false);
   const [channelList, setChannelList] = useState<Channel[]>([]);
-  const [userList, setUserList] = useState<UserInfo[]>([]);
+  // const [userList, setUserList] = useState<UserInfo[]>([]);
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const divRef = useRef(null);
 
@@ -33,14 +33,14 @@ function ChannelIndex() {
     </div>
   ));
 
-  useEffect(() => {
-    getUsers(parseInt(workspaceId)).then((userList: UserInfo[]) => {
-      if (Array.isArray(userList)) {
-        setUserList(userList);
-        console.log(userList)
-      }
-    });
-  },[workspaceId])
+  // useEffect(() => {
+  //   getUsers(parseInt(workspaceId)).then((userList: UserInfo[]) => {
+  //     if (Array.isArray(userList)) {
+  //       setUserList(userList);
+  //       console.log(userList)
+  //     }
+  //   });
+  // },[workspaceId])
 
   return (
     <div>

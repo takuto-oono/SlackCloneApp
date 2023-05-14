@@ -3,7 +3,7 @@ import { ProSidebarProvider, Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import WorkspaceIndex from "@src/components/sideNav1/show_workspaces"
 import classes from '@styles/Home.module.css'
 import { Link, Outlet } from "react-router-dom";
-import SendDMForm from "@src/components/sideNav1/send_dm_api";
+import SendDM from "@src/components/main/send_dm";
 
 export default function SideNav1() {
   return (
@@ -31,9 +31,8 @@ export default function SideNav1() {
 
                 {/* テスト用 */}
                 </MenuItem>
-                  < SendDMForm />
                 </Menu>
-                
+                  < SendDM />
               </Sidebar>
             </ProSidebarProvider>
           </div>
