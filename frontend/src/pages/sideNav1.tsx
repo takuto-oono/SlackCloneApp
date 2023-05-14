@@ -31,7 +31,7 @@ export default function SideNav1() {
 
                 {/* テスト用 */}
                 </MenuItem>
-                  < SendDMForm />
+                  {/* < SendDMForm /> */}
                 </Menu>
                 
               </Sidebar>

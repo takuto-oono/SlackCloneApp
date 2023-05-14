@@ -1,29 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace, UserInfo, getUsers} from '@fetchAPI/workspace'
-import router from "next/router";
+import { getWorkspaces, Workspace, UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
 import { Link } from 'react-router-dom';
 import { MenuItem } from "react-pro-sidebar";
+import { atom, useRecoilState } from "recoil";
 
-function returnUsers(id: number): Promise<UserInfo[]>{
-  let res: Promise<UserInfo[]>
-  res = getUsers(id);
-  console.log(res)
-  return res;
-}
+export const usersInWState = atom<UserInWorkspace[]>({
+  key: "usersInW",
+  default: []
+})
 
 function WorkspaceIndex() {
+  const [usersInW, setUsersInW] = useRecoilState(usersInWState);
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
-  const list = workspaceList.map((item, index) => (
+  
+  const getWorkspaceInfo = (workspaceId: number) =>{
+    getUsersInWorkspace(workspaceId).then(
+      (usersInW: UserInWorkspace[]) => {
+      setUsersInW(usersInW);
+    });
+  }
+
+  const list = workspaceList.map((workspace, index) => (
     <div key={index}>
-      {/* workspaceオブジェクトも渡したい（未） */}
       <MenuItem>
-        <Link to={`${item.id}`} onClick={() => returnUsers(item.id)}>
-          <span>{item.name}</span>
+        <Link to={`${workspace.id}`} onClick={() => getWorkspaceInfo(workspace.id)}>
+          <span>{workspace.name}</span>
         </Link>
       </ MenuItem>
     </div>
   ));
-
 
   useEffect(() => {
     getWorkspaces().then((workspaces: Workspace[]) => {
@@ -37,7 +42,7 @@ function WorkspaceIndex() {
         {list}
       </div>      
     </div>
-    );
+  );
 }
 
 export default WorkspaceIndex;
