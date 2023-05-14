@@ -27,6 +27,8 @@ export default function SideNav1() {
                   <Link to="create" >
                     create
                   </Link>
+
+                {/* テスト用 */}
                 </MenuItem>
                 </Menu>
               </Sidebar>

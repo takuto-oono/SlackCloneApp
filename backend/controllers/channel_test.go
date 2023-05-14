@@ -69,6 +69,14 @@ func getChannelsByUserTestFunc(workspaceId int, jwtToken string) *httptest.Respo
 	return rr
 }
 
+func getChannelsByWorkspaceTestFunc(jwtToken string, workspaceID int) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/channel/"+strconv.Itoa(workspaceID), nil)
+	req.Header.Set("Authorization", jwtToken)
+	channelRouter.ServeHTTP(rr, req)
+	return rr
+}
+
 func TestCreateChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
@@ -1439,4 +1447,94 @@ func TestGetChannelsByUser(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"request user not found in workspace\"}", rr.Body.String())
 	})
+}
+
+func TestGetChannelsByWorkspace(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	userName1 := randomstring.EnglishFrequencyString(30)
+	userName2 := randomstring.EnglishFrequencyString(30)
+	isPrivateTrue := true
+	isPrivateFalse := false
+
+	assert.Equal(t, http.StatusOK, signUpTestFunc(userName1, "pass").Code)
+	assert.Equal(t, http.StatusOK, signUpTestFunc(userName2, "pass").Code)
+
+	rr := loginTestFunc(userName1, "pass")
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ := ioutil.ReadAll(rr.Body)
+	lr1 := new(LoginResponse)
+	json.Unmarshal(([]byte)(byteArray), lr1)
+
+	rr = loginTestFunc(userName2, "pass")
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	lr2 := new(LoginResponse)
+	json.Unmarshal(([]byte)(byteArray), lr2)
+
+	rr = createWorkSpaceTestFunc(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	w := new(models.Workspace)
+	json.Unmarshal(([]byte)(byteArray), w)
+
+	assert.Equal(t, http.StatusOK, addUserWorkspaceTestFunc(w.ID, 4, lr2.UserId, lr1.Token).Code)
+
+	var c1, c2, c3, c4 models.Channel
+	rr = createChannelTestFunc(randomstring.EnglishFrequencyString(30), "", &isPrivateFalse, lr1.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &c1)
+	
+	rr = createChannelTestFunc(randomstring.EnglishFrequencyString(30), "", &isPrivateFalse, lr1.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &c2)
+	
+	rr = createChannelTestFunc(randomstring.EnglishFrequencyString(30), "", &isPrivateTrue, lr1.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &c3)
+	
+	rr = createChannelTestFunc(randomstring.EnglishFrequencyString(30), "", &isPrivateTrue, lr1.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &c4)
+	
+	assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c1.ID, lr2.UserId, lr1.Token).Code)
+	assert.Equal(t, http.StatusOK, addUserInChannelTestFunc(c3.ID, lr2.UserId, lr1.Token).Code)
+
+	var res1, res2 []models.Channel
+	rr = getChannelsByWorkspaceTestFunc(lr1.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &res1)
+	
+	rr = getChannelsByWorkspaceTestFunc(lr2.Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	byteArray, _ = ioutil.ReadAll(rr.Body)
+	json.Unmarshal(([]byte)(byteArray), &res2)
+
+	assert.Equal(t, 4 + 2, len(res1))
+	assert.Equal(t, 3 + 2, len(res2))
+
+	isExist := func(v models.Channel, sl []models.Channel) bool {
+		for _, x := range sl {
+			if x.ID == v.ID {
+				return true
+			}
+		}
+		return false
+	}
+
+	assert.True(t, isExist(c1, res1))
+	assert.True(t, isExist(c1, res2))
+	assert.True(t, isExist(c2, res1))
+	assert.True(t, isExist(c2, res2))
+	assert.True(t, isExist(c3, res1))
+	assert.True(t, isExist(c3, res2))
+	assert.True(t, isExist(c4, res1))
+	assert.False(t, isExist(c4, res2))
 }
