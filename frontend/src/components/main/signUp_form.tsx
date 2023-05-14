@@ -14,7 +14,8 @@ const SignUpForm = () => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
+    e.preventDefault();
     console.log("signup");
     let user = { name: name, password: password };
     signUp(user);

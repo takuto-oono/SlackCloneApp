@@ -20,7 +20,8 @@ const LoginForm = () => {
   const passwordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
+    e.preventDefault();
     console.log("login");
     let user = { name: name, password: password }
     login(user).then((currentUser: currentUser) => { 

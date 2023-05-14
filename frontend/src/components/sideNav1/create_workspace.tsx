@@ -9,7 +9,8 @@ function CreateWorkspace() {
     setName(e.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
+    e.preventDefault();
     console.log("create");
     let workspaceName = name;
     postWorkspace(workspaceName);
