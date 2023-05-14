@@ -10,7 +10,7 @@ const Header = () => {
       <header className={classes.header}>
         <div className={classes.container}>
           <div className={classes.item}>
-            <h3>header</h3>
+            <h3 className='text-pink-700'>header</h3>
           </div>
           <div className={classes.item}>
             <Logout />
