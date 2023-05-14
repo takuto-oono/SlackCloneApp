@@ -12,9 +12,7 @@ const SendDM = () => {
   };
 
   const doSubmit = () => {
-    console.log("workspace id", workspaceID);
-    let form: SendDMForm;
-    form = {
+    let form: SendDMForm = {
       receivedUserID: Number(getUserId()),
       workspaceID: workspaceID,
       text: text,

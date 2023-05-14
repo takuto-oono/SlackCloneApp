@@ -17,10 +17,10 @@ export interface ResSendDM {
   updatedAt: string;
 }
 
-const baseUrl = "http://localhost:8080/api/dm/";
+const baseUrl = "http://localhost:8080/api/dm";
 
 export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
-  const url = baseUrl + "send";
+  const url = baseUrl + "/send";
   try {
     const res = await fetch(url, {
       method: "POST",
