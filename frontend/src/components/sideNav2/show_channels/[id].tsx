@@ -33,7 +33,7 @@ function ChannelIndex() {
   ));
 
   useEffect(() => {
-    getChannelsByWorkspaceId(parseInt(workspaceId)).then((channels: Channel[]) => {
+    getChannelsByWorkspaceId(Number(workspaceId)).then((channels: Channel[]) => {
       setChannelList(channels)
     });
   },[workspaceId])
