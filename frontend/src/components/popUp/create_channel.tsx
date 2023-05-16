@@ -1,6 +1,6 @@
 import { postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
 
 const CreateChannelForm = () => {
@@ -9,7 +9,6 @@ const CreateChannelForm = () => {
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const { workspaceId } = useParams<{ workspaceId: string }>();
-  const navigate = useNavigate();
 
   const handleOpen = () => {
     setOpen(true);
