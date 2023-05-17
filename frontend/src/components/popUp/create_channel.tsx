@@ -49,19 +49,23 @@ const CreateChannelForm = () => {
         <form onSubmit={handleSubmit}>
           <DialogTitle>Create a channel</DialogTitle>
           <DialogContent>
-            <label>
-              名前
-              <input type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
-            </label>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">名前</label>
+              <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
+            </div>
             <fieldset>
-              <legend>可視性</legend>
-              <label>
-                <input type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
-                  プライベート : 特定のメンバーのみ
-              </label><br />
-              <label>
-                <input type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked/>
+              <legend className="block text-gray-700 text-sm font-bold mb-2">可視性</legend>
+              <label className="block text-gray-500 font-bold">
+                <input className="mr-2 leading-tight" type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
+                  <span>
+                    プライベート : 特定のメンバーのみ
+                  </span>
+              </label>
+              <label className="block text-gray-500 font-bold">
+                <input className="mr-2 leading-tight" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
+                <span>
                   パブリック : Slack 内の全員
+                </span>
               </label>
             </fieldset>
           </DialogContent>
