@@ -9,8 +9,10 @@ export const usersInWState = atom<UserInWorkspace[]>({
   default: []
 })
 
-function WorkspaceIndex() {
+function ShowWorkspaces() {
+
   const [usersInW, setUsersInW] = useRecoilState(usersInWState);
+
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   
   const getWorkspaceInfo = (workspaceId: number) =>{
@@ -45,4 +47,4 @@ function WorkspaceIndex() {
   );
 }
 
-export default WorkspaceIndex;
+export default ShowWorkspaces;

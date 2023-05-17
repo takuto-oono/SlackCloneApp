@@ -1,11 +1,7 @@
 import { postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
 import { useParams } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
 
 const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
@@ -14,14 +10,14 @@ const CreateChannelForm = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
-  const handleClickOpen = () => {
+  const handleOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
   };
 
-  const nameChange = (e: any) => {
+  const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
@@ -33,44 +29,47 @@ const CreateChannelForm = () => {
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
+    e.preventDefault();
     console.log("create channel");
-    let channel = { name: name, description: description, is_private: isPrivate, workspace_id: parseInt(workspaceId) };
+    let channel = { name: name, description: description, is_private: isPrivate, workspace_id: Number(workspaceId) };
     postChannel(channel);
     setOpen(false);
+    // チャンネルのリストを更新する(Todo)
   };
 
   return (
     <div>
       <div>
-        <Button onClick={handleClickOpen}>
+        <Button onClick={handleOpen}>
           <p style={{ color: 'black'}}>新しいチャンネルを作成</p>
         </Button>
       </div>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create a channel</DialogTitle>
-        <DialogContent>
-          <label htmlFor="name">
-            名前<br />
-            <input type="text" value={name} name="name" onChange={nameChange} />
-          </label>
-
-          <fieldset>
-            <legend>可視性</legend>
-            <label htmlFor="is_private">
-              <input type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
-              プライベート : 特定のメンバーのみ
-            </label><br />
-            <label htmlFor="is_private">
-              <input type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked/>
-              パブリック : Slack 内の全員
+        <form onSubmit={handleSubmit}>
+          <DialogTitle>Create a channel</DialogTitle>
+          <DialogContent>
+            <label>
+              名前
+              <input type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
             </label>
-          </fieldset> 
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={handleClose}>閉じる</Button>
-          <Button variant="contained" color="success" onClick={handleSubmit}>作成</Button>
-        </DialogActions>
+            <fieldset>
+              <legend>可視性</legend>
+              <label>
+                <input type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
+                  プライベート : 特定のメンバーのみ
+              </label><br />
+              <label>
+                <input type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked/>
+                  パブリック : Slack 内の全員
+              </label>
+            </fieldset>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="outlined" onClick={handleClose}>閉じる</Button>
+            <Button type="submit" variant="contained" color="success">作成</Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </div>
   );

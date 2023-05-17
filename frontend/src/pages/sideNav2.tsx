@@ -1,8 +1,8 @@
 import React from "react";
 import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
 import classes from '@styles/Home.module.css'
-import ChannelIndex from "@src/components/sideNav2/show_channels/[id]";
 import { Outlet } from "react-router-dom";
+import ShowChannels from "@src/components/sideNav2/show_channels/[id]";
 
 export default function SideNav2() {
   return (
@@ -21,7 +21,7 @@ export default function SideNav2() {
                   },
                 }}
               >
-                < ChannelIndex />
+                < ShowChannels />
               </Menu>
             </Sidebar>
           </ProSidebarProvider>
