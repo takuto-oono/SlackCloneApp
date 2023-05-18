@@ -9,6 +9,7 @@ import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
 
 function ChannelIndex() {
+  // test
 	const [open, setOpen] = useState(false);
 	const [channelList, setChannelList] = useState<Channel[]>([]);
 	const { workspaceId } = useParams<{ workspaceId: string }>();
