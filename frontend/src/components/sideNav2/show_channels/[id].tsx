@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { MenuItem, SubMenu } from "react-pro-sidebar";
 import { getChannelsByWorkspaceId, Channel } from "@fetchAPI/channel";
 import { useParams } from "react-router-dom";
-import SearchUsers from "@src/utils/searchUsers";
 
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
@@ -21,9 +20,6 @@ function ChannelIndex() {
 	const handleClose = () => {
 		setOpen(false);
 	};
-	console.log(SearchUsers('ts'));
-	console.log(SearchUsers('tu'));
-	console.log(SearchUsers('tes'));
 
 	const list = channelList.map((item, index) => (
 		<div key={index}>
