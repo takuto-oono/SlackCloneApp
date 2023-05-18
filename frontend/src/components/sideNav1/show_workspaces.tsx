@@ -18,7 +18,6 @@ function WorkspaceIndex() {
       (usersInW: UserInWorkspace[]) => {
       setUsersInW(usersInW);
     });
-    console.log(usersInW);
   }
 
   const list = workspaceList.map((workspace, index) => (
