@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getWorkspaces, Workspace, UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
 import { Link } from 'react-router-dom';
 import { MenuItem } from "react-pro-sidebar";
-import { atom, useRecoilState, useRecoilValue } from "recoil";
+import { atom, useRecoilState } from "recoil";
 
 export const usersInWState = atom<UserInWorkspace[]>({
   key: "usersInW",
@@ -19,9 +19,6 @@ function WorkspaceIndex() {
       setUsersInW(usersInW);
     });
     console.log(usersInW);
-    // console.log(SearchUsers('ts'));
-    // console.log(SearchUsers('tu'));
-    // console.log(SearchUsers('tes'));
   }
 
   const list = workspaceList.map((workspace, index) => (
