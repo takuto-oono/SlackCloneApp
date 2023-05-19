@@ -26,11 +26,10 @@ function ShowChannels() {
 
   const list = channelList.map((item, index) => (
     <div key={index}>
-      <MenuItem>
+      <MenuItem className="bg-purple-200 text-pink-700">
         <Link to="tmp_main">
           <span>{item.name}</span>
         </Link>
-
       </MenuItem>
     </div>
   ));
@@ -45,9 +44,9 @@ function ShowChannels() {
     <div>
       <SubMenu label="Channels">
         {list}
-        <div ref={divRef} style={{ backgroundColor: "rgb(63, 14, 64)" }}>
+        <div ref={divRef}  className="bg-purple-200 text-pink-700">
           <Button onClick={handleClickOpen}>
-          <p style={{ color: 'rgb(153, 133, 156)'}}>+ チャンネルを追加</p>
+            <p className="bg-purple-200 text-pink-700">+ チャンネルを追加</p>
           </Button>
           <Popover
               open={open}
@@ -59,7 +58,7 @@ function ShowChannels() {
               }}
             >
             < CreateChannelForm />
-            <Button><p style={{ color: 'black'}}>チャンネル一覧</p></Button>
+            <Button><p className="text-black">チャンネル一覧</p></Button>
             {/* チャンネル一覧ページへの移動ボタンを設置する（未） */}
           </Popover>
         </div>

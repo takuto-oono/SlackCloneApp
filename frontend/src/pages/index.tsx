@@ -1,6 +1,4 @@
 import React from 'react';
-import classes from '@styles/Home.module.css'
-
 import { createRoot } from 'react-dom/client';
 import { RouterConfig } from './route';
 import Header from './header';
@@ -12,10 +10,8 @@ export default function Home() {
     root.render(
       <React.StrictMode>
         <Header />
-        <div className={classes.container}>
-          <div className={classes.item}>
-            <RouterConfig />
-          </div>
+        <div className="h-full flex" id="container">
+          <RouterConfig />
         </div>
       </React.StrictMode>
     );

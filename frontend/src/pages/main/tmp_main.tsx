@@ -1,11 +1,7 @@
-import classes from '@styles/Home.module.css'
-
 function TmpMain() {
   return (
-    <div style={{ display: 'flex', height: '100%', width: '100vw'}}>
-      <div className={classes.item}>
-        <p style={{ color: 'black'}}>main</p>
-      </div>
+    <div>
+      <p>main</p>
     </div>
   )
 }

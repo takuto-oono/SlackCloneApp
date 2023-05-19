@@ -42,7 +42,7 @@ const CreateChannelForm = () => {
     <div>
       <div>
         <Button onClick={handleOpen}>
-          <p style={{ color: 'black'}}>新しいチャンネルを作成</p>
+          <p className="text-black">新しいチャンネルを作成</p>
         </Button>
       </div>
       <Dialog open={open} onClose={handleClose}>
@@ -50,19 +50,19 @@ const CreateChannelForm = () => {
           <DialogTitle>Create a channel</DialogTitle>
           <DialogContent>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">名前</label>
-              <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
+              <label className="block mb-2 font-bold">名前</label>
+              <input className="border border-black w-full py-2 px-3 bg-white text-gray-700" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
             </div>
             <fieldset>
-              <legend className="block text-gray-700 text-sm font-bold mb-2">可視性</legend>
-              <label className="block text-gray-500 font-bold">
-                <input className="mr-2 leading-tight" type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
+              <legend className="block mb-2 font-bold">可視性</legend>
+              <label className="block">
+                <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
                   <span>
                     プライベート : 特定のメンバーのみ
                   </span>
               </label>
-              <label className="block text-gray-500 font-bold">
-                <input className="mr-2 leading-tight" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
+              <label className="block">
+                <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
                 <span>
                   パブリック : Slack 内の全員
                 </span>
