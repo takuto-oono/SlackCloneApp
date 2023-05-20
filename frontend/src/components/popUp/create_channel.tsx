@@ -42,26 +42,30 @@ const CreateChannelForm = () => {
     <div>
       <div>
         <Button onClick={handleOpen}>
-          <p style={{ color: 'black'}}>新しいチャンネルを作成</p>
+          <p className="text-black">新しいチャンネルを作成</p>
         </Button>
       </div>
       <Dialog open={open} onClose={handleClose}>
         <form onSubmit={handleSubmit}>
           <DialogTitle>Create a channel</DialogTitle>
           <DialogContent>
-            <label>
-              名前
-              <input type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
-            </label>
+            <div className="mb-4">
+              <label className="block mb-2 font-bold">名前</label>
+              <input className="border border-black w-full py-2 px-3" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
+            </div>
             <fieldset>
-              <legend>可視性</legend>
-              <label>
-                <input type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
-                  プライベート : 特定のメンバーのみ
-              </label><br />
-              <label>
-                <input type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked/>
+              <legend className="block mb-2 font-bold">可視性</legend>
+              <label className="block">
+                <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeTrue} />
+                  <span>
+                    プライベート : 特定のメンバーのみ
+                  </span>
+              </label>
+              <label className="block">
+                <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
+                <span>
                   パブリック : Slack 内の全員
+                </span>
               </label>
             </fieldset>
           </DialogContent>

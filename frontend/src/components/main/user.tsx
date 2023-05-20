@@ -6,9 +6,6 @@ import router from "next/router";
 import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
 
-
-
-
 const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -30,24 +27,29 @@ const LoginForm = () => {
         setCookie("user_id", currentUser.user_id);
       }
     });
-    
   };
 
   return (
     <div className="App">
-      <form onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <label>名前
-          <input type="text" value={ name } name="name" onChange={(e) => nameChange(e)} maxLength={80} required />
-        </label><br />
-        <label>パスワード
-          <input type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} minLength={6} maxLength={72} required />
-        </label><br />
-        <input type="submit" value="ログイン" />
+      <form className="px-8 py-8" onSubmit={handleSubmit}>
+        <p className="text-2xl p-1">Login</p>
+        <div className="mb-4">
+          <label  className="block mb-2 font-bold">名前</label>
+          <input className="border border-black w-full py-2 px-3" type="text" value={ name } name="name" onChange={(e) => nameChange(e)} maxLength={80} required />
+        </div>
+        <div className="mb-6">
+          <label className="block mb-2 font-bold">パスワード</label>
+          <input className="border border-black w-full py-2 px-3" type="password" value={ password } name="password" onChange={(e) => passwordChange(e)} minLength={6} maxLength={72} required />
+        </div>
+        <div>
+          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">ログイン</button>
+        </div>
+        <div>
+          <Link to="/signUp_form">
+              <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
+          </Link>
+        </div>
       </form>
-      <Link to="/signUp_form">
-        <button>まだアカウントを持っていませんか？</button>
-      </Link>
     </div>
   );
 }
