@@ -51,7 +51,7 @@ const CreateChannelForm = () => {
           <DialogContent>
             <div className="mb-4">
               <label className="block mb-2 font-bold">名前</label>
-              <input className="border border-black w-full py-2 px-3 bg-white text-gray-700" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
+              <input className="border border-black w-full py-2 px-3" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
             </div>
             <fieldset>
               <legend className="block mb-2 font-bold">可視性</legend>

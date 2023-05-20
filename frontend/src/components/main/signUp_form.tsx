@@ -24,10 +24,10 @@ const SignUpForm = () => {
   return (
     <div>
       <form className="px-8 py-8" onSubmit={handleSubmit}>
-        <p className="text-gray-900 text-2xl p-1">SingUp</p>
+        <p className="text-2xl p-1">SingUp</p>
         <div className="mb-4">
           <label className="block mb-2 font-bold">名前</label>
-          <input className="border border-black w-full py-2 px-3 bg-white text-gray-700" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
+          <input className="border border-black w-full py-2 px-3" type="text" value={name} name="name" onChange={nameChange} maxLength={80} required />
         </div>
         <div className="mb-6">
           <label className="block mb-2 font-bold">パスワード</label>

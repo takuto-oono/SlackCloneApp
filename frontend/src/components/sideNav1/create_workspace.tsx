@@ -20,10 +20,10 @@ function CreateWorkspace() {
   return (
     <div>
       <form onSubmit={handleSubmit}  className="px-8 py-8">
-        <p className="text-gray-900 text-2xl p-1">Create Workspace</p>
+        <p className="text-2xl p-1">Create Workspace</p>
         <div className="mb-4">
         <label  className="block mb-2 font-bold">ワークスペースの名前</label>
-          <input className="border border-black w-full py-2 px-3 bg-white text-gray-700" type="text" value={ name } name="name" onChange={(e) => nameChange(e)} maxLength={50} required/>
+          <input className="border border-black w-full py-2 px-3" type="text" value={ name } name="name" onChange={(e) => nameChange(e)} maxLength={50} required/>
         </div>
         <div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">作成</button>
