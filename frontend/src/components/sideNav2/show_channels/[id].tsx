@@ -27,7 +27,7 @@ function ShowChannels() {
   const list = channelList.map((item, index) => (
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
-        <Link to="tmp_main">
+        <Link to={`channel/${item.id}`}>
           <span>{item.name}</span>
         </Link>
       </MenuItem>
