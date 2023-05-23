@@ -20,6 +20,7 @@ const showItem: React.FC<Message> = (
 			break;
 		}
 	}
+  
 	return (
 		<>
 			<p>{userName}</p>
