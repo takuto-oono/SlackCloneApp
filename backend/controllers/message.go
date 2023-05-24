@@ -387,7 +387,7 @@ func EditDM(c *gin.Context) {
 	}
 
 	// dmが存在するかどうかを確認
-	b, err := controllerUtils.IsExistDMById(dmId)
+	b, err := controllerUtils.IsExistMessageById(dmId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -429,7 +429,7 @@ func DeleteDM(c *gin.Context) {
 	}
 
 	// dmが存在するかどうかを確認
-	b, err := controllerUtils.IsExistDMById(dmId)
+	b, err := controllerUtils.IsExistMessageById(dmId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
