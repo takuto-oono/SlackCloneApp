@@ -1,8 +1,7 @@
-import { Channel } from "@src/fetchAPI/channel";
 import { getMessagesFromChannel, Message } from "@src/fetchAPI/message";
 import { UserInWorkspace } from "@src/fetchAPI/workspace";
 import React, { useState, useEffect } from "react";
-import { atom, useRecoilValue, useResetRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { usersInWState } from "@src/components/sideNav1/show_workspaces";
 
 type Props = {
@@ -20,7 +19,7 @@ const showItem: React.FC<Message> = (
 			break;
 		}
 	}
-  
+
 	return (
 		<>
 			<p>{userName}</p>
@@ -39,7 +38,6 @@ export const ShowMessagesComponent: React.FC<Props> = (props: Props) => {
 			const messages: Message[] | null = await getMessagesFromChannel(
 				props.channelID
 			);
-			console.log(messages);
 			if (messages != null) {
 				setMessages(messages.reverse());
 			}

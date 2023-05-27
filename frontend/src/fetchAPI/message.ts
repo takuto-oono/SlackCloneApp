@@ -1,8 +1,4 @@
-import SendDM from "@src/components/main/send_dm";
 import { getToken } from "./cookie";
-import { resetCookie, getUserId } from "./cookie";
-import { UserInWorkspace } from "./workspace";
-import { Channel } from "./channel";
 
 export interface SendDMForm {
   receivedUserID: number;
@@ -64,6 +60,9 @@ export async function getMessagesFromChannel(channelID: number): Promise<Message
     if (res.status == 200) {
       const response = await res.json();
       const messages: Message[] = [];
+      if (!response) {
+        return messages
+      }
       for (const r of response) {
         messages.push({
           id: r.id,
