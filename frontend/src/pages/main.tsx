@@ -7,9 +7,9 @@ const Main: React.FC = () => {
 
 	if (channelID) {
 		return (
-			<div className="w-full">
+			<>
 				<ChannelComponent channelID={Number(channelID)} />
-			</div>
+			</>
 		);
 	}
 

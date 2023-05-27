@@ -48,7 +48,7 @@ export const ShowMessagesComponent: React.FC<Props> = (props: Props) => {
 	}, [props]);
 
 	return (
-		<div>
+		<div className="w-full">
 			<ul>
 				{messages.map((message: Message) => (
 					<li
