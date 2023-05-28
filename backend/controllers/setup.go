@@ -28,6 +28,7 @@ func SetupRouter() *gin.Engine {
 	user.POST("/signUp", SignUp)
 	user.POST("/login", Login)
 	user.GET("/currentUser", GetCurrentUser)
+	user.GET("/all", GetAllUsers)
 
 	workspace := api.Group("/workspace")
 	workspace.POST("/create", CreateWorkspace)
