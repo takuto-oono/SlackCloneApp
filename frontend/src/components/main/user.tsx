@@ -5,11 +5,17 @@ import { resetCookie } from "@src/fetchAPI/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
+import { atom, useRecoilState } from "recoil";
+
+export const loginUserState = atom<string>({
+  key: "usersInW"
+})
 
 const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
+  const [loginUser, setLoginUser] = useRecoilState()
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -25,6 +31,7 @@ const LoginForm = () => {
       if (currentUser.token) {
         setCookie("token", currentUser.token);
         setCookie("user_id", currentUser.user_id);
+        
       }
     });
   };
