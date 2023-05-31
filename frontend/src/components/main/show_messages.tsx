@@ -24,7 +24,7 @@ const showItem: React.FC<Message> = (
 		<>
 			<p>{userName}</p>
 			<p>{message.createdAt}</p>
-			<p>{message.text}</p>
+			<p className="break-words">{message.text}</p>
 		</>
 	);
 };
