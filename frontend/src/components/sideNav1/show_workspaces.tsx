@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	getWorkspaces,
 	Workspace,
@@ -20,7 +20,6 @@ function ShowWorkspaces() {
 	const [usersInW, setUsersInW] = useRecoilState(usersInWState);
 
 	const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
-	const divRef = useRef(null);
 
 	const handleClickOpen = () => {
 		setOpen(true);
@@ -45,7 +44,7 @@ function ShowWorkspaces() {
 				>
 					<span>{workspace.name}</span>
 				</Link>
-				<div ref={divRef} className="bg-purple-200 text-pink-700">
+				<div className="bg-purple-200 text-pink-700">
 					<AddUserInWorkspaceForm workspaceID={workspace.id} />
 				</div>
 			</MenuItem>
