@@ -10,7 +10,7 @@ type Props = {
 export const ChannelComponent: React.FC<Props> = (props: Props) => {
 	return (
 		<div className="h-full border-2 border-black w-full">
-			<div className="h-5/6 border-2 border-black w-full">
+			<div className="h-5/6 border-2 border-black w-full overflow-y-scroll">
 				<ShowMessagesComponent
 					channelID={props.channelID}
 				></ShowMessagesComponent>
