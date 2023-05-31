@@ -8,8 +8,6 @@ import {
 import { Link } from "react-router-dom";
 import { MenuItem } from "react-pro-sidebar";
 import { atom, useRecoilState } from "recoil";
-import Button from "@mui/material/Button";
-import Popover from "@mui/material/Popover";
 import { AddUserInWorkspaceForm } from "../popUp/add_user_in_workspace_form";
 
 export const usersInWState = atom<UserInWorkspace[]>({
@@ -48,22 +46,7 @@ function ShowWorkspaces() {
 					<span>{workspace.name}</span>
 				</Link>
 				<div ref={divRef} className="bg-purple-200 text-pink-700">
-					<Button onClick={handleClickOpen}>
-						<p className="bg-purple-200 text-pink-700">
-							+ ユーザーを追加
-						</p>
-					</Button>
-					<Popover
-						open={open}
-						anchorEl={divRef.current}
-						onClose={handleClickClose}
-						anchorOrigin={{
-							vertical: "bottom",
-							horizontal: "left",
-						}}
-					>
-						<AddUserInWorkspaceForm workspaceID={workspace.id} />
-					</Popover>
+					<AddUserInWorkspaceForm workspaceID={workspace.id} />
 				</div>
 			</MenuItem>
 		</div>
