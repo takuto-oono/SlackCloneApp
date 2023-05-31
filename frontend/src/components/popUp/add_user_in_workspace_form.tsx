@@ -53,7 +53,7 @@ export const AddUserInWorkspaceForm: React.FC<Props> = (props: Props) => {
 			</div>
 			<Dialog open={open} onClose={handleClose}>
 				<form onSubmit={handleSubmit}>
-					<DialogTitle>Create a channel</DialogTitle>
+					<DialogTitle>新しいユーザーを追加</DialogTitle>
 					<DialogContent>
 						<div className="mb-4">
 							<label className="block mb-2 font-bold">ユーザー名</label>
@@ -73,7 +73,7 @@ export const AddUserInWorkspaceForm: React.FC<Props> = (props: Props) => {
 							閉じる
 						</Button>
 						<Button type="submit" variant="contained" color="success">
-							作成
+							追加
 						</Button>
 					</DialogActions>
 				</form>
