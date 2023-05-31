@@ -9,7 +9,7 @@ type Props = {
 export const SendMessageComponent: React.FC<Props> = (props: Props) => {
 	const [text, setText] = useState("");
 
-	const changeText = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const changeText = (e: React.ChangeEvent<HTMLInputElement>): void => {
 		setText(e.target.value);
 	};
 
@@ -21,14 +21,14 @@ export const SendMessageComponent: React.FC<Props> = (props: Props) => {
 
 	return (
 		<form className="my-12 mx-auto" onSubmit={handleSubmit}>
-			<input
+			<textarea
 				className="box-border w-1/3 h-2/3 border-2 border-black"
 				type="text"
 				name="text"
 				value={text}
 				onChange={changeText}
 				required
-			/>
+			></textarea>
 			<button className="border-2 border-black" type="submit">
 				Send
 			</button>
