@@ -1,17 +1,23 @@
 import React, { useState } from "react";
 import { useCookies } from "react-cookie";
-import { currentUser, login } from '@fetchAPI/login'
+import { currentUser, login } from '@fetchAPI/login';
 import { resetCookie } from "@src/fetchAPI/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
 import { Link, useNavigate } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
-import { getWorkspaces, Workspace} from '@fetchAPI/workspace'
+import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
 import { workspacesState } from "@src/utils/atom";
+import { atom, useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
+  
+export const loginUserState = atom<string>({
+  key: "userName",
+  default: ""
+})
 
 const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [loginUser, setLoginUser] = useRecoilState(loginUserState);
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const setWorkspaces = useSetRecoilState(workspacesState);
   const navigate = useNavigate();
@@ -25,11 +31,12 @@ const LoginForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
     console.log("login");
-    let user = { name: name, password: password }
+    let user = { name: name, password: password };
     login(user).then((currentUser: currentUser) => { 
       if (currentUser.token) {
         setCookie("token", currentUser.token);
         setCookie("user_id", currentUser.user_id);
+        setLoginUser(currentUser.username);
         getWorkspaces().then((workspaces: Workspace[]) => {
           setWorkspaces(workspaces);
           navigate("workspace");
