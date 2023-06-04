@@ -4,8 +4,6 @@ import { useRecoilValue } from 'recoil';
 
 export const ShowLoginUserName: React.FC = () => {
   const userName: string = useRecoilValue(loginUserState);
-  console.log(loginUserState);
-  console.log(userName);
 
   return (
     <>
