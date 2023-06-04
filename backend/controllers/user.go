@@ -80,3 +80,32 @@ func GetCurrentUser(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, user)
 }
+
+type UserResponse struct {
+	ID   uint32 `json:"id"`
+	Name string `json:"name"`
+}
+
+func GetAllUsers(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	_, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+	users, err := models.GetUsers(db)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	res := make([]UserResponse, len(users))
+	for i, user := range users {
+		res[i] = UserResponse{
+			ID:   user.ID,
+			Name: user.Name,
+		}
+	}
+
+	c.IndentedJSON(http.StatusOK, res)
+}
