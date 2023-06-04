@@ -1,7 +1,7 @@
 import { Logout } from "@components/main/user";
 import { ShowLoginUserName } from "@src/components/header/show_login_username";
 import { useCookies } from "react-cookie";
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot } from "recoil";
 
 const Header = () => {
 	const [cookies, setCookie, removeCookie] = useCookies(["token", "user_id"]);
@@ -15,11 +15,9 @@ const Header = () => {
 					<div className="float-left px-8 py-5 text-center" id="item">
 						<Logout />
 					</div>
-					<RecoilRoot>
-						<div className="float-left px-8 py-5 text-center">
-							<ShowLoginUserName />
-						</div>
-					</RecoilRoot>
+					<div className="float-left px-8 py-5 text-center">
+						<ShowLoginUserName />
+					</div>
 				</div>
 			</header>
 		);

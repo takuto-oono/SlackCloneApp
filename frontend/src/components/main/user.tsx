@@ -35,7 +35,6 @@ const LoginForm = () => {
         setLoginUser(currentUser.username);
       }
     });
-    console.log(useRecoilValue(loginUserState))
   };
 
   return (
