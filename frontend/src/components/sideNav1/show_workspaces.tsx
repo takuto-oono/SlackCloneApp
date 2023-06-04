@@ -1,43 +1,29 @@
-import React, { useEffect, useState } from "react";
-import {
-	getWorkspaces,
-	Workspace,
-	UserInWorkspace,
-	getUsersInWorkspace,
-} from "@fetchAPI/workspace";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
+import { Link } from 'react-router-dom';
 import { MenuItem } from "react-pro-sidebar";
-import { atom, useRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { channelsState, usersInWState, workspacesState } from "@src/utils/atom";
+import { Channel, getChannelsByWorkspaceId } from "@src/fetchAPI/channel";
 import { AddUserInWorkspaceForm } from "../popUp/add_user_in_workspace_form";
 
-export const usersInWState = atom<UserInWorkspace[]>({
-	key: "usersInW",
-	default: [],
-});
-
 function ShowWorkspaces() {
-	const [open, setOpen] = useState(false);
-	const [usersInW, setUsersInW] = useRecoilState(usersInWState);
-
-	const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
-
-	const handleClickOpen = () => {
-		setOpen(true);
-	};
-
-	const handleClickClose = () => {
-		setOpen(false);
-	};
-
-	const getWorkspaceInfo = (workspaceId: number) => {
-		getUsersInWorkspace(workspaceId).then((usersInW: UserInWorkspace[]) => {
-			setUsersInW(usersInW);
-		});
-	};
-
-	const list = workspaceList.map((workspace, index) => (
-		<div key={index}>
-			<MenuItem>
+  const setUsersInW = useSetRecoilState(usersInWState);
+  const setChannels = useSetRecoilState(channelsState);
+  const workspaces = useRecoilValue(workspacesState);
+  const getWorkspaceInfo = (workspaceId: number) =>{
+    getUsersInWorkspace(workspaceId).then(
+      (usersInW: UserInWorkspace[]) => {
+        setUsersInW(usersInW);
+      });
+    getChannelsByWorkspaceId(workspaceId).then(
+      (channels: Channel[]) => {
+        setChannels(channels);
+      });
+  }
+  const list = workspaces.map((workspace, index) => (
+    <div key={index}>
+      <MenuItem>
 				<Link
 					to={`${workspace.id}`}
 					onClick={() => getWorkspaceInfo(workspace.id)}
@@ -48,20 +34,16 @@ function ShowWorkspaces() {
 					<AddUserInWorkspaceForm workspaceID={workspace.id} />
 				</div>
 			</MenuItem>
-		</div>
-	));
+    </div>
+  ));
 
-	useEffect(() => {
-		getWorkspaces().then((workspaces: Workspace[]) => {
-			setWorkspaceList(workspaces);
-		});
-	}, []);
-
-	return (
-		<div className="App">
-			<div>{list}</div>
-		</div>
-	);
+  return (
+    <div className="App">
+      <div>
+        {list}
+      </div>      
+    </div>
+  );
 }
 
 export default ShowWorkspaces;

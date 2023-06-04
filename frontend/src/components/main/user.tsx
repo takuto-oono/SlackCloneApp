@@ -4,12 +4,17 @@ import { currentUser, login } from '@fetchAPI/login'
 import { resetCookie } from "@src/fetchAPI/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import { getWorkspaces, Workspace} from '@fetchAPI/workspace'
+import { workspacesState } from "@src/utils/atom";
 
 const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [cookies, setCookie, removeCookie] = useCookies(['token','user_id']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
+  const setWorkspaces = useSetRecoilState(workspacesState);
+  const navigate = useNavigate();
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -25,6 +30,10 @@ const LoginForm = () => {
       if (currentUser.token) {
         setCookie("token", currentUser.token);
         setCookie("user_id", currentUser.user_id);
+        getWorkspaces().then((workspaces: Workspace[]) => {
+          setWorkspaces(workspaces);
+          navigate("workspace");
+        });
       }
     });
   };
