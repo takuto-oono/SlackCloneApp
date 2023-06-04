@@ -1,28 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { getWorkspaces, Workspace, UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
+import React from "react";
+import { UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
 import { Link } from 'react-router-dom';
 import { MenuItem } from "react-pro-sidebar";
-import { atom, useRecoilState } from "recoil";
-
-export const usersInWState = atom<UserInWorkspace[]>({
-  key: "usersInW",
-  default: []
-})
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { channelsState, usersInWState, workspacesState } from "@src/utils/atom";
+import { Channel, getChannelsByWorkspaceId } from "@src/fetchAPI/channel";
 
 function ShowWorkspaces() {
-
-  const [usersInW, setUsersInW] = useRecoilState(usersInWState);
-
-  const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
-  
+  const setUsersInW = useSetRecoilState(usersInWState);
+  const setChannels = useSetRecoilState(channelsState);
+  const workspaces = useRecoilValue(workspacesState);
   const getWorkspaceInfo = (workspaceId: number) =>{
     getUsersInWorkspace(workspaceId).then(
       (usersInW: UserInWorkspace[]) => {
-      setUsersInW(usersInW);
-    });
+        setUsersInW(usersInW);
+      });
+    getChannelsByWorkspaceId(workspaceId).then(
+      (channels: Channel[]) => {
+        setChannels(channels);
+      });
   }
-
-  const list = workspaceList.map((workspace, index) => (
+  const list = workspaces.map((workspace, index) => (
     <div key={index}>
       <MenuItem>
         <Link to={`${workspace.id}`} onClick={() => getWorkspaceInfo(workspace.id)}>
@@ -31,12 +29,6 @@ function ShowWorkspaces() {
       </ MenuItem>
     </div>
   ));
-
-  useEffect(() => {
-    getWorkspaces().then((workspaces: Workspace[]) => {
-      setWorkspaceList(workspaces);
-    });
-  },[]);
 
   return (
     <div className="App">

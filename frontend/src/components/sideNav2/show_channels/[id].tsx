@@ -1,21 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from 'react-router-dom';
 import { MenuItem, SubMenu } from "react-pro-sidebar";
-import { getChannelsByWorkspaceId, Channel } from '@fetchAPI/channel';
-import { useParams } from "react-router-dom";
-
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
-
-
+import { useRecoilValue } from "recoil";
+import { channelsState } from "@src/utils/atom";
 
 function ShowChannels() {
-
   const [open, setOpen] = useState(false);
-  const [channelList, setChannelList] = useState<Channel[]>([]);
-  const { workspaceId } = useParams<{ workspaceId: string }>();
   const divRef = useRef(null);
+  const channels = useRecoilValue(channelsState);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -24,7 +19,7 @@ function ShowChannels() {
     setOpen(false);
   };
 
-  const list = channelList.map((item, index) => (
+  const list = channels.map((item, index) => (
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
         <Link to="tmp_main">
@@ -33,12 +28,6 @@ function ShowChannels() {
       </MenuItem>
     </div>
   ));
-
-  useEffect(() => {
-    getChannelsByWorkspaceId(Number(workspaceId)).then((channels: Channel[]) => {
-      setChannelList(channels)
-    });
-  },[workspaceId])
 
   return (
     <div>
