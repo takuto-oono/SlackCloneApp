@@ -1,3 +1,5 @@
+import { getToken } from "./cookie";
+
 export interface User {
     id: string;
     name: string;
@@ -104,3 +106,30 @@ export async function deleteUser(user: User) :Promise<User> {
     return user
 }
 
+export async function getAllUsers(): Promise<User[]|null>{
+  const url = baseUrl + 'api/user/all'
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: getToken(),
+      },
+    })
+    if (res.status === 200) {
+      const users: User[] = [];
+      const response = await res.json();
+      for (const r of response) {
+        users.push({
+          id: r.id,
+          name: r.name,
+          password: "",
+        })
+      }
+      return users
+    }
+    console.log(res);
+  } catch(e) {
+    console.log(e);
+  }
+  return null
+}

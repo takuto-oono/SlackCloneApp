@@ -68,18 +68,6 @@ func IsExistWAUByWorkspaceIdAndUserId(workspaceId int, userId uint32) bool {
 	return wau.WorkspaceId == workspaceId && wau.UserId == userId
 }
 
-func IsExistDMById(messageId uint) (bool, error) {
-	_, err := models.GetMessageById(db, messageId)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			// not found errorはfalse, nilを返すようにする
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
-}
-
 func IsExistChannelByChannelIdAndWorkspaceId(channelId, workspaceId int) (bool, error) {
 	_, err := models.GetChannelByIdAndWorkspaceId(db, channelId, workspaceId)
 	if err != nil {

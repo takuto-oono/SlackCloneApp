@@ -75,3 +75,24 @@ export async function postChannel(current: CurrentChannel) {
   }
   return;
 }
+
+export async function addUserInChannel(chanelID: number, userID: number) {
+  const url = baseUrl + "add_user";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: getToken(),
+      },
+      body: JSON.stringify({
+        channel_id: chanelID,
+        user_id: userID,
+      }),
+    })
+    if (res.status != 200) {
+      console.log(res);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}

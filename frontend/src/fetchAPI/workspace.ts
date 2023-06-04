@@ -112,3 +112,24 @@ export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWo
   }
   return usersInWorkspace;
 }
+
+export async function addUserInWorkspace(workspaceID: number, userID: number): Promise<void> {
+  const url = baseUrl + "add_user";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: getToken(),
+      },
+      body: JSON.stringify({
+        workspace_id: workspaceID,
+        user_id: userID,
+        // とりあえず、4固定にしておく
+        role_id: 4,
+      }),
+    })
+    console.log(res);
+  } catch(e) {
+    console.log(e);
+  }
+}
