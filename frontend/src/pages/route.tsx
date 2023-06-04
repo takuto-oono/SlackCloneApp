@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, BrowserRouter, Route, Routes } from 'react-router-dom';
 import Login from './main/login_form';
 import SignUp from './main/signUp_form';
 import SideNav2 from './sideNav2';
@@ -12,7 +12,7 @@ import { RecoilRoot } from 'recoil';
 export const RouterConfig: React.FC = () => {
   return (
     <RecoilRoot>
-     <BrowserRouter>
+     <HashRouter>
         <Routes >
           <Route path="/">
             <Route index element={<Login />} />
@@ -26,7 +26,7 @@ export const RouterConfig: React.FC = () => {
             </Route>
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </RecoilRoot>
   );
 }
