@@ -6,7 +6,6 @@ import SideNav2 from "./sideNav2";
 import SideNav1 from "./sideNav1";
 import TmpMain from "./main/tmp_main";
 import CreateW from "./main/create_workspace";
-import { RecoilRoot } from "recoil";
 
 export const RouterConfig: React.FC = () => {
 	return (
