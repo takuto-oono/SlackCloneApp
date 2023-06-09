@@ -1539,7 +1539,7 @@ func TestGetChannelsByWorkspace(t *testing.T) {
 	assert.False(t, isExist(c4, res2))
 }
 
-func GetAllUsersInChannelTest(t *testing.T) {
+func TestGetAllUsersInChannel(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
@@ -1567,8 +1567,12 @@ func GetAllUsersInChannelTest(t *testing.T) {
 	}
 	rr, res := getAllUsersInChannelTestFuncV2(ch.ID, lr.Token)
 	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, 10, len(res))
+	assert.Equal(t, 11, len(res))
+	
 	for _, r := range res {
+		if (r.ID == lr.UserId) {
+			continue
+		}
 		assert.Contains(t, userIDs, r.ID)
 	}
 }

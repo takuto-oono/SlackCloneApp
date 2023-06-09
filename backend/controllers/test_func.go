@@ -138,7 +138,7 @@ func readMessageByUserTestFunc(messageID uint, jwtToken string) (*httptest.Respo
 }
 
 func getAllUsersInChannelTestFuncV2(channelID int, jwtToken string) (*httptest.ResponseRecorder, []UserResponse) {
-	rr := Req(http.MethodGet, "/api/channel/get_all_user/"+strconv.Itoa(channelID), jwtToken, nil)
+	rr := Req(http.MethodGet, "/api/channel/all_user/"+strconv.Itoa(channelID), jwtToken, nil)
 	byteArray, _ := io.ReadAll(rr.Body)
 	var users []UserResponse
 	json.Unmarshal(([]byte)(byteArray), &users)

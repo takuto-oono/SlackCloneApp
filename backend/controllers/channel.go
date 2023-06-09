@@ -376,7 +376,7 @@ func GetAllUsersInChannel(c *gin.Context) {
 	}
 
 	// urlからworkspace_idを取得
-	channelID, err := strconv.Atoi(c.Param("workspace_id"))
+	channelID, err := strconv.Atoi(c.Param("channel_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
