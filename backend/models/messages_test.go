@@ -196,9 +196,9 @@ func TestGetMessagesThreadId(t *testing.T) {
 }
 
 func TestUpdateMessageThreadId(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
 	assert.Empty(t, m.Create(db))
