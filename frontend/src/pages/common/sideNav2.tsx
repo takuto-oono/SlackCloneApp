@@ -1,13 +1,11 @@
 import React from "react";
 import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
-import { Outlet } from "react-router-dom";
 import ShowChannels from "@src/components/sideNav2/show_channels/[id]";
 
 export default function SideNav2() {
   return (
-    <div className="h-full flex" id="container">
-      {/* SideNav2表示用item */}
-      <div className="bg-purple-200 h-full flex text-pink-700 border-r-2 border-pink-50" id="item">
+    <div className="h-full" id="container">
+      <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50" >
         <div>
           <ProSidebarProvider>
             <Sidebar>
@@ -17,10 +15,6 @@ export default function SideNav2() {
             </Sidebar>
           </ProSidebarProvider>
         </div>
-      </div>
-      {/* main,sub表示用item */}
-      <div id="item">
-        <Outlet />
       </div>
     </div>
   );

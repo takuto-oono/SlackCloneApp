@@ -1,19 +1,28 @@
+import { LoginForm } from "@src/components/main/user";
 import { ChannelComponent } from "./main/channel";
-import { Channel } from "@src/fetchAPI/channel";
+import { useCookies } from "react-cookie";
 import { useParams } from "react-router-dom";
 
 const Main: React.FC = () => {
-	const { channelID } = useParams<{ channelID: string }>();
-
-	if (channelID) {
-		return (
+  const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
+  const { channelID } = useParams<{ channelID: string }>();
+  if (!cookies.token) {
+    return (
 			<>
-				<ChannelComponent channelID={Number(channelID)} />
+        <LoginForm />
 			</>
 		);
-	}
-
-	return <></>;
+  } else {
+    if (channelID) {
+		return (
+			<>
+        <ChannelComponent channelID={Number(channelID)} />
+			</>
+		);
+    } else {
+      return <></>;
+    }
+  }
 };
 
 export default Main;

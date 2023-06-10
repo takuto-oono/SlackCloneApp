@@ -4,10 +4,10 @@ import { currentUser, login } from '@fetchAPI/login';
 import { resetCookie } from "@src/fetchAPI/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
-import { Link, useNavigate } from "react-router-dom";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
 import { workspacesState } from "@src/utils/atom";
-import { atom, useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
+import { atom, useSetRecoilState, useRecoilState } from "recoil";
+import Link from "next/link";
   
 export const loginUserState = atom<string>({
   key: "userName",
@@ -20,7 +20,6 @@ const LoginForm = () => {
   const [loginUser, setLoginUser] = useRecoilState(loginUserState);
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const setWorkspaces = useSetRecoilState(workspacesState);
-  const navigate = useNavigate();
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -39,7 +38,7 @@ const LoginForm = () => {
         setLoginUser(currentUser.username);
         getWorkspaces().then((workspaces: Workspace[]) => {
           setWorkspaces(workspaces);
-          navigate("workspace");
+          router.push("/")
         });
       }
     });
@@ -61,8 +60,8 @@ const LoginForm = () => {
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">ログイン</button>
         </div>
         <div>
-          <Link to="/signUp_form">
-              <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
+          <Link href="signUp_form">
+            <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
           </Link>
         </div>
       </form>
