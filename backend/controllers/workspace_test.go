@@ -242,7 +242,6 @@ func TestCreateWorkspace(t *testing.T) {
 
 		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusConflict, rr.Code)
-		assert.Equal(t, "{\"message\":\"UNIQUE constraint failed: workspaces.name\"}", rr.Body.String())
 	})
 }
 

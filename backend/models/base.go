@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	"backend/config"
 )
 
 var DbConnection *sql.DB
@@ -43,12 +40,32 @@ func initRoleTable(db *gorm.DB) error {
 }
 
 func init() {
-	dbName := config.Config.DbName
+	// dbName := config.Config.DbName
 	var err error
 
-	db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	// db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// c := mysqlConfig.Config{
+	// 	DBName:    "MYSQL",
+	// 	User:      "MYSQL",
+	// 	Passwd:    "MYSQL",
+	// 	Addr:      "MYSQL:3306",
+	// 	Net:       "tcp",
+	// 	ParseTime: true,
+	// 	Collation: "utf8mb4_unicode_ci",
+	// }
+
+	// sqlDB, err := sql.Open("mysql", c.FormatDSN())
+	// if err != nil {
+	// 	panic(err)
+	// }
+	db, err = gorm.Open(mysql.New(mysql.Config{
+		DSN: "MYSQL:MYSQL@tcp(MYSQL)/MYSQL?charset=utf8mb4&parseTime=True&loc=Local",
+	}), &gorm.Config{})
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	fmt.Println("------------------")
@@ -102,11 +119,11 @@ func init() {
 	if err := db.AutoMigrate(&ThreadAndUser{}); err != nil {
 		fmt.Println(err)
 	}
-	
+
 	if err := db.AutoMigrate(&Mention{}); err != nil {
 		fmt.Println(err)
 	}
-	
+
 	if err := db.AutoMigrate(&MessageAndUser{}); err != nil {
 		fmt.Println(err)
 	}

@@ -10,6 +10,10 @@ services:
       - ./backend:/go/src
     ports:
       - "8080:8080"
+    depends_on:
+      - db
+    links:
+      - "db:database"
   frontend:
     build:
       context: frontend
@@ -24,3 +28,14 @@ services:
     environment:
      - WATCHPACK_POLLING=true
     command: sh -c "npm install && npm run dev"
+  db:
+    image: mysql:8.0
+    container_name: MYSQL
+    ports:
+      - "3306:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=MYSQL"
+      - "MYSQL_USER=MYSQL"
+      - "MYSQL_PASSWORD=MYSQL"
+      - "MYSQL_DATABASE=MYSQL"
+      
