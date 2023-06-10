@@ -366,3 +366,45 @@ func GetChannelsByWorkspace(c *gin.Context) {
 
 	c.JSON(http.StatusOK, chs)
 }
+
+func GetAllUsersInChannel(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	userID, err := Authenticate(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+
+	// urlからworkspace_idを取得
+	channelID, err := strconv.Atoi(c.Param("channel_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// userとchannelが同じworkspaceに存在するかを
+	if b, err := controllerUtils.IsExistChannelAndUserInSameWorkspace(channelID, userID); !b || err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "channel and user not found in same workspace"})
+		return
+	}
+
+	caus, err := models.GetCAUsByChannelId(db, channelID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	res := make([]UserResponse, len(caus))
+	for i, cau := range caus {
+		u, err := models.GetUserById(db, cau.UserId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+		res[i] = UserResponse{
+			ID: u.ID,
+			Name: u.Name,
+		}
+	}
+	c.JSON(http.StatusOK, res)
+}

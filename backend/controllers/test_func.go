@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -134,4 +135,12 @@ func readMessageByUserTestFunc(messageID uint, jwtToken string) (*httptest.Respo
 	var mau models.MessageAndUser
 	json.Unmarshal(([]byte)(byteArray), &mau)
 	return rr, mau
+}
+
+func getAllUsersInChannelTestFuncV2(channelID int, jwtToken string) (*httptest.ResponseRecorder, []UserResponse) {
+	rr := Req(http.MethodGet, "/api/channel/all_user/"+strconv.Itoa(channelID), jwtToken, nil)
+	byteArray, _ := io.ReadAll(rr.Body)
+	var users []UserResponse
+	json.Unmarshal(([]byte)(byteArray), &users)
+	return rr, users
 }
