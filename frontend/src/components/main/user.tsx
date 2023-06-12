@@ -38,7 +38,7 @@ const LoginForm = () => {
         setLoginUser(currentUser.username);
         getWorkspaces().then((workspaces: Workspace[]) => {
           setWorkspaces(workspaces);
-          router.push("/")
+          router.push("/main")
         });
       }
     });
@@ -59,12 +59,12 @@ const LoginForm = () => {
         <div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">ログイン</button>
         </div>
-        <div>
-          <Link href="signUp_form">
-            <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
-          </Link>
-        </div>
       </form>
+      <div>
+        <Link href="/signUp_page">
+          <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
+        </Link>
+      </div>
     </div>
   );
 }

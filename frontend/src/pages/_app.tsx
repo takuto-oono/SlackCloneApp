@@ -6,18 +6,12 @@ import Layout from "./common/layout";
 import { NextPage } from "next/types";
 import { RecoilRoot } from "recoil";
 
- export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-    getLayout?: (page: ReactElement) => ReactNode
-  }
-  
-  type AppPropsWithLayout = AppProps & {
-    Component: NextPageWithLayout
-  }
-
-export default function App({ Component, pageProps }: AppPropsWithLayout) {
+export default function App({ Component, pageProps }: AppProps) {
   return (
     <CookiesProvider>
-      <Component {...pageProps} />
+      <Layout >
+        <Component {...pageProps} />
+      </Layout>
     </CookiesProvider>
   )
 }

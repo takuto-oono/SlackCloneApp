@@ -3,16 +3,14 @@ import Header from "./header";
 import SideNav1 from "./sideNav1";
 import SideNav2 from "./sideNav2";
 
-function Layout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+function Layout({ children }: LayoutProps){
   return (
-    <html>
-      <head />
-      <body>
-        <RecoilRoot>
+    <main className="h-full">
+      <RecoilRoot>
         <div className="h-full">
           <Header />
           <div className="h-full flex">
@@ -22,14 +20,13 @@ function Layout({
             <div>
               <SideNav2 />
             </div>
-            <main>
+            <div>
               { children }
-            </main>        
+            </div>
           </div>
-          </div>
-          </RecoilRoot>
-      </body>
-    </html>
+        </div>
+      </RecoilRoot>
+    </main>
   )
 }
 
