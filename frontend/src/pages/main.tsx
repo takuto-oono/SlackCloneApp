@@ -6,22 +6,15 @@ import { useParams } from "react-router-dom";
 const Main: React.FC = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const { channelID } = useParams<{ channelID: string }>();
-  if (!cookies.token) {
-    return (
-			<>
-        <LoginForm />
-			</>
-		);
+  
+  if (channelID) {
+  return (
+    <>
+      <ChannelComponent channelID={Number(channelID)} />
+    </>
+  );
   } else {
-    if (channelID) {
-		return (
-			<>
-        <ChannelComponent channelID={Number(channelID)} />
-			</>
-		);
-    } else {
-      return <></>;
-    }
+    return <></>;
   }
 };
 

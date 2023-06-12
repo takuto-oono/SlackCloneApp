@@ -110,7 +110,7 @@ export async function sendMessage(text: string, channelID: number, mentionedUser
         createdAt: response.created_at,
         updatedAt: response.updated_at,
       }
-      return response;
+      return message;
     }
     console.log(res);
   } catch (e) {

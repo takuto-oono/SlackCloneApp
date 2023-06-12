@@ -28,7 +28,7 @@ function ShowWorkspaces() {
 					to={`${workspace.id}`}
 					onClick={() => getWorkspaceInfo(workspace.id)}
 				>
-					<span>{workspace.name}</span>
+					<>{workspace.name}</>
 				</Link>
 				<div className="bg-purple-200 text-pink-700">
 					<AddUserInWorkspaceForm workspaceID={workspace.id} />

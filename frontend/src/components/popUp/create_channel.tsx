@@ -63,9 +63,9 @@ const CreateChannelForm = () => {
               </label>
               <label className="block">
                 <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
-                <span>
+                <>
                   パブリック : Slack 内の全員
-                </span>
+                </>
               </label>
             </fieldset>
           </DialogContent>

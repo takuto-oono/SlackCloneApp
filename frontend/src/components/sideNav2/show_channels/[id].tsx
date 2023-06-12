@@ -23,7 +23,7 @@ function ShowChannels() {
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
         <Link to={`channel/${item.id}`}>
-          <span>{item.name}</span>
+          <>{item.name}</>
         </Link>
       </MenuItem>
     </div>
