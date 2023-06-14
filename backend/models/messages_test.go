@@ -3,6 +3,7 @@ package models
 import (
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
@@ -60,6 +61,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 		for _, text := range texts {
 			m := NewChannelMessage(text, channelId, userId)
 			assert.Empty(t, m.Create(db))
+			time.Sleep(50 * time.Millisecond)
 		}
 
 		messages, err := GetMessagesByChannelId(db, channelId)
@@ -99,6 +101,7 @@ func TestGetMessagesByDlId(t *testing.T) {
 		for _, text := range texts {
 			m := NewDMMessage(text, dlId, userId)
 			assert.Empty(t, m.Create(db))
+			time.Sleep(50 * time.Millisecond)
 		}
 
 		messages, err := GetMessagesByDLId(db, dlId)
@@ -135,8 +138,8 @@ func TestGetMessageById(t *testing.T) {
 		assert.Equal(t, m.Text, res.Text)
 		assert.Equal(t, m.ChannelId, res.ChannelId)
 		assert.Equal(t, m.UserId, res.UserId)
-		assert.Equal(t, m.CreatedAt.UTC(), res.CreatedAt)
-		assert.Equal(t, m.UpdatedAt.UTC(), res.UpdatedAt)
+		assert.Equal(t, m.CreatedAt, res.CreatedAt)
+		assert.Equal(t, m.UpdatedAt, res.UpdatedAt)
 	})
 
 	t.Run("2 データが存在しない場合", func(t *testing.T) {
@@ -161,8 +164,8 @@ func TestUpdateMessageText(t *testing.T) {
 		assert.Equal(t, newText, res.Text)
 		assert.Equal(t, m.ChannelId, res.ChannelId)
 		assert.Equal(t, m.UserId, res.UserId)
-		assert.Equal(t, m.CreatedAt.UTC(), res.CreatedAt)
-		assert.True(t, m.UpdatedAt.UTC().Before(res.UpdatedAt))
+		assert.Equal(t, m.CreatedAt, res.CreatedAt)
+		assert.True(t, m.UpdatedAt.Before(res.UpdatedAt))
 
 		res2, err := GetMessageById(db, m.ID)
 		assert.Empty(t, err)
@@ -170,7 +173,7 @@ func TestUpdateMessageText(t *testing.T) {
 		assert.Equal(t, newText, res2.Text)
 		assert.Equal(t, m.ChannelId, res2.ChannelId)
 		assert.Equal(t, m.UserId, res2.UserId)
-		assert.Equal(t, m.CreatedAt.UTC(), res2.CreatedAt)
+		assert.Equal(t, m.CreatedAt, res2.CreatedAt)
 		assert.Equal(t, res.UpdatedAt, res2.UpdatedAt)
 	})
 
@@ -196,7 +199,7 @@ func TestUpdateMessageThreadId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	
+
 	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
 	assert.Empty(t, m.Create(db))
 	threadId := uint(rand.Uint32())

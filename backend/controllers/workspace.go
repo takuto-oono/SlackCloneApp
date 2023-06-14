@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	my "github.com/go-mysql/errors"
 
 	"backend/controllerUtils"
 	"backend/models"
@@ -39,10 +40,12 @@ func CreateWorkspace(c *gin.Context) {
 	// dbに保存
 	w := models.NewWorkspace(in.Name, in.RequestUserId)
 	if err := w.Create(db); err != nil {
-		if err.Error() == "UNIQUE constraint failed: workspaces.name" {
-			tx.Rollback()
-			c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
-			return
+		if ok, myerr := my.Error(err); ok {
+			if myerr == my.ErrDupeKey {
+				tx.Rollback()
+				c.JSON(http.StatusConflict, gin.H{"message": err.Error()})
+				return
+			}
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		tx.Rollback()
