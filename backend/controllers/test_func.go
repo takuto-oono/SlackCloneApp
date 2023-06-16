@@ -8,12 +8,12 @@ import (
 	"net/http/httptest"
 	"strconv"
 
-	"backend/controllerUtils"
 	"backend/models"
 	"backend/utils"
+	"backend/controllerUtils"
 )
 
-var testRouter = SetupRouter()
+var testRouter = SetupRouter1()
 
 type LoginResponse struct {
 	Token    string `json:"token"`

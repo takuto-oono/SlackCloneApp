@@ -16,7 +16,7 @@ import (
 	"backend/models"
 )
 
-var threadRouter = SetupRouter()
+var threadRouter = SetupRouter1()
 
 func postThreadTestFunc(text, jwtToken string, parentMessageId uint, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()

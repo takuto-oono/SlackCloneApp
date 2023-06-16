@@ -1,18 +1,15 @@
 package controllers
 
 import (
-	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
-	"backend/models"
 )
 
-func SetupRouter() *gin.Engine {
+func settingRouter() *gin.Engine {
 	r := gin.Default()
-
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
@@ -21,7 +18,11 @@ func SetupRouter() *gin.Engine {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-	fmt.Println(models.DbConnection)
+	return r
+}
+
+func SetupRouter1() *gin.Engine {
+	r := settingRouter()
 	api := r.Group("/api")
 
 	user := api.Group("/user")
@@ -66,6 +67,14 @@ func SetupRouter() *gin.Engine {
 
 	mention := api.Group("/mention")
 	mention.GET("/by_user/:workspace_id", GetMessagesMentionedByUser)
-	
+
+	return r
+}
+
+func SetupRouter2() *gin.Engine{
+	r := settingRouter()
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"message": "server2 OK"})
+	})
 	return r
 }

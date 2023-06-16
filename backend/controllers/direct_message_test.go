@@ -17,7 +17,7 @@ import (
 	"backend/models"
 )
 
-var dmRouter = SetupRouter()
+var dmRouter = SetupRouter1()
 
 func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
