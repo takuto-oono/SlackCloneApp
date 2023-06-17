@@ -7,13 +7,13 @@ export default function SideNav2() {
     <div className="h-full" id="container">
       <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50" >
         <div>
-          <ProSidebarProvider>
+          {/* <ProSidebarProvider>
             <Sidebar>
               <Menu className="bg-purple-200 text-pink-700">
                 < ShowChannels />
               </Menu>
             </Sidebar>
-          </ProSidebarProvider>
+          </ProSidebarProvider> */}
         </div>
       </div>
     </div>
