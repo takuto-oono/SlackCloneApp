@@ -18,7 +18,7 @@ import (
 	"backend/utils"
 )
 
-var messageRouter = SetupRouter()
+var messageRouter = SetupRouter1()
 
 func sendMessageTestFunc(text string, channelId int, jwtToken string, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()

@@ -18,7 +18,7 @@ import (
 	"backend/models"
 )
 
-var workspaceRouter = SetupRouter()
+var workspaceRouter = SetupRouter1()
 
 func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()

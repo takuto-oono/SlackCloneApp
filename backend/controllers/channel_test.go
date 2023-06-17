@@ -16,7 +16,7 @@ import (
 	"backend/models"
 )
 
-var channelRouter = SetupRouter()
+var channelRouter = SetupRouter1()
 
 func createChannelTestFunc(name, description string, isPrivate *bool, jwtToken string, workspaceId int) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()

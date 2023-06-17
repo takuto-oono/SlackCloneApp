@@ -16,7 +16,7 @@ import (
 	"backend/models"
 )
 
-var router = SetupRouter()
+var router = SetupRouter1()
 
 type BadResponse struct {
 	Message string `json:"message"`
