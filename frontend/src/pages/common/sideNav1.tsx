@@ -8,18 +8,18 @@ export default function SideNav1() {
     <div className="h-full" id="container">
       <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50">
         <div>
-          {/* <ProSidebarProvider>
+          <ProSidebarProvider>
             <Sidebar>
               <Menu className="bg-purple-200 text-pink-700">
                 < ShowWorkspaces />
                 <MenuItem>
-                  <Link href="/create">
+                  {/* <Link href="/create">
                     create
-                  </Link>
+                  </Link> */}
                 </MenuItem>
               </Menu>
             </Sidebar>
-          </ProSidebarProvider> */}
+          </ProSidebarProvider>
         </div>
       </div>
     </div>
