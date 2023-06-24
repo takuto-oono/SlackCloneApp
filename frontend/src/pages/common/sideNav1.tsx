@@ -13,9 +13,9 @@ export default function SideNav1() {
               <Menu className="bg-purple-200 text-pink-700">
                 < ShowWorkspaces />
                 <MenuItem>
-                  {/* <Link href="/create">
-                    create
-                  </Link> */}
+                  <Link href="main/create_workspace">
+                    <>create</>
+                  </Link>
                 </MenuItem>
               </Menu>
             </Sidebar>

@@ -61,9 +61,9 @@ const LoginForm = () => {
         </div>
       </form>
       <div>
-        <Link href="/signUp_page">
+        <a href="/main/signUp_page.tsx">
           <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
-        </Link>
+        </a>
       </div>
     </div>
   );
