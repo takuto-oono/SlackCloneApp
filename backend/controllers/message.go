@@ -44,51 +44,55 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
-	// トランザクションを宣言
-	tx := db.Begin()
-	if err := tx.Error; err != nil {
+	// // トランザクションを宣言
+	// tx := db.Begin()
+	// if err := tx.Error; err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 	return
+	// }
+
+	// // message情報をDBに登録
+	// if err := m.Create(tx); err != nil {
+	// 	tx.Rollback()
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 	return
+	// }
+
+	// // mentionの処理をする
+	// for _, userID := range in.MentionedUserIDs {
+	// 	men := models.NewMention(userID, m.ID)
+	// 	if err := men.Create(tx); err != nil {
+	// 		tx.Rollback()
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 		return
+	// 	}
+	// }
+
+	// // channelにいるuserをmessage_and_users tableに追加する
+	// caus, err := models.GetCAUsByChannelId(tx, m.ChannelId)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 	return
+	// }
+
+	// for _, cau := range caus {
+	// 	if cau.UserId == userId {
+	// 		continue
+	// 	}
+	// 	mau := models.NewMessageAndUser(m.ID, cau.UserId, false)
+	// 	if err := mau.Create(tx); err != nil {
+	// 		tx.Rollback()
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 		return
+	// 	}
+	// }
+
+	// tx.Commit()
+	if err = controllerUtils.SendMessageTX(*m, userId, in.MentionedUserIDs); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-
-	// message情報をDBに登録
-	if err := m.Create(tx); err != nil {
-		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
-	// mentionの処理をする
-	for _, userID := range in.MentionedUserIDs {
-		men := models.NewMention(userID, m.ID)
-		if err := men.Create(tx); err != nil {
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-	}
-
-	// channelにいるuserをmessage_and_users tableに追加する
-	caus, err := models.GetCAUsByChannelId(tx, m.ChannelId)
-	if err != nil {
-		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
-	for _, cau := range caus {
-		if cau.UserId == userId {
-			continue
-		}
-		mau := models.NewMessageAndUser(m.ID, cau.UserId, false)
-		if err := mau.Create(tx); err != nil {
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-	}
-
-	tx.Commit()
 	c.JSON(http.StatusOK, m)
 }
 
@@ -503,4 +507,39 @@ func ReadMessageByUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, mau)
+}
+
+func ChannelSocket(hub *Hub, ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Origin", "*")
+	// userID, err := Authenticate(ctx)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+	// 	return
+	// }
+
+	// urlからchannel_idを取得
+	channelID, err := utils.StringToUint(ctx.Param("channel_id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	fmt.Println(channelID)
+
+	// channelの情報を取得
+
+	go hub.run()
+	fmt.Println("in channelSocket func")
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	fmt.Println("conn", conn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// defer conn.Close()
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte)}
+	fmt.Println("client: ", client)
+	client.hub.register <- client
+	fmt.Println(hub.clients)
+
 }

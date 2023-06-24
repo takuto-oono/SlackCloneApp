@@ -62,9 +62,9 @@ func editMessageTestFunc(messageId uint, text, jwtToken string) *httptest.Respon
 }
 
 func TestSendMessage(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
+	// if testing.Short() {
+	// 	t.Skip("skipping test in short mode.")
+	// }
 
 	// 1. 正常な場合 200
 	// 2. bodyに不足がある場合 400
@@ -598,9 +598,9 @@ func TestEditMessage(t *testing.T) {
 }
 
 func TestReadMessageByUser(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1 channelのmessageの場合 200
 	// 2 dmのmessageの場合 200
