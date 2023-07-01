@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login';
 import { resetCookie } from "@src/fetchAPI/cookie";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import Button from "@mui/material/Button";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
 import { workspacesState } from "@src/utils/atom";
@@ -20,6 +20,7 @@ const LoginForm = () => {
   const [loginUser, setLoginUser] = useRecoilState(loginUserState);
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const setWorkspaces = useSetRecoilState(workspacesState);
+
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -61,9 +62,9 @@ const LoginForm = () => {
         </div>
       </form>
       <div>
-        <a href="/main/signUp_page.tsx">
-          <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
-        </a>
+          <button type="button"  onClick={() => router.push('/main/signUp_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+            まだアカウントを持っていませんか？
+          </button>
       </div>
     </div>
   );
