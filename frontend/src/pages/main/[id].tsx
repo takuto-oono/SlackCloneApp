@@ -1,5 +1,5 @@
 import { LoginForm } from "@src/components/main/user";
-import { ChannelComponent } from "./main/channel";
+import { ChannelComponent } from "../../components/main/channel";
 import { useCookies } from "react-cookie";
 import { useParams } from "react-router-dom";
 
@@ -8,11 +8,11 @@ const Main: React.FC = () => {
   const { channelID } = useParams<{ channelID: string }>();
   
   if (channelID) {
-  return (
-    <>
-      <ChannelComponent channelID={Number(channelID)} />
-    </>
-  );
+    return (
+      <>
+        <ChannelComponent channelID={Number(channelID)} />
+      </>
+    );
   } else {
     return <></>;
   }

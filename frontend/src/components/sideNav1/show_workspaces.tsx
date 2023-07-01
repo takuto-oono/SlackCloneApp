@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { UserInWorkspace, getUsersInWorkspace} from '@fetchAPI/workspace'
-import { Link } from 'react-router-dom';
+import React from "react";
+import { UserInWorkspace, getUsersInWorkspace } from '@fetchAPI/workspace'
 import { MenuItem } from "react-pro-sidebar";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { channelsState, usersInWState, workspacesState } from "@src/utils/atom";
@@ -21,15 +20,13 @@ function ShowWorkspaces() {
         setChannels(channels);
       });
   }
+
   const list = workspaces.map((workspace, index) => (
     <div key={index}>
       <MenuItem>
-				<Link
-					to={`${workspace.id}`}
-					onClick={() => getWorkspaceInfo(workspace.id)}
-				>
-					<>{workspace.name}</>
-				</Link>
+        <button type="button" onClick={() => getWorkspaceInfo(workspace.id)} className="inline-block align-baseline text-sm text-pink-700" >
+          <>{workspace.name}</>
+        </button>
 				<div className="bg-purple-200 text-pink-700">
 					<AddUserInWorkspaceForm workspaceID={workspace.id} />
 				</div>

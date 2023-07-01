@@ -1,11 +1,12 @@
 import Link from "next/link";
-import router from "next/router";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { signUp } from "src/fetchAPI/signUp";
 
 const SignUpForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter()
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);

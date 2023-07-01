@@ -1,9 +1,11 @@
 import React from "react";
 import { ProSidebarProvider, Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import ShowWorkspaces from "@src/components/sideNav1/show_workspaces";
-import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function SideNav1() {
+  const router = useRouter()
+
   return (
     <div className="h-full" id="container">
       <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50">
@@ -13,9 +15,9 @@ export default function SideNav1() {
               <Menu className="bg-purple-200 text-pink-700">
                 < ShowWorkspaces />
                 <MenuItem>
-                  <Link href="/main/create_workspace">
+                  <button type="button" onClick={() => router.push('/main/create_workspace')}>
                     <>create</>
-                  </Link>
+                  </button>
                 </MenuItem>
               </Menu>
             </Sidebar>
