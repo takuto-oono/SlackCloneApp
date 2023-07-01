@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"fmt"
+	"backend/models"
 )
 
 type Hub struct {
 	clients    map[*Client]bool
 	register   chan *Client
 	unregister chan *Client
+	message    chan models.Message
 }
 
 func newHub() *Hub {
@@ -23,12 +24,20 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
-			fmt.Println("in run func")
-			fmt.Println(h.clients)
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
-				// close(client.send)
+				close(client.send)
+			}
+		case m := <-h.message:
+			for client := range h.clients {
+				if m.ChannelId != client.channelID {
+					continue
+				}
+				select {
+				case client.send <- m:
+				}
+
 			}
 		}
 	}

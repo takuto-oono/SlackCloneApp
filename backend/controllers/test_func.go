@@ -14,6 +14,7 @@ import (
 )
 
 var testRouter = SetupRouter1()
+var testRouter2 = SetupRouter2()
 
 type LoginResponse struct {
 	Token    string `json:"token"`
@@ -143,4 +144,12 @@ func getAllUsersInChannelTestFuncV2(channelID int, jwtToken string) (*httptest.R
 	var users []UserResponse
 	json.Unmarshal(([]byte)(byteArray), &users)
 	return rr, users
+}
+
+func getAllMessagesFromChannelTestFuncV2(channelID int, jwtToken string) (*httptest.ResponseRecorder, []models.Message) {
+	rr := Req(http.MethodGet, "/api/message/get_from_channel/"+strconv.Itoa(channelID), jwtToken, nil)
+	byteArray, _ := io.ReadAll(rr.Body)
+	var messages []models.Message
+	json.Unmarshal(([]byte)(byteArray), &messages)
+	return rr, messages
 }

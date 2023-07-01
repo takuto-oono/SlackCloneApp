@@ -83,5 +83,4 @@ func SetupRouter2() *gin.Engine {
 		ChannelSocket(hub, ctx)
 	})
 	return r
-	
 }

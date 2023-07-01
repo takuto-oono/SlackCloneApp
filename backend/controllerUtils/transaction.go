@@ -11,7 +11,7 @@ func initTX() (*gorm.DB, error) {
 	return tx, tx.Error
 }
 
-func SendMessageTX(m models.Message, userID uint32, mentionedUserIDs []uint32) error {
+func SendMessageTX(m *models.Message, userID uint32, mentionedUserIDs []uint32) error {
 	tx, err := initTX()
 	if err != nil {
 		return err

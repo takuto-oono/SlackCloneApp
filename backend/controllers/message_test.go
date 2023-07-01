@@ -3,13 +3,16 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"io"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
 	"testing"
 
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
 
@@ -678,4 +681,70 @@ func TestReadMessageByUser(t *testing.T) {
 		assert.Equal(t, lr2.UserId, mau2.UserID)
 		assert.True(t, mau2.IsRead)
 	})
+}
+
+var addr = flag.String("addr", "localhost:8000", "http service address")
+
+func TestChannelSocket(t *testing.T) {
+	cnt := 10
+	lrs := make([]LoginResponse, cnt)
+
+	for i := 0; i < cnt; i++ {
+		rr, u := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr := loginTestFuncV2(u.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		lrs[i] = lr
+	}
+
+	rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lrs[0].Token, lrs[0].UserId)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	isPrivate := false
+	rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lrs[0].Token, w.ID)
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	for i, lr := range lrs {
+		if i == 0 {
+			continue
+		}
+		rr, _ := addUserInWorkspaceV2(w.ID, lr.UserId, 4, lrs[0].Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr.UserId, lrs[0].Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+	}
+
+	url := url.URL{Scheme: "ws", Host: *addr, Path: "/socket/get_channel_message/" + strconv.Itoa(ch.ID)}
+
+	// wss := make([]*websocket.Conn, cnt)
+
+	for _, lr := range lrs {
+		header := http.Header{}
+		header.Set("Authorization", lr.Token)
+		ws, _, err := websocket.DefaultDialer.Dial(url.String(), header)
+		if err != nil {
+			panic(err)
+		}
+		// wss[i] = ws
+		defer ws.Close()
+		// in := controllerUtils.SendMessageInput{
+		// 	Text:             randomstring.EnglishFrequencyString(30),
+		// 	ChannelId:        ch.ID,
+		// 	MentionedUserIDs: []uint32{},
+		// }
+		// ws.WriteMessage(1, utils.ByteToStruct(in))
+	}
+
+	sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lrs[0].Token, []uint32{})
+
+	rr, res := getAllMessagesFromChannelTestFuncV2(ch.ID, lrs[0].Token)
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, cnt, len(res))
+}
+
+func TestServer2(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/", nil)
+	testRouter2.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusOK, rr.Code)
 }
