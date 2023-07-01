@@ -37,12 +37,12 @@ const SignUpForm = () => {
         <div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">作成</button>
         </div>
-        <div>
-          <button type="button" onClick={() => router.push('/main/login_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" >
-            既に作成してある方はこちらへ
-          </button>
-        </div>
       </form>
+      <div>
+        <button type="button" onClick={() => router.push('/login_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" >
+          既に作成してある方はこちらへ
+        </button>
+      </div>
     </div>
   );
 };

@@ -4,7 +4,6 @@ import { LoginForm } from "@src/components/main/user";
 import { Workspace, getWorkspaces } from "@src/fetchAPI/workspace";
 import { useSetRecoilState } from "recoil";
 import { workspacesState } from "@src/utils/atom";
-import { useRouter } from "next/router";
 
 function LoginPage() {
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);

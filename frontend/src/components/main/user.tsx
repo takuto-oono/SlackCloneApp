@@ -39,7 +39,6 @@ const LoginForm = () => {
         setLoginUser(currentUser.username);
         getWorkspaces().then((workspaces: Workspace[]) => {
           setWorkspaces(workspaces);
-          router.push("/main")
         });
       }
     });
@@ -62,7 +61,7 @@ const LoginForm = () => {
         </div>
       </form>
       <div>
-          <button type="button"  onClick={() => router.push('/main/signUp_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+          <button type="button"  onClick={() => router.push('/signUp_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
             まだアカウントを持っていませんか？
           </button>
       </div>

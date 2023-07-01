@@ -13,7 +13,7 @@ export default function SideNav1() {
               <Menu className="bg-purple-200 text-pink-700">
                 < ShowWorkspaces />
                 <MenuItem>
-                  <Link href="main/create_workspace">
+                  <Link href="/main/create_workspace">
                     <>create</>
                   </Link>
                 </MenuItem>
