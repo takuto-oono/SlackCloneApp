@@ -71,7 +71,7 @@ func SetupRouter1() *gin.Engine {
 	return r
 }
 
-func SetupRouter2() *gin.Engine{
+func SetupRouter2() *gin.Engine {
 	r := settingRouter()
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"message": "server2 OK"})

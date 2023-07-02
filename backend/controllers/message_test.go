@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
@@ -71,6 +72,7 @@ func TestSendMessage(t *testing.T) {
 	// 3. userとchannelが同じworkspaceに存在していない場合 404
 	// 4. channelにuserが存在しない場合 404
 	// 5. mentionがある場合 200
+	// 6.スケジュールされたメッセージがある場合 200
 
 	t.Run("1 正常な場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
@@ -274,6 +276,38 @@ func TestSendMessage(t *testing.T) {
 		assert.Equal(t, lr.UserId, m.UserId)
 	})
 
+	t.Run("6 スケジュールされたメッセージがある場合", func(t *testing.T) {
+		isPrivate := false
+		rr, user := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr := loginTestFuncV2(user.Name, user.PassWord)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, scheduledMessage := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, time.Now().Add(time.Second*15))
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, res := getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 0, len(res))
+
+		for i := 0; i < 5; i++ {
+			rr, _ := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, utils.CreateDefaultTime())
+			assert.Equal(t, http.StatusOK, rr.Code)
+			time.Sleep(1 * time.Second)
+		}
+
+		rr, res = getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 5, len(res))
+		time.Sleep(time.Second * 15)
+		rr, res = getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 6, len(res))
+		assert.Equal(t, scheduledMessage.ID, res[0].ID)
+	})
 }
 
 func TestGetAllMessagesFromChannel(t *testing.T) {
@@ -598,9 +632,9 @@ func TestEditMessage(t *testing.T) {
 }
 
 func TestReadMessageByUser(t *testing.T) {
-	// if testing.Short() {
-	// 	t.Skip("skipping test in short mode.")
-	// }
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	// 1 channelのmessageの場合 200
 	// 2 dmのmessageの場合 200
@@ -629,7 +663,7 @@ func TestReadMessageByUser(t *testing.T) {
 		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, m := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr1.Token, []uint32{})
+		rr, m := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr1.Token, []uint32{}, utils.CreateDefaultTime())
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)
@@ -666,7 +700,7 @@ func TestReadMessageByUser(t *testing.T) {
 		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, m := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr2.UserId, w.ID, []uint32{})
+		rr, m := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr2.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)

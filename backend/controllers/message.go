@@ -30,7 +30,7 @@ func SendMessage(c *gin.Context) {
 	}
 
 	// message structを作成
-	m := models.NewChannelMessage(in.Text, in.ChannelId, userId)
+	m := models.NewChannelMessage(in.Text, in.ChannelId, userId, in.ScheduleTime)
 
 	// userとchannelが同じworkspaceに存在しているかを確認
 	if b, err := controllerUtils.IsExistChannelAndUserInSameWorkspace(m.ChannelId, userId); !b || err != nil {
@@ -120,7 +120,13 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, messages)
+	createResponse := func(messages []models.Message) []models.Message {
+		messages = controllerUtils.FilterByFutureScheduleTimeOfMessages(messages)
+		messages = controllerUtils.UpdateCreatedAt(messages)
+		return controllerUtils.SortMessageByCreatedAt(messages)
+	}
+
+	c.JSON(http.StatusOK, createResponse(messages))
 }
 
 func EditMessage(c *gin.Context) {
@@ -224,7 +230,7 @@ func SendDM(c *gin.Context) {
 	}
 
 	// direct_messages tableにデータを保存する
-	dm := models.NewDMMessage(in.Text, dl.ID, userId)
+	dm := models.NewDMMessage(in.Text, dl.ID, userId, in.ScheduleTime)
 	if err := dm.Create(tx); err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -292,7 +298,13 @@ func GetDMsInLine(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dms)
+	createResponse := func(messages []models.Message) []models.Message {
+		messages = controllerUtils.FilterByFutureScheduleTimeOfMessages(messages)
+		messages = controllerUtils.UpdateCreatedAt(messages)
+		return controllerUtils.SortMessageByCreatedAt(messages)
+	}
+
+	c.JSON(http.StatusOK, createResponse(dms))
 }
 
 type DMLineInfo struct {
