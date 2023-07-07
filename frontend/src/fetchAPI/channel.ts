@@ -16,6 +16,12 @@ export interface CurrentChannel {
   workspace_id: number;
 }
 
+export interface UserInChannel {
+  id: number;
+  name: string;
+  roleid: number;
+}
+
 const baseUrl = "http://localhost:8080/api/channel/";
 
 export async function getChannelsByWorkspaceId(
@@ -95,4 +101,35 @@ export async function addUserInChannel(chanelID: number, userID: number) {
   } catch (e) {
     console.log(e);
   }
+}
+
+export async function getUsersInChannel(channelId: number): Promise<UserInChannel[]> {
+  const url = baseUrl + "get_users/" + channelId;
+  let resUsersInChannel: UserInChannel[];
+  const usersInChannel = [{
+    id: 0,
+    name: "",
+    roleid: 0,
+  }];
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: getToken(),
+      },
+    });
+    
+    if (res.status == 200) {
+      resUsersInChannel = await res.json();
+      return new Promise((resolve) => {
+        const usersInChannel: UserInChannel[] = resUsersInChannel;
+        resolve(usersInChannel);
+      });
+    }
+    
+  } catch (err) {
+    console.log(err);
+  }
+  return usersInChannel;
 }
