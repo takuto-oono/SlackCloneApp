@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { channelsState, usersInCState, usersInWState } from "@src/utils/atom";
+import { channelsState, usersInCState } from "@src/utils/atom";
 import { useRouter } from "next/router";
 import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
 
@@ -27,7 +27,10 @@ function ShowChannels() {
       (usersInC: UserInChannel[]) => {
         setUsersInC(usersInC);
       });
-    router.push(`/main/${channelId}`)
+    router.push({
+      pathname: `/main/${channelId}`,
+      query: { channelId: channelId },
+    })
   }
 
   const list = channels.map((channel, index) => (
