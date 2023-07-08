@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login';
 import { resetCookie } from "@src/fetchAPI/cookie";
-import router, { useRouter } from "next/router";
+import router from "next/router";
 import Button from "@mui/material/Button";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
-import { workspacesState } from "@src/utils/atom";
-import { atom, useSetRecoilState, useRecoilState } from "recoil";
-import Link from "next/link";
+import { channelsState, usersInWState, workspacesState } from "@src/utils/atom";
+import { atom, useSetRecoilState, useRecoilState,  useResetRecoilState } from "recoil";
   
 export const loginUserState = atom<string>({
   key: "userName",
@@ -72,8 +71,21 @@ const LoginForm = () => {
 export { LoginForm };
   
 const Logout = () => {
+  const resetUsersInWState = useResetRecoilState(usersInWState);
+  const resetChannelsState = useResetRecoilState(channelsState);
+  const resetWorkspacesState = useResetRecoilState(workspacesState);
+  const resetLoginUserState =  useResetRecoilState(loginUserState);
+
+  const resetState = () => {
+    resetUsersInWState();
+    resetChannelsState();
+    resetWorkspacesState();
+    resetLoginUserState();
+  }
+
   const handleLogout = () => {
     console.log("logout");
+    resetState();
     resetCookie();
     router.push("/");
   };

@@ -12,13 +12,13 @@ function ShowWorkspaces() {
   const workspaces = useRecoilValue(workspacesState);
   const getWorkspaceInfo = (workspaceId: number) =>{
     getUsersInWorkspace(workspaceId).then(
-      (usersInW: UserInWorkspace[]) => {
-        setUsersInW(usersInW);
-      });
+    (usersInW: UserInWorkspace[]) => {
+      setUsersInW(usersInW);
+    });
     getChannelsByWorkspaceId(workspaceId).then(
-      (channels: Channel[]) => {
-        setChannels(channels);
-      });
+    (channels: Channel[]) => {
+      setChannels(channels);
+    });
   }
 
   const list = workspaces.map((workspace, index) => (
