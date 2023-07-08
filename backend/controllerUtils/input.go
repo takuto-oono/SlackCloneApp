@@ -2,6 +2,7 @@ package controllerUtils
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,9 +46,10 @@ type AddUserInChannelInput struct {
 }
 
 type SendMessageInput struct {
-	Text             string   `json:"text"`
-	ChannelId        int      `json:"channel_id"`
-	MentionedUserIDs []uint32 `json:"mentioned_user_ids"`
+	Text             string    `json:"text"`
+	ChannelId        int       `json:"channel_id"`
+	MentionedUserIDs []uint32  `json:"mentioned_user_ids"`
+	ScheduleTime     time.Time `json:"schedule_time"`
 }
 
 type EditMessageInput struct {
@@ -55,10 +57,11 @@ type EditMessageInput struct {
 }
 
 type SendDMInput struct {
-	ReceiveUserId    uint32   `json:"received_user_id"`
-	Text             string   `json:"text"`
-	WorkspaceId      int      `json:"workspace_id"`
-	MentionedUserIDs []uint32 `json:"mentioned_user_ids"`
+	ReceiveUserId    uint32    `json:"received_user_id"`
+	Text             string    `json:"text"`
+	WorkspaceId      int       `json:"workspace_id"`
+	MentionedUserIDs []uint32  `json:"mentioned_user_ids"`
+	ScheduleTime     time.Time `json:"schedule_time"`
 }
 
 type EditDMInput struct {

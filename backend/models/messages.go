@@ -5,34 +5,39 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"backend/utils"
 )
 
 type Message struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	Text      string    `json:"text" gorm:"not null"`
-	ChannelId int       `json:"channel_id"`
-	DMLineId  uint      `json:"dm_line_id" gorm:"column:dm_line_id"`
-	UserId    uint32    `json:"user_id" gorm:"not null"`
-	ThreadId  uint      `json:"thread_id"`
-	CreatedAt time.Time `json:"created_at" gorm:"not null"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"not null"`
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	Text         string    `json:"text" gorm:"not null"`
+	ChannelId    int       `json:"channel_id"`
+	DMLineId     uint      `json:"dm_line_id" gorm:"column:dm_line_id"`
+	UserId       uint32    `json:"user_id" gorm:"not null"`
+	ThreadId     uint      `json:"thread_id"`
+	ScheduleTime time.Time `json:"schedule_time"`
+	CreatedAt    time.Time `json:"created_at" gorm:"not null"`
+	UpdatedAt    time.Time `json:"updated_at" gorm:"not null"`
 }
 
-func NewChannelMessage(text string, channelId int, userId uint32) *Message {
+func NewChannelMessage(text string, channelId int, userId uint32, scheduleTime time.Time) *Message {
 	return &Message{
-		Text:      text,
-		ChannelId: channelId,
-		UserId:    userId,
-		DMLineId:  uint(0),
+		Text:         text,
+		ChannelId:    channelId,
+		UserId:       userId,
+		DMLineId:     uint(0),
+		ScheduleTime: scheduleTime,
 	}
 }
 
-func NewDMMessage(text string, dmLineId uint, userId uint32) *Message {
+func NewDMMessage(text string, dmLineId uint, userId uint32, scheduleTime time.Time) *Message {
 	return &Message{
-		Text:      text,
-		DMLineId:  dmLineId,
-		UserId:    userId,
-		ChannelId: 0,
+		Text:         text,
+		DMLineId:     dmLineId,
+		UserId:       userId,
+		ChannelId:    0,
+		ScheduleTime: scheduleTime,
 	}
 }
 
@@ -40,6 +45,7 @@ func (m *Message) Create(tx *gorm.DB) error {
 	if m.ChannelId != 0 && m.DMLineId != uint(0) {
 		return fmt.Errorf("channelId and dmLineId equal 0")
 	}
+	m.ScheduleTime = utils.GormTimeValidate(m.ScheduleTime)
 	return tx.Model(&Message{}).Create(m).Error
 }
 

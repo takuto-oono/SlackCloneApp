@@ -9,12 +9,14 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
 
 	"backend/controllerUtils"
 	"backend/models"
+	"backend/utils"
 )
 
 var dmRouter = SetupRouter1()
@@ -22,9 +24,9 @@ var dmRouter = SetupRouter1()
 func sendDMTestFunc(text, jwtToken string, receiveUserId uint32, workspaceId int, mentionedUserIDs []uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	jsonInput, _ := json.Marshal(controllerUtils.SendDMInput{
-		Text:          text,
-		WorkspaceId:   workspaceId,
-		ReceiveUserId: receiveUserId,
+		Text:             text,
+		WorkspaceId:      workspaceId,
+		ReceiveUserId:    receiveUserId,
 		MentionedUserIDs: mentionedUserIDs,
 	})
 	req, err := http.NewRequest("POST", "/api/dm/send", bytes.NewBuffer(jsonInput))
@@ -91,6 +93,7 @@ func TestSendDM(t *testing.T) {
 	// 4. requestしたuserがworkspaceに存在しない場合 404 (workspaceが存在しない場合も含まれる)
 	// 5. receiveするuserがworkspaceに存在しない場合 404
 	// 6 メンションがある場合 200
+	// 7 スケジュールされたメッセージがある場合 200
 
 	t.Run("1 正常な場合", func(t *testing.T) {
 		sendUserName := randomstring.EnglishFrequencyString(30)
@@ -295,7 +298,7 @@ func TestSendDM(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		assert.Equal(t, "{\"message\":\"receive user not found in workspace\"}", rr.Body.String())
 	})
-	
+
 	t.Run("6 メンションがある場合", func(t *testing.T) {
 		sendUserName := randomstring.EnglishFrequencyString(30)
 		receiveUserName := randomstring.EnglishFrequencyString(30)
@@ -353,6 +356,36 @@ func TestSendDM(t *testing.T) {
 
 		assert.Equal(t, dm1.DMLineId, dm2.DMLineId)
 		assert.Equal(t, dm1.DMLineId, dm3.DMLineId)
+	})
+
+	t.Run("7 スケジュールされたメッセージがある場合", func(t *testing.T) {
+		rr, user := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr := loginTestFuncV2(user.Name, user.PassWord)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, scheduledMessage := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, time.Now().Add(time.Second*15))
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, res := getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 0, len(res))
+
+		for i := 0; i < 5; i++ {
+			rr, _ := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
+			assert.Equal(t, http.StatusOK, rr.Code)
+			time.Sleep(1 * time.Second)
+		}
+
+		rr, res = getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 5, len(res))
+		time.Sleep(time.Second * 15)
+		rr, res = getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, 6, len(res))
+		assert.Equal(t, scheduledMessage.ID, res[0].ID)
 	})
 }
 
@@ -547,7 +580,7 @@ func TestGetDMLines(t *testing.T) {
 	t.Run("2 正常な場合 データが存在しない場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
-		
+
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
@@ -574,7 +607,7 @@ func TestGetDMLines(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
 		requestUserName := randomstring.EnglishFrequencyString(30)
-		
+
 		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
 		rr := loginTestFunc(userName, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)

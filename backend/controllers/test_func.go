@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"time"
 
+	"backend/controllerUtils"
 	"backend/models"
 	"backend/utils"
-	"backend/controllerUtils"
 )
 
 var testRouter = SetupRouter1()
@@ -104,11 +105,12 @@ func addUserInChannelTestFuncV2(channelID int, userID uint32, jwtToken string) (
 	return rr, cau
 }
 
-func sendMessageTestFuncV2(text string, channelID int, jwtToken string, mentionedUserIDs []uint32) (*httptest.ResponseRecorder, models.Message) {
+func sendMessageTestFuncV2(text string, channelID int, jwtToken string, mentionedUserIDs []uint32, scheduleTime time.Time) (*httptest.ResponseRecorder, models.Message) {
 	rr := Req(http.MethodPost, "/api/message/send", jwtToken, controllerUtils.SendMessageInput{
 		Text:             text,
 		ChannelId:        channelID,
 		MentionedUserIDs: mentionedUserIDs,
+		ScheduleTime:     scheduleTime,
 	})
 	byteArray, _ := io.ReadAll(rr.Body)
 	var m models.Message
@@ -116,12 +118,13 @@ func sendMessageTestFuncV2(text string, channelID int, jwtToken string, mentione
 	return rr, m
 }
 
-func sendDMTestFuncV2(text string, jwtToken string, receiveUserID uint32, workspaceID int, mentionedUserIDs []uint32) (*httptest.ResponseRecorder, models.Message) {
+func sendDMTestFuncV2(text string, jwtToken string, receiveUserID uint32, workspaceID int, mentionedUserIDs []uint32, scheduleTime time.Time) (*httptest.ResponseRecorder, models.Message) {
 	rr := Req(http.MethodPost, "/api/dm/send", jwtToken, controllerUtils.SendDMInput{
 		Text:             text,
 		ReceiveUserId:    receiveUserID,
 		WorkspaceId:      workspaceID,
 		MentionedUserIDs: mentionedUserIDs,
+		ScheduleTime:     scheduleTime,
 	})
 	byteArray, _ := io.ReadAll(rr.Body)
 	var m models.Message
@@ -143,4 +146,20 @@ func getAllUsersInChannelTestFuncV2(channelID int, jwtToken string) (*httptest.R
 	var users []UserResponse
 	json.Unmarshal(([]byte)(byteArray), &users)
 	return rr, users
+}
+
+func getAllMessagesFromChannelTestFuncV2(channelID int, jwtToken string) (*httptest.ResponseRecorder, []models.Message) {
+	rr := Req(http.MethodGet, "/api/message/get_from_channel/"+strconv.Itoa(channelID), jwtToken, nil)
+	byteArray, _ := io.ReadAll(rr.Body)
+	var messages []models.Message
+	json.Unmarshal(([]byte)(byteArray), &messages)
+	return rr, messages
+}
+
+func getDMsInLineTestFuncV2(dmLineID uint, jwtToken string) (*httptest.ResponseRecorder, []models.Message) {
+	rr := Req(http.MethodGet, "/api/dm/"+utils.UintToString(dmLineID), jwtToken, nil)
+	byteArray, _ := io.ReadAll(rr.Body)
+	var messages []models.Message
+	json.Unmarshal(([]byte)(byteArray), &messages)
+	return rr, messages
 }

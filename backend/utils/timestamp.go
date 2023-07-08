@@ -4,12 +4,13 @@ import (
 	"time"
 )
 
-var TimeFormat = "2006-01-02 15:04:05.000000"
-
-func GetCurrentTime() string {
-	return time.Now().Format(TimeFormat)
+func CreateDefaultTime() time.Time {
+	return time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func TimeFromString(dateString string) (time.Time, error) {
-	return time.Parse(TimeFormat, dateString)
+func GormTimeValidate(t time.Time) time.Time {
+	if t.Year() == 0001 {
+		return CreateDefaultTime()
+	}
+	return t
 }

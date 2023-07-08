@@ -8,6 +8,7 @@ import (
 
 	"backend/controllerUtils"
 	"backend/models"
+	"backend/utils"
 )
 
 func PostThread(c *gin.Context) {
@@ -78,7 +79,7 @@ func PostThread(c *gin.Context) {
 		}
 
 		// message structを作成
-		m = models.NewChannelMessage(in.Text, parentMessage.ChannelId, userId)
+		m = models.NewChannelMessage(in.Text, parentMessage.ChannelId, userId, utils.CreateDefaultTime())
 	} else if parentMessage.ChannelId == 0 && parentMessage.DMLineId != uint(0) {
 		// parentMessageが存在するDMLineにuserが参加しているかを確認
 		b, err := controllerUtils.IsExistUserInDL(userId, parentMessage.DMLineId)
@@ -94,7 +95,7 @@ func PostThread(c *gin.Context) {
 		}
 
 		// message structを作成
-		m = models.NewDMMessage(in.Text, parentMessage.DMLineId, userId)
+		m = models.NewDMMessage(in.Text, parentMessage.DMLineId, userId, utils.CreateDefaultTime())
 	} else {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "wrong channel_id or dm_line_id"})

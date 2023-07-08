@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xyproto/randomstring"
 	"gorm.io/gorm"
+
+	"backend/utils"
 )
 
 func TestCreateMessage(t *testing.T) {
@@ -19,11 +21,11 @@ func TestCreateMessage(t *testing.T) {
 		text := randomstring.EnglishFrequencyString(30)
 		channelId := rand.Int()
 		userId := rand.Uint32()
-		m := NewChannelMessage(text, channelId, userId)
+		m := NewChannelMessage(text, channelId, userId, utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 		assert.NotEqual(t, 0, m.ID)
 		assert.NotEqual(t, "", m.CreatedAt)
-		m = NewChannelMessage(text, channelId, userId)
+		m = NewChannelMessage(text, channelId, userId, utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 		assert.NotEqual(t, 0, m.ID)
 		assert.NotEqual(t, "", m.CreatedAt)
@@ -33,11 +35,11 @@ func TestCreateMessage(t *testing.T) {
 		text := randomstring.EnglishFrequencyString(30)
 		dmLineId := uint(rand.Uint32())
 		userId := rand.Uint32()
-		m := NewDMMessage(text, dmLineId, userId)
+		m := NewDMMessage(text, dmLineId, userId, utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 		assert.NotEqual(t, 0, m.ID)
 		assert.NotEqual(t, "", m.CreatedAt)
-		m = NewDMMessage(text, dmLineId, userId)
+		m = NewDMMessage(text, dmLineId, userId, utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 		assert.NotEqual(t, 0, m.ID)
 		assert.NotEqual(t, "", m.CreatedAt)
@@ -59,7 +61,7 @@ func TestGetMessagesByChannelId(t *testing.T) {
 		userId := rand.Uint32()
 
 		for _, text := range texts {
-			m := NewChannelMessage(text, channelId, userId)
+			m := NewChannelMessage(text, channelId, userId, utils.CreateDefaultTime())
 			assert.Empty(t, m.Create(db))
 			time.Sleep(50 * time.Millisecond)
 		}
@@ -99,7 +101,7 @@ func TestGetMessagesByDlId(t *testing.T) {
 		userId := rand.Uint32()
 
 		for _, text := range texts {
-			m := NewDMMessage(text, dlId, userId)
+			m := NewDMMessage(text, dlId, userId, utils.CreateDefaultTime())
 			assert.Empty(t, m.Create(db))
 			time.Sleep(50 * time.Millisecond)
 		}
@@ -130,7 +132,7 @@ func TestGetMessageById(t *testing.T) {
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
+		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32(), utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 		res, err := GetMessageById(db, m.ID)
 		assert.Empty(t, err)
@@ -154,7 +156,7 @@ func TestUpdateMessageText(t *testing.T) {
 	}
 
 	t.Run("1 データが存在する場合", func(t *testing.T) {
-		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32())
+		m := NewChannelMessage(randomstring.EnglishFrequencyString(100), rand.Int(), rand.Uint32(), utils.CreateDefaultTime())
 		assert.Empty(t, m.Create(db))
 
 		newText := randomstring.EnglishFrequencyString(100)
@@ -189,7 +191,7 @@ func TestGetMessagesThreadId(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
+	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32(), utils.CreateDefaultTime())
 	assert.Empty(t, m.Create(db))
 	message, _ := GetMessageById(db, m.ID)
 	assert.Equal(t, uint(0), message.ThreadId)
@@ -200,7 +202,7 @@ func TestUpdateMessageThreadId(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32())
+	m := NewChannelMessage(randomstring.EnglishFrequencyString(30), rand.Int(), rand.Uint32(), utils.CreateDefaultTime())
 	assert.Empty(t, m.Create(db))
 	threadId := uint(rand.Uint32())
 	assert.Empty(t, m.UpdateMessageThreadId(db, threadId))
