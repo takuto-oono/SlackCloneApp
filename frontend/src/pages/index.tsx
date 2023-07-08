@@ -6,7 +6,7 @@ import { loginUserState } from "@src/components/main/user";
 export default function Home() {
   const loginUser =  useRecoilValue(loginUserState);
 
-  if (loginUser.length == 0) {
+  if (!loginUser) {
     return <LoginPage />;
   } else {
     return <></>;

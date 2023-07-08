@@ -7,7 +7,7 @@ import { useRecoilValue } from "recoil";
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState);
   
-  if (workspaceId != 0) {
+  if (workspaceId) {
     return (
       <div className="h-full" id="container">
         <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50" >

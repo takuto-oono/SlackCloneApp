@@ -17,7 +17,7 @@ export default function SideNav1() {
     resetWorkspaceIdState();
     router.push('/create_workspace')
   }
-  if (loginUser.length != 0) {
+  if (loginUser) {
     return (
       <div className="h-full" id="container">
         <div className="bg-purple-200 h-full text-pink-700 border-r-2 border-pink-50">
