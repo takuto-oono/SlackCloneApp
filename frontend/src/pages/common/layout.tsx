@@ -14,10 +14,10 @@ const Layout: React.FC<LayoutProps> = ({ children }: LayoutProps)=>{
         <div className="h-full">
           <Header />
           <div className="h-full flex">
-            <div>
+            <div className="truncate w-32 border-r-2 border-pink-50">
               <SideNav1 />
             </div>
-            <div>
+            <div className="truncate w-36 ">
               <SideNav2 />
             </div>
             <main>

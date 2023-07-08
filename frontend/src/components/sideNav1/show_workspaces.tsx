@@ -33,11 +33,10 @@ function ShowWorkspaces() {
     <div key={index}>
       <MenuItem>
         <button type="button" onClick={() => getWorkspaceInfo(workspace.id)} className="inline-block align-baseline text-sm text-pink-700" >
-          <>{workspace.name}</>
+          <div className="truncate">
+            {workspace.name}
+          </div>
         </button>
-				<div className="bg-purple-200 text-pink-700">
-					<AddUserInWorkspaceForm workspaceID={workspace.id} />
-				</div>
 			</MenuItem>
     </div>
   ));

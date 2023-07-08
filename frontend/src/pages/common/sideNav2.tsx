@@ -3,6 +3,7 @@ import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
 import ShowChannels from "@src/components/sideNav2/[id]";
 import { workspaceIdState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
+import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
 
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState);
