@@ -28,7 +28,7 @@ function ShowChannels() {
         setUsersInC(usersInC);
       });
     router.push({
-      pathname: `/main/${channelId}`,
+      pathname: `/main`,
       query: { channelId: channelId },
     })
   }

@@ -2,12 +2,18 @@ import React from "react";
 import { ProSidebarProvider, Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import ShowWorkspaces from "@src/components/sideNav1/show_workspaces";
 import { useRouter } from "next/router";
-import { workspacesState } from "@src/utils/atom";
-import { useRecoilValue } from "recoil";
+import { channelsState, workspacesState } from "@src/utils/atom";
+import { useRecoilValue, useResetRecoilState } from "recoil";
 
 export default function SideNav1() {
   const router = useRouter()
   const workspaces = useRecoilValue(workspacesState);
+  const resetChannelsState = useResetRecoilState(channelsState);
+
+  const exitWorkspace = () => {
+    resetChannelsState();
+    router.push('/create_workspace')
+  }
   if (workspaces.length != 0) {
     return (
       <div className="h-full" id="container">
@@ -18,7 +24,7 @@ export default function SideNav1() {
                 <Menu className="bg-purple-200 text-pink-700">
                   < ShowWorkspaces />
                   <MenuItem>
-                    <button type="button" onClick={() => router.push('/main/create_workspace')}>
+                    <button type="button" onClick={() => exitWorkspace() }>
                       <>create</>
                     </button>
                   </MenuItem>

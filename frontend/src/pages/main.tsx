@@ -1,4 +1,4 @@
-import { ChannelComponent } from "../../components/main/channel";
+import { ChannelComponent } from "../components/main/channel";
 import { useRouter } from "next/router";
 
 const Main: React.FC = () => {

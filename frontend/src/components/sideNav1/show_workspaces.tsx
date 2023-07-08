@@ -5,11 +5,14 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { channelsState, usersInWState, workspacesState } from "@src/utils/atom";
 import { Channel, getChannelsByWorkspaceId } from "@src/fetchAPI/channel";
 import { AddUserInWorkspaceForm } from "../popUp/add_user_in_workspace_form";
+import { useRouter } from "next/router";
 
 function ShowWorkspaces() {
+  const router = useRouter();
   const setUsersInW = useSetRecoilState(usersInWState);
   const setChannels = useSetRecoilState(channelsState);
   const workspaces = useRecoilValue(workspacesState);
+
   const getWorkspaceInfo = (workspaceId: number) =>{
     getUsersInWorkspace(workspaceId).then(
     (usersInW: UserInWorkspace[]) => {
@@ -19,6 +22,9 @@ function ShowWorkspaces() {
     (channels: Channel[]) => {
       setChannels(channels);
     });
+    router.push({
+      query: { workspaceId: workspaceId },
+    })
   }
 
   const list = workspaces.map((workspace, index) => (

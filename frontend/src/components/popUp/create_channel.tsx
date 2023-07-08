@@ -1,14 +1,14 @@
 import { postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
-import { useParams } from 'react-router-dom';
 import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
+import router from "next/router";
 
 const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId } = router.query
 
   const handleOpen = () => {
     setOpen(true);
