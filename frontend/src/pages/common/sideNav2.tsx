@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
-import ShowChannels from "@src/components/sideNav2/[id]";
+import ShowUserChannels from "@src/components/sideNav2/show_user_channels";
 import { workspaceIdState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
 import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
@@ -21,7 +21,7 @@ export default function SideNav2() {
                   </div>
                   <div>
                     <Menu className="pd-5 bg-purple-200 text-pink-700">
-                      < ShowChannels />
+                      < ShowUserChannels />
                     </Menu>
                   </div>
                   <div>

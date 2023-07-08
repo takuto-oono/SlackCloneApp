@@ -8,7 +8,7 @@ import { channelsState, usersInCState } from "@src/utils/atom";
 import { useRouter } from "next/router";
 import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
 
-function ShowChannels() {
+function ShowUserChannels() {
   const [open, setOpen] = useState(false);
   const divRef = useRef(null);
   const channels = useRecoilValue(channelsState);
@@ -72,6 +72,5 @@ function ShowChannels() {
   )
 }
 
-
-export default ShowChannels;
+export default ShowUserChannels;
 
