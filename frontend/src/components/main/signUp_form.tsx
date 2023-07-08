@@ -40,7 +40,7 @@ const SignUpForm = () => {
         </div>
       </form>
       <div>
-        <button type="button" onClick={() => router.push('/login_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" >
+        <button type="button" onClick={() => router.push('/')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" >
           既に作成してある方はこちらへ
         </button>
       </div>
