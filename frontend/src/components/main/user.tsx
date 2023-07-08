@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login';
-import { resetCookie } from "@src/fetchAPI/cookie";
+import { resetCookie } from "@src/utils/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
-import { channelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
-import { atom, useSetRecoilState, useRecoilState,  useResetRecoilState } from "recoil";
-  
-export const loginUserState = atom<string>({
-  key: "userName",
-  default: ""
-})
+import { channelsState, loginUserState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { useSetRecoilState, useRecoilState,  useResetRecoilState } from "recoil";
+
 
 const LoginForm = () => {
   const [name, setName] = useState("");

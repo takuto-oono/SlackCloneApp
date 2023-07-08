@@ -2,9 +2,8 @@ import React from "react";
 import { ProSidebarProvider, Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import ShowWorkspaces from "@src/components/sideNav1/show_workspaces";
 import { useRouter } from "next/router";
-import { channelsState, workspaceIdState } from "@src/utils/atom";
+import { channelsState, loginUserState, workspaceIdState } from "@src/utils/atom";
 import { useRecoilValue, useResetRecoilState } from "recoil";
-import { loginUserState } from "@src/components/main/user";
 
 export default function SideNav1() {
   const router = useRouter()
