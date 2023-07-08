@@ -1,14 +1,15 @@
 import { postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
 import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
-import router from "next/router";
+import { workspaceIdState } from "@src/utils/atom";
+import { useRecoilValue } from "recoil";
 
 const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const { workspaceId } = router.query
+  const workspaceId = useRecoilValue(workspaceIdState);
 
   const handleOpen = () => {
     setOpen(true);
