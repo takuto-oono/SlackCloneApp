@@ -37,7 +37,9 @@ function ShowChannels() {
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
         <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >
-         <>{channel.name}</>
+          <div className="truncate">
+            {channel.name}
+          </div>
         </button>
       </MenuItem>
     </div>
@@ -45,7 +47,7 @@ function ShowChannels() {
 
   return (
     <div>
-      <SubMenu label="Channels">
+      <SubMenu label="Channels" className="truncate w-36">
         {list}
         <div ref={divRef}  className="bg-purple-200 text-pink-700">
           <Button onClick={handleClickOpen}>
