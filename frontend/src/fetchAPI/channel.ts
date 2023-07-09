@@ -24,7 +24,7 @@ export interface UserInChannel {
 
 const baseUrl = "http://localhost:8080/api/channel/";
 
-export async function getChannelsByWorkspaceId(
+export async function getUserChannels(
   workspace_id: number
 ): Promise<Channel[]> {
   const url = baseUrl + "get_by_user_and_workspace/" + workspace_id;

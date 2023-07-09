@@ -5,7 +5,7 @@ import { resetCookie } from "@src/utils/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
-import { channelsState, loginUserState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { userChannelsState, loginUserState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useSetRecoilState, useRecoilState,  useResetRecoilState } from "recoil";
 
 
@@ -69,14 +69,14 @@ export { LoginForm };
 const Logout = () => {
   // ToDo: resetState用の関数をutilsに作る
   const resetUsersInWState = useResetRecoilState(usersInWState);
-  const resetChannelsState = useResetRecoilState(channelsState);
+  const resetUserChannelsState = useResetRecoilState(userChannelsState);
   const resetWorkspacesState = useResetRecoilState(workspacesState);
   const resetLoginUserState = useResetRecoilState(loginUserState);
   const resetWorkspaceIdState =  useResetRecoilState(workspaceIdState);
 
   const resetState = () => {
     resetUsersInWState();
-    resetChannelsState();
+    resetUserChannelsState();
     resetWorkspacesState();
     resetLoginUserState();
     resetWorkspaceIdState();

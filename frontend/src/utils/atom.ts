@@ -17,8 +17,8 @@ export const workspacesState = atom<Workspace[]>({
   default: [],
 })
 
-export const channelsState = atom<Channel[]>({
-  key: "channels",
+export const userChannelsState = atom<Channel[]>({
+  key: "userChannels",
   default: []
 })
 
