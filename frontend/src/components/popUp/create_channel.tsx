@@ -1,14 +1,15 @@
 import { postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
-import { useParams } from 'react-router-dom';
 import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
+import { workspaceIdState } from "@src/utils/atom";
+import { useRecoilValue } from "recoil";
 
 const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const workspaceId = useRecoilValue(workspaceIdState);
 
   const handleOpen = () => {
     setOpen(true);
@@ -63,9 +64,9 @@ const CreateChannelForm = () => {
               </label>
               <label className="block">
                 <input className="mr-2" type="radio" name="isPrivate" onChange={isPrivateChangeFalse} checked />
-                <span>
+                <>
                   パブリック : Slack 内の全員
-                </span>
+                </>
               </label>
             </fieldset>
           </DialogContent>

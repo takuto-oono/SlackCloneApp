@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { postWorkspace } from '@fetchAPI/workspace';
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 function CreateWorkspace() {
   const [name, setName] = useState("");
-  const navigate = useNavigate();
+  const router = useRouter()
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
@@ -14,7 +14,6 @@ function CreateWorkspace() {
     console.log("create");
     let workspaceName = name;
     postWorkspace(workspaceName);
-    navigate("/workspace");
     // ワークスペースのリストを更新する(Todo)
   };
   return (

@@ -1,4 +1,4 @@
-import { getToken } from "./cookie";
+import { getToken } from "../utils/cookie";
 
 export interface User {
     id: string;

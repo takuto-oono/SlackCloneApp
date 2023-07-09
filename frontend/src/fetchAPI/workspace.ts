@@ -1,5 +1,5 @@
 import router from "next/router";
-import { getToken,resetCookie,getUserId } from "./cookie";
+import { getToken,resetCookie,getUserId } from "../utils/cookie";
 
 export interface Workspace {
     id: number;

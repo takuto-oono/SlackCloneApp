@@ -1,18 +1,13 @@
 import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 import { currentUser, login } from '@fetchAPI/login';
-import { resetCookie } from "@src/fetchAPI/cookie";
+import { resetCookie } from "@src/utils/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
-import { Link, useNavigate } from "react-router-dom";
 import { getWorkspaces, Workspace} from '@fetchAPI/workspace';
-import { workspacesState } from "@src/utils/atom";
-import { atom, useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
-  
-export const loginUserState = atom<string>({
-  key: "userName",
-  default: ""
-})
+import { channelsState, loginUserState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { useSetRecoilState, useRecoilState,  useResetRecoilState } from "recoil";
+
 
 const LoginForm = () => {
   const [name, setName] = useState("");
@@ -20,7 +15,7 @@ const LoginForm = () => {
   const [loginUser, setLoginUser] = useRecoilState(loginUserState);
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id']);
   const setWorkspaces = useSetRecoilState(workspacesState);
-  const navigate = useNavigate();
+
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -39,7 +34,6 @@ const LoginForm = () => {
         setLoginUser(currentUser.username);
         getWorkspaces().then((workspaces: Workspace[]) => {
           setWorkspaces(workspaces);
-          navigate("workspace");
         });
       }
     });
@@ -60,12 +54,12 @@ const LoginForm = () => {
         <div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">ログイン</button>
         </div>
-        <div>
-          <Link to="/signUp_form">
-              <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">まだアカウントを持っていませんか？</button>
-          </Link>
-        </div>
       </form>
+      <div>
+          <button type="button"  onClick={() => router.push('/signUp_page')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+            まだアカウントを持っていませんか？
+          </button>
+      </div>
     </div>
   );
 }
@@ -73,8 +67,24 @@ const LoginForm = () => {
 export { LoginForm };
   
 const Logout = () => {
+  // ToDo: resetState用の関数をutilsに作る
+  const resetUsersInWState = useResetRecoilState(usersInWState);
+  const resetChannelsState = useResetRecoilState(channelsState);
+  const resetWorkspacesState = useResetRecoilState(workspacesState);
+  const resetLoginUserState = useResetRecoilState(loginUserState);
+  const resetWorkspaceIdState =  useResetRecoilState(workspaceIdState);
+
+  const resetState = () => {
+    resetUsersInWState();
+    resetChannelsState();
+    resetWorkspacesState();
+    resetLoginUserState();
+    resetWorkspaceIdState();
+  }
+
   const handleLogout = () => {
     console.log("logout");
+    resetState();
     resetCookie();
     router.push("/");
   };

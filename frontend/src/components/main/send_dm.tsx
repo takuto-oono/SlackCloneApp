@@ -1,12 +1,13 @@
-import { getUserId } from "@src/fetchAPI/cookie";
+import { workspaceIdState } from "@src/utils/atom";
+import { getUserId } from "@src/utils/cookie";
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import { sendDM, SendDMForm } from "src/fetchAPI/message";
 
 const SendDM = () => {
   const [text, setText] = useState("");
-  const workspaceID: number = Number(useParams<{ workspaceId: string }>().workspaceId)
-  
+  const workspaceID = useRecoilValue(workspaceIdState);
+
   const doChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   };

@@ -48,7 +48,7 @@ export const AddUserInWorkspaceForm: React.FC<Props> = (props: Props) => {
 		<>
 			<div>
 				<Button onClick={handleOpen}>
-					<p className="text-black">新しいユーザーを追加</p>
+					<p className="bg-purple-200 text-pink-700">ユーザーを追加</p>
 				</Button>
 			</div>
 			<Dialog open={open} onClose={handleClose}>

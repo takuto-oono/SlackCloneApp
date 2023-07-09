@@ -1,16 +1,19 @@
 import React, { useRef, useState } from "react";
-import { Link } from 'react-router-dom';
 import { MenuItem, SubMenu } from "react-pro-sidebar";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
-import { useRecoilValue } from "recoil";
-import { channelsState } from "@src/utils/atom";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { channelsState, usersInCState } from "@src/utils/atom";
+import { useRouter } from "next/router";
+import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
 
-function ShowChannels() {
+function ShowUserChannels() {
   const [open, setOpen] = useState(false);
   const divRef = useRef(null);
   const channels = useRecoilValue(channelsState);
+  const router = useRouter()
+  const setUsersInC = useSetRecoilState(usersInCState);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -19,19 +22,32 @@ function ShowChannels() {
     setOpen(false);
   };
 
-  const list = channels.map((item, index) => (
+  const getChannelInfo = (channelId: number) =>{
+    getUsersInChannel(channelId).then(
+      (usersInC: UserInChannel[]) => {
+        setUsersInC(usersInC);
+      });
+    router.push({
+      pathname: `/main`,
+      query: { channelId: channelId },
+    })
+  }
+
+  const list = channels.map((channel, index) => (
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
-        <Link to={`channel/${item.id}`}>
-          <span>{item.name}</span>
-        </Link>
+        <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >
+          <div className="truncate">
+            {channel.name}
+          </div>
+        </button>
       </MenuItem>
     </div>
   ));
 
   return (
     <div>
-      <SubMenu label="Channels">
+      <SubMenu label="Channels" className="truncate w-36">
         {list}
         <div ref={divRef}  className="bg-purple-200 text-pink-700">
           <Button onClick={handleClickOpen}>
@@ -56,6 +72,5 @@ function ShowChannels() {
   )
 }
 
-
-export default ShowChannels;
+export default ShowUserChannels;
 

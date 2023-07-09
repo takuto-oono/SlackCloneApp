@@ -1,4 +1,4 @@
-import { loginUserState } from "../main/user"
+import { loginUserState } from "@src/utils/atom";
 import React from "react";
 import { useRecoilValue } from 'recoil';
 

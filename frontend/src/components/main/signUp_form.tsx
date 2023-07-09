@@ -1,10 +1,12 @@
+import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { signUp } from "src/fetchAPI/signUp";
-import { Link } from 'react-router-dom';
 
 const SignUpForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter()
 
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -36,12 +38,12 @@ const SignUpForm = () => {
         <div>
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">作成</button>
         </div>
-        <div>
-          <Link to="/">
-            <button className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">既に作成してある方はこちらへ</button>
-          </Link>
-        </div>
       </form>
+      <div>
+        <button type="button" onClick={() => router.push('/')} className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" >
+          既に作成してある方はこちらへ
+        </button>
+      </div>
     </div>
   );
 };

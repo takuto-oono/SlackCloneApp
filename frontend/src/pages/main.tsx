@@ -1,19 +1,19 @@
-import { ChannelComponent } from "./main/channel";
-import { Channel } from "@src/fetchAPI/channel";
-import { useParams } from "react-router-dom";
+import { ChannelComponent } from "../components/main/channel";
+import { useRouter } from "next/router";
 
 const Main: React.FC = () => {
-	const { channelID } = useParams<{ channelID: string }>();
+  const router = useRouter()
+  const { channelId } = router.query
 
-	if (channelID) {
-		return (
-			<>
-				<ChannelComponent channelID={Number(channelID)} />
-			</>
-		);
-	}
-
-	return <></>;
+  if (channelId) {
+    return (
+      <>
+        <ChannelComponent channelID={Number(channelId)} />
+      </>
+    );
+  } else {
+    return <></>;
+  }
 };
 
 export default Main;
