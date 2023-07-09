@@ -4,14 +4,14 @@ import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { channelsState, usersInCState } from "@src/utils/atom";
+import { userChannelsState, usersInCState } from "@src/utils/atom";
 import { useRouter } from "next/router";
 import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
 
 function ShowUserChannels() {
   const [open, setOpen] = useState(false);
   const divRef = useRef(null);
-  const channels = useRecoilValue(channelsState);
+  const userChannels = useRecoilValue(userChannelsState);
   const router = useRouter()
   const setUsersInC = useSetRecoilState(usersInCState);
 
@@ -33,7 +33,7 @@ function ShowUserChannels() {
     })
   }
 
-  const list = channels.map((channel, index) => (
+  const list = userChannels.map((channel, index) => (
     <div key={index}>
       <MenuItem className="bg-purple-200 text-pink-700">
         <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >

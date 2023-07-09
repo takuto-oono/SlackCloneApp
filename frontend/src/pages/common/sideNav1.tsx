@@ -2,17 +2,17 @@ import React from "react";
 import { ProSidebarProvider, Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import ShowWorkspaces from "@src/components/sideNav1/show_workspaces";
 import { useRouter } from "next/router";
-import { channelsState, loginUserState, workspaceIdState } from "@src/utils/atom";
+import { userChannelsState, loginUserState, workspaceIdState } from "@src/utils/atom";
 import { useRecoilValue, useResetRecoilState } from "recoil";
 
 export default function SideNav1() {
   const router = useRouter()
-  const resetChannelsState = useResetRecoilState(channelsState);
+  const resetUserChannelsState = useResetRecoilState(userChannelsState);
   const resetWorkspaceIdState =  useResetRecoilState(workspaceIdState);
   const loginUser =  useRecoilValue(loginUserState);
 
   const exitWorkspace = () => {
-    resetChannelsState();
+    resetUserChannelsState();
     resetWorkspaceIdState();
     router.push('/create_workspace')
   }
