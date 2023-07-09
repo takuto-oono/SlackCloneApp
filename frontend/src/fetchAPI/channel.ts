@@ -20,12 +20,45 @@ export interface CurrentChannel {
 
 const baseUrl = "http://localhost:8080/api/channel/";
 
-export async function getUserChannels(
+export async function getUserChannelsInW(
   workspace_id: number
 ): Promise<Channel[]> {
   const url = baseUrl + "get_by_user_and_workspace/" + workspace_id;
   console.log(url);
-  // let res_channels: Channel[]
+  let res_channels = [
+    {
+      id: 0,
+      name: "",
+      description: "",
+      is_private: false,
+      is_archive: false,
+      workspace_id: 0,
+    },
+  ];
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: getToken(),
+      },
+    });
+    console.log(res);
+    res_channels = await res.json();
+    return new Promise((resolve) => {
+      resolve(res_channels);
+    });
+  } catch (err) {
+    console.log("err");
+    console.log(err);
+  }
+  return res_channels;
+}
+
+export async function getChannelsInW(
+  workspace_id: number
+): Promise<Channel[]> {
+  const url = baseUrl + workspace_id;
+  console.log(url);
   let res_channels = [
     {
       id: 0,
