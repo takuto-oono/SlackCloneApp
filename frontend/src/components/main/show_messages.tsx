@@ -2,7 +2,6 @@ import { getMessagesFromChannel, Message } from "@src/fetchAPI/message";
 import { UserInWorkspace } from "@src/fetchAPI/workspace";
 import React, { useState, useEffect } from "react";
 import { useRecoilValue } from "recoil";
-import { UserInChannel } from "@src/fetchAPI/channel";
 import { usersInCState } from "@src/utils/atom";
 
 type Props = {
@@ -32,7 +31,7 @@ const showItem: React.FC<Message> = (
 
 export const ShowMessagesComponent: React.FC<Props> = (props: Props) => {
 	const [messages, setMessages] = useState<Message[]>([]);
-	const users: UserInChannel[] = useRecoilValue(usersInCState);
+	const users: UserInWorkspace[] = useRecoilValue(usersInCState);
 
 	useEffect(() => {
 		const timer = setInterval(async () => {

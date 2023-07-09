@@ -6,7 +6,8 @@ import CreateChannelForm from "@src/components/popUp/create_channel";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { userChannelsState, usersInCState } from "@src/utils/atom";
 import { useRouter } from "next/router";
-import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
+import { getUsersInChannel } from "@src/fetchAPI/channel";
+import { UserInWorkspace } from "@src/fetchAPI/workspace";
 
 function ShowUserChannels() {
   const [open, setOpen] = useState(false);
@@ -24,7 +25,7 @@ function ShowUserChannels() {
 
   const getChannelInfo = (channelId: number) =>{
     getUsersInChannel(channelId).then(
-      (usersInC: UserInChannel[]) => {
+      (usersInC: UserInWorkspace[]) => {
         setUsersInC(usersInC);
       });
     router.push({

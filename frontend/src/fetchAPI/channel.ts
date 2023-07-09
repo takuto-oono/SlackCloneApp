@@ -1,4 +1,5 @@
 import { getToken } from "../utils/cookie";
+import { UserInWorkspace } from "./workspace";
 
 export interface Channel {
   id: number;
@@ -16,11 +17,6 @@ export interface CurrentChannel {
   workspace_id: number;
 }
 
-export interface UserInChannel {
-  id: number;
-  name: string;
-  roleid: number;
-}
 
 const baseUrl = "http://localhost:8080/api/channel/";
 
@@ -103,9 +99,9 @@ export async function addUserInChannel(chanelID: number, userID: number) {
   }
 }
 
-export async function getUsersInChannel(channelId: number): Promise<UserInChannel[]> {
+export async function getUsersInChannel(channelId: number): Promise<UserInWorkspace[]> {
   const url = baseUrl + "all_user/" + channelId;
-  let resUsersInChannel: UserInChannel[];
+  let resUsersInChannel: UserInWorkspace[];
   const usersInChannel = [{
     id: 0,
     name: "",
@@ -123,7 +119,7 @@ export async function getUsersInChannel(channelId: number): Promise<UserInChanne
     if (res.status == 200) {
       resUsersInChannel = await res.json();
       return new Promise((resolve) => {
-        const usersInChannel: UserInChannel[] = resUsersInChannel;
+        const usersInChannel: UserInWorkspace[] = resUsersInChannel;
         resolve(usersInChannel);
       });
     }
