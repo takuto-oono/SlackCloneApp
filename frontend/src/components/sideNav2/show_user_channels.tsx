@@ -64,8 +64,12 @@ function ShowUserChannels() {
               }}
             >
             < CreateChannelForm />
-            <Button><p className="text-black">チャンネル一覧</p></Button>
-            {/* チャンネル一覧ページへの移動ボタンを設置する（未） */}
+            <Button
+              onClick={() => router.push({
+                pathname: `/main`,
+                query: { contents: "show_workspace_channels" },
+              })}>
+              <p className="text-black">チャンネル一覧</p></Button>
           </Popover>
         </div>
       </SubMenu>
