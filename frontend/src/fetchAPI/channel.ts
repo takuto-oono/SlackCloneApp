@@ -104,7 +104,7 @@ export async function addUserInChannel(chanelID: number, userID: number) {
 }
 
 export async function getUsersInChannel(channelId: number): Promise<UserInChannel[]> {
-  const url = baseUrl + "get_users/" + channelId;
+  const url = baseUrl + "all_user/" + channelId;
   let resUsersInChannel: UserInChannel[];
   const usersInChannel = [{
     id: 0,
