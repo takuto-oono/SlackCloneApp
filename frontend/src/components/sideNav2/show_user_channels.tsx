@@ -39,7 +39,7 @@ function ShowUserChannels() {
       <MenuItem className="bg-purple-200 text-pink-700">
         <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >
           <div className="truncate">
-            {channel.name}
+            #{channel.name}
           </div>
         </button>
       </MenuItem>
@@ -64,12 +64,13 @@ function ShowUserChannels() {
               }}
             >
             < CreateChannelForm />
-            <Button
+            <button
+              className="px-4 py-1 border w-full border-slate-400 hover:bg-slate-50"
               onClick={() => router.push({
                 pathname: `/main`,
                 query: { contents: "show_workspace_channels" },
               })}>
-              <p className="text-black">チャンネル一覧</p></Button>
+              <p className="text-black">チャンネル一覧</p></button>
           </Popover>
         </div>
       </SubMenu>

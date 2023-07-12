@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }: LayoutProps)=>{
             <div className="truncate w-36 ">
               <SideNav2 />
             </div>
-            <main>
+            <main className="w-9/12">
               { children }
             </main>
           </div>
