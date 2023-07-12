@@ -47,33 +47,3 @@ func NewTestData() *TestData {
 	setDefaultWorkspaces([]string{"testWorkspace"})
 	return td
 }
-
-// func (td *TestData) createUserData() {
-// 	for i := 0; i < 1000; i ++ {
-// 		td.users = append(td.users, controllers.LoginResponse{
-// 			Username: randomstring.EnglishFrequencyString(30),
-// 			Token: "",
-// 			UserId: uint32(0),
-// 		})
-// 	}
-// }
-
-// func (td *TestData) createChannelData() {
-// 	for i := 0; i < 10000; i ++ {
-// 		if i % 5 == 0 {
-// 			td.channels = append(td.channels, *&models.Channel{
-// 				Name: randomstring.EnglishFrequencyString(20),
-// 				Description: randomstring.EnglishFrequencyString(30),
-// 				IsPrivate: true,
-// 				IsArchive: true,
-// 			})
-// 		} else {
-// 			td.channels = append(td.channels, *&models.Channel{
-// 				Name: randomstring.EnglishFrequencyString(20),
-// 				Description: randomstring.EnglishFrequencyString(30),
-// 				IsPrivate: false,
-// 				IsArchive: true,
-// 			})
-// 		}
-// 	}
-// }
