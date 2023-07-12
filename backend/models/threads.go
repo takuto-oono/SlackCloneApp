@@ -40,3 +40,7 @@ func GetThreadByParentMessageId(tx *gorm.DB, parentMessageId uint) (Thread, erro
 	err := tx.Model(&Thread{}).Where("parent_message_id = ?", parentMessageId).Take(&result).Error
 	return result, err
 }
+
+func DeleteThreadsTableRecords() {
+	db.Exec("DELETE FROM threads")
+}

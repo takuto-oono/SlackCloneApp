@@ -61,3 +61,7 @@ func GetDLById(tx *gorm.DB, id uint) (DMLine, error) {
 	err := tx.Model(&DMLine{}).Where("id = ?", id).Take(&result).Error
 	return result, err
 }
+
+func DeleteDmLinesTableRecords() {
+	db.Exec("DELETE FROM dm_lines")
+}

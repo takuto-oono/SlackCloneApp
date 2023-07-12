@@ -71,3 +71,7 @@ func GetCAUsByChannelId(tx *gorm.DB, channelId int) ([]ChannelsAndUsers, error) 
 	}
 	return result, nil
 }
+
+func DeleteChannelsAndUsersTableRecords() {
+	db.Exec("DELETE FROM channels_and_users")
+}

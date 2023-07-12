@@ -33,7 +33,7 @@ func GetMentionsByMessageID(tx *gorm.DB, messageID uint) ([]Mention, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var men Mention
-		if err := tx.ScanRows(rows, &men); err != nil {	
+		if err := tx.ScanRows(rows, &men); err != nil {
 			return result, err
 		}
 		result = append(result, men)
@@ -56,4 +56,8 @@ func GetMentionsByUserIDSortedByCreatedAt(tx *gorm.DB, userID uint32) ([]Mention
 		result = append(result, men)
 	}
 	return result, nil
+}
+
+func DeleteMentionsTableRecords() {
+	db.Exec("DELETE FROM mentions")
 }

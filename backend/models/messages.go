@@ -136,3 +136,7 @@ func GetAllMessages(tx *gorm.DB) ([]Message, error) {
 	}
 	return result, nil
 }
+
+func DeleteMessagesTableRecords() {
+	db.Exec("DELETE FROM messages")
+}

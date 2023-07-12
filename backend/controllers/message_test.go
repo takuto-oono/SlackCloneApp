@@ -278,32 +278,32 @@ func TestSendMessage(t *testing.T) {
 
 	t.Run("6 スケジュールされたメッセージがある場合", func(t *testing.T) {
 		isPrivate := false
-		rr, user := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		rr, user := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, lr := loginTestFuncV2(user.Name, user.PassWord)
+		rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
+		rr, ch := CreateChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, scheduledMessage := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, time.Now().Add(time.Second*15))
+		rr, scheduledMessage := SendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, time.Now().Add(time.Second*15))
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, res := getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		rr, res := GetAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 0, len(res))
 
 		for i := 0; i < 5; i++ {
-			rr, _ := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, utils.CreateDefaultTime())
+			rr, _ := SendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr.Token, []uint32{}, utils.CreateDefaultTime())
 			assert.Equal(t, http.StatusOK, rr.Code)
 			time.Sleep(1 * time.Second)
 		}
 
-		rr, res = getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		rr, res = GetAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 5, len(res))
 		time.Sleep(time.Second * 15)
-		rr, res = getAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
+		rr, res = GetAllMessagesFromChannelTestFuncV2(ch.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 6, len(res))
 		assert.Equal(t, scheduledMessage.ID, res[0].ID)
@@ -640,36 +640,36 @@ func TestReadMessageByUser(t *testing.T) {
 	// 2 dmのmessageの場合 200
 
 	t.Run("1 channelのmessageの場合 200", func(t *testing.T) {
-		rr, u1 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		rr, u1 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, u2 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-
-		rr, lr1 := loginTestFuncV2(u1.Name, "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, lr2 := loginTestFuncV2(u2.Name, "pass")
+		rr, u2 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		rr, lr1 := LoginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		isPrivate := false
-		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
+		rr, ch := CreateChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
+		rr, _ = AddUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, m := sendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr1.Token, []uint32{}, utils.CreateDefaultTime())
+		rr, m := SendMessageTestFuncV2(randomstring.EnglishFrequencyString(30), ch.ID, lr1.Token, []uint32{}, utils.CreateDefaultTime())
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)
+		rr, _ = ReadMessageByUserTestFunc(m.ID, lr1.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 
-		rr, mau2 := readMessageByUserTestFunc(m.ID, lr2.Token)
+		rr, mau2 := ReadMessageByUserTestFunc(m.ID, lr2.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, m.ID, mau2.MessageID)
 		assert.Equal(t, lr2.UserId, mau2.UserID)
@@ -677,36 +677,36 @@ func TestReadMessageByUser(t *testing.T) {
 	})
 
 	t.Run("2 dmのmessageの場合 200", func(t *testing.T) {
-		rr, u1 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		rr, u1 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, u2 := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-
-		rr, lr1 := loginTestFuncV2(u1.Name, "pass")
-		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, lr2 := loginTestFuncV2(u2.Name, "pass")
+		rr, u2 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		rr, lr1 := LoginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		isPrivate := false
-		rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
+		rr, ch := CreateChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr1.Token, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = addUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
+		rr, _ = AddUserInChannelTestFuncV2(ch.ID, lr2.UserId, lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, m := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr2.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
+		rr, m := SendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr2.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, _ = readMessageByUserTestFunc(m.ID, lr1.Token)
+		rr, _ = ReadMessageByUserTestFunc(m.ID, lr1.Token)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 
-		rr, mau2 := readMessageByUserTestFunc(m.ID, lr2.Token)
+		rr, mau2 := ReadMessageByUserTestFunc(m.ID, lr2.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, m.ID, mau2.MessageID)
 		assert.Equal(t, lr2.UserId, mau2.UserID)

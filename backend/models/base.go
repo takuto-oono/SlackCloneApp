@@ -108,3 +108,18 @@ func init() {
 		fmt.Println(err)
 	}
 }
+
+func DeleteAllTableData() {
+	DeleteChannelsTableRecords()
+	DeleteChannelsAndUsersTableRecords()
+	DeleteDmLinesTableRecords()
+	DeleteMentionsTableRecords()
+	DeleteMessagesAndUsersTableRecords()
+	DeleteMessagesTableRecords()
+	DeleteThreadAndMessagesTableRecords()
+	DeleteThreadAndUsersTableRecords()
+	DeleteThreadsTableRecords()
+	DeleteUsersTableRecords()
+	DeleteWorkspaceAndUsersTableRecords()
+	DeleteWorkspacesTableRecords()
+}

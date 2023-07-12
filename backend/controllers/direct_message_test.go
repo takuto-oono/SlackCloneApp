@@ -359,30 +359,30 @@ func TestSendDM(t *testing.T) {
 	})
 
 	t.Run("7 スケジュールされたメッセージがある場合", func(t *testing.T) {
-		rr, user := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		rr, user := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, lr := loginTestFuncV2(user.Name, user.PassWord)
+		rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, scheduledMessage := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, time.Now().Add(time.Second*15))
+		rr, scheduledMessage := SendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, time.Now().Add(time.Second*15))
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, res := getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		rr, res := GetDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 0, len(res))
 
 		for i := 0; i < 5; i++ {
-			rr, _ := sendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
+			rr, _ := SendDMTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId, w.ID, []uint32{}, utils.CreateDefaultTime())
 			assert.Equal(t, http.StatusOK, rr.Code)
 			time.Sleep(1 * time.Second)
 		}
 
-		rr, res = getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		rr, res = GetDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 5, len(res))
 		time.Sleep(time.Second * 15)
-		rr, res = getDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
+		rr, res = GetDMsInLineTestFuncV2(scheduledMessage.DMLineId, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, 6, len(res))
 		assert.Equal(t, scheduledMessage.ID, res[0].ID)
