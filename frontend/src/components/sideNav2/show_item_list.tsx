@@ -3,14 +3,10 @@ import { Menu, MenuItem } from "react-pro-sidebar";
 import { useRouter } from "next/router";
 
 function ShowItemList() {
-  const router = useRouter()
-
   return (
-    <div>
-      <Menu className="pd-5 bg-purple-200 text-pink-700">
-        < ShowWorkspaceChannels />
-      </Menu>
-    </div>
+    <Menu className="pd-5 bg-purple-200 text-pink-700">
+      < ShowWorkspaceChannels />
+    </Menu>
   )
 }
 
