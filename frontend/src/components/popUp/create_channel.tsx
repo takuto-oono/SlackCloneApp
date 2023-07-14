@@ -1,8 +1,9 @@
-import { postChannel } from "@src/fetchAPI/channel";
+import { Channel, getChannelsInW, getUserChannelsInW, postChannel } from "@src/fetchAPI/channel";
 import React, { useState } from "react";
 import { DialogTitle, DialogContent, DialogActions, Dialog, Button } from '@mui/material';
-import { workspaceIdState } from "@src/utils/atom";
-import { useRecoilValue } from "recoil";
+import { userChannelsState, workspaceChannelsState, workspaceIdState } from "@src/utils/atom";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import router from "next/router";
 
 const CreateChannelForm = () => {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,8 @@ const CreateChannelForm = () => {
   const [description, setDescription] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const workspaceId = useRecoilValue(workspaceIdState);
+  const setUserChannels = useSetRecoilState(userChannelsState);
+  const setWorkspaceChannels = useSetRecoilState(workspaceChannelsState)
 
   const handleOpen = () => {
     setOpen(true);
@@ -32,11 +35,27 @@ const CreateChannelForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
-    console.log("create channel");
     let channel = { name: name, description: description, is_private: isPrivate, workspace_id: Number(workspaceId) };
-    postChannel(channel);
-    setOpen(false);
-    // チャンネルのリストを更新する(Todo)
+    postChannel(channel).then((channelId: number | undefined) => {
+      if (channelId != undefined) {
+        router.push({
+          pathname: `/main`,
+          query: { channelId: channelId },
+        })
+        getUserChannelsInW(workspaceId).then(
+        (userChannels: Channel[]) => {
+          setUserChannels(userChannels);
+          }
+        );
+        getChannelsInW(workspaceId).then(
+        (workspaceChannels: Channel[]) => {
+          setWorkspaceChannels(workspaceChannels);
+          }
+        );
+        setName('');
+        setOpen(false);
+      }
+    });
   };
 
   return (
