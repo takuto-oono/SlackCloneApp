@@ -10,6 +10,8 @@ function CreateWorkspace() {
   const setWorkspaceId = useSetRecoilState(workspaceIdState);
   const setWorkspaces = useSetRecoilState(workspacesState);
   const setUserChannels = useSetRecoilState(userChannelsState);
+  const setWorkspaceChannels = useSetRecoilState(workspaceChannelsState)
+
   const router = useRouter()
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -33,6 +35,11 @@ function CreateWorkspace() {
         getUserChannelsInW(workspaceId).then(
         (userChannels: Channel[]) => {
           setUserChannels(userChannels);
+          }
+        );
+        getChannelsInW(workspaceId).then(
+        (workspaceChannels: Channel[]) => {
+          setWorkspaceChannels(workspaceChannels);
           }
         );
         setName('');
