@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Workspace, getWorkspaces, postWorkspace } from '@fetchAPI/workspace';
 import { useRouter } from "next/router";
-import { userChannelsState, workspaceChannelsState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { userChannelsState, workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useSetRecoilState } from "recoil";
-import { Channel, getChannelsInW, getUserChannelsInW } from "@src/fetchAPI/channel";
+import { Channel, getUserChannelsInW } from "@src/fetchAPI/channel";
 
 function CreateWorkspace() {
   const [name, setName] = useState("");
