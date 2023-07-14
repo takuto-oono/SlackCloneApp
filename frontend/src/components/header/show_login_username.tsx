@@ -7,7 +7,7 @@ export const ShowLoginUserName: React.FC = () => {
 
   return (
     <>
-      <p>{userName}</p>
+      <p className="font-bold text-pink-800 text-lg">{userName}</p>
     </>
   );
 }
