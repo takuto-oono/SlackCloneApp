@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import { postWorkspace } from '@fetchAPI/workspace';
+import { Workspace, getWorkspaces, postWorkspace } from '@fetchAPI/workspace';
 import { useRouter } from "next/router";
+import { workspaceIdState, workspacesState } from "@src/utils/atom";
+import { useSetRecoilState } from "recoil";
 
 function CreateWorkspace() {
   const [name, setName] = useState("");
+  const setWorkspaceId = useSetRecoilState(workspaceIdState);
+  const setWorkspaces = useSetRecoilState(workspacesState);
   const router = useRouter()
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -11,10 +15,22 @@ function CreateWorkspace() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
-    console.log("create");
     let workspaceName = name;
-    postWorkspace(workspaceName);
-    // ワークスペースのリストを更新する(Todo)
+    postWorkspace(workspaceName).then((workspaceId: number | undefined) => {
+      if (workspaceId != undefined) {
+        router.push({
+          pathname: `/main`,
+          query: { workspaceId: workspaceId },
+        })
+        setWorkspaceId(workspaceId);
+        getWorkspaces().then(
+        (workspaces: Workspace[]) => {
+          setWorkspaces(workspaces);
+          }
+        );
+        setName('');
+      }
+    });
   };
   return (
     <div>
