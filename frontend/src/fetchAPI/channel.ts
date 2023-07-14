@@ -88,7 +88,7 @@ export async function getChannelsInW(
   return res_channels;
 }
 
-export async function postChannel(current: CurrentChannel) {
+export async function postChannel(current: CurrentChannel): Promise<number | undefined> {
   const url = baseUrl + "create";
   let channel: Channel;
   try {
@@ -105,6 +105,7 @@ export async function postChannel(current: CurrentChannel) {
       }),
     });
     channel = await res.json();
+    return channel.id;
   } catch (err) {
     console.log(err);
   }
