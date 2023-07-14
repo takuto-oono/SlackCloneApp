@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { MenuItem, SubMenu } from "react-pro-sidebar";
+import { Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
@@ -47,7 +47,7 @@ function ShowUserChannels() {
   ));
 
   return (
-    <div>
+    <Menu className="pd-5 bg-purple-200 text-pink-700">
       <SubMenu label="Channels" className="truncate w-36">
         {list}
         <div ref={divRef}  className="bg-purple-200 text-pink-700">
@@ -74,7 +74,7 @@ function ShowUserChannels() {
           </Popover>
         </div>
       </SubMenu>
-    </div>
+    </Menu>
   )
 }
 
