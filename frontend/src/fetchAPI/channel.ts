@@ -104,8 +104,10 @@ export async function postChannel(current: CurrentChannel): Promise<number | und
         workspace_id: current.workspace_id,
       }),
     });
-    channel = await res.json();
-    return channel.id;
+    if (res.status == 200) {
+      channel = await res.json();
+      return channel.id;
+    }
   } catch (err) {
     console.log(err);
   }
