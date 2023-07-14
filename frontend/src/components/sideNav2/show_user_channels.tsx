@@ -36,8 +36,8 @@ function ShowUserChannels() {
 
   const list = userChannels.map((channel, index) => (
     <div key={index}>
-      <MenuItem className="bg-purple-200 text-pink-700">
-        <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >
+      <MenuItem className="bg-purple-200">
+        <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm" >
           <div className="truncate">
             #{channel.name}
           </div>
@@ -50,7 +50,7 @@ function ShowUserChannels() {
     <Menu className="pd-5 bg-purple-200 text-pink-700">
       <SubMenu label="Channels" className="truncate w-36">
         {list}
-        <div ref={divRef}  className="bg-purple-200 text-pink-700">
+        <div ref={divRef}  className="bg-purple-200">
           <Button onClick={handleClickOpen}>
             <p className="bg-purple-200 text-pink-700">+ チャンネルを追加</p>
           </Button>
