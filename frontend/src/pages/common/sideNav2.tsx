@@ -1,13 +1,17 @@
 import React from "react";
-import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
+import { Menu, MenuItem, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
 import ShowUserChannels from "@src/components/sideNav2/show_user_channels";
-import { workspaceIdState } from "@src/utils/atom";
+import { workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
 import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
 import ShowItemList from "@src/components/sideNav2/show_item_list";
+import { Button } from "@mui/material";
 
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState);
+  const workspaces = useRecoilValue(workspacesState);
+  const currentWorkspace = workspaces.find(workspace => workspace.id === workspaceId)
+  const workspaceName = currentWorkspace?.name
   
   if (workspaceId) {
     return (
@@ -17,9 +21,11 @@ export default function SideNav2() {
             <ProSidebarProvider>
               <Sidebar>
                 <div className="grid grid-cols-1 divide-y divide-inherit">
-                  <div>
-                    {/* ToDo: WorkspaceNameを表示する */}
-                  </div>
+                    <Menu className="pd-5 bg-purple-200 text-pink-800 text-lg">
+                      <MenuItem>
+                        <button>{workspaceName}</button>
+                      </MenuItem>
+                    </Menu>
                   <div>
                     < ShowItemList />
                   </div>
