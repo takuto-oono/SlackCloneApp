@@ -13,6 +13,7 @@ type TestData struct {
 	workspaceAndUsers map[int]([]models.WorkspaceAndUsers)
 	jwtTokenMap       map[uint32]string
 	channelAndUsers   map[uint32]([]models.ChannelsAndUsers)
+	dms               []models.Message
 }
 
 func NewTestData() *TestData {
@@ -24,6 +25,7 @@ func NewTestData() *TestData {
 		workspaceAndUsers: map[int][]models.WorkspaceAndUsers{},
 		jwtTokenMap:       map[uint32]string{},
 		channelAndUsers:   map[uint32][]models.ChannelsAndUsers{},
+		dms:               make([]models.Message, 0),
 	}
 
 	setDefaultUsers := func(userNames []string) {
