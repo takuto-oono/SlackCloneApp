@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Workspace, getWorkspaces, postWorkspace } from '@fetchAPI/workspace';
 import { useRouter } from "next/router";
-import { userChannelsState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { userChannelsState, workspaceChannelsState, workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useSetRecoilState } from "recoil";
-import { Channel, getUserChannelsInW } from "@src/fetchAPI/channel";
+import { Channel, getChannelsInW, getUserChannelsInW } from "@src/fetchAPI/channel";
 
 function CreateWorkspace() {
   const [name, setName] = useState("");
   const setWorkspaceId = useSetRecoilState(workspaceIdState);
   const setWorkspaces = useSetRecoilState(workspacesState);
   const setUserChannels = useSetRecoilState(userChannelsState);
+  const setWorkspaceChannels = useSetRecoilState(workspaceChannelsState)
+
   const router = useRouter()
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -33,6 +35,11 @@ function CreateWorkspace() {
         getUserChannelsInW(workspaceId).then(
         (userChannels: Channel[]) => {
           setUserChannels(userChannels);
+          }
+        );
+        getChannelsInW(workspaceId).then(
+        (workspaceChannels: Channel[]) => {
+          setWorkspaceChannels(workspaceChannels);
           }
         );
         setName('');
