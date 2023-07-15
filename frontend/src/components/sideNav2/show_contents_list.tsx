@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, MenuItem } from "react-pro-sidebar";
 import { useRouter } from "next/router";
 
-function ShowItemList() {
+function ShowContentsList() {
   return (
     <Menu className="pd-5 bg-purple-200 text-pink-700">
       < ShowWorkspaceChannels />
@@ -10,7 +10,7 @@ function ShowItemList() {
   )
 }
 
-export default ShowItemList;
+export default ShowContentsList;
 
 const ShowWorkspaceChannels = () => {
   const router = useRouter()

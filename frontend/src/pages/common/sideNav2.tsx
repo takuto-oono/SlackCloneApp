@@ -4,8 +4,7 @@ import ShowUserChannels from "@src/components/sideNav2/show_user_channels";
 import { workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
 import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
-import ShowItemList from "@src/components/sideNav2/show_item_list";
-import { Button } from "@mui/material";
+import ShowContentsList from "@src/components/sideNav2/show_contents_list";
 
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState);
@@ -27,7 +26,7 @@ export default function SideNav2() {
                       </MenuItem>
                     </Menu>
                   <div>
-                    < ShowItemList />
+                    < ShowContentsList />
                   </div>
                   <div>
                     < ShowUserChannels />
