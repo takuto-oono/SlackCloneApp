@@ -486,7 +486,7 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		ch := new(models.Channel)
 		json.Unmarshal(([]byte)(byteArray), ch)
 
-		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr.Token)
+		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		for i := 0; i < messageCount; i++ {
