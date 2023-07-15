@@ -13,4 +13,5 @@ func TestDataMain() {
 	td.createChannels(td.workspaces[0].ID)
 	td.addUserInChannel(td.workspaces[0].ID)
 	td.sendMessage(td.workspaces[0].ID)
+	td.sendDM(td.workspaces[0].ID)
 }

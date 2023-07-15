@@ -1,15 +1,16 @@
 package testdata
 
 import (
-	"backend/controllers"
-	"backend/models"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"sync"
+	"fmt"
 	"time"
 
 	"github.com/xyproto/randomstring"
+
+	"backend/controllers"
+	"backend/models"
 )
 
 func (td *TestData) createUsers() {
@@ -201,8 +202,35 @@ func (td *TestData) sendMessage(workspaceID int) {
 		go func(userID uint32) {
 			defer wg.Done()
 			sendMessagePump(userID)
-			fmt.Println("finish task")
 		}(wau.UserId)
+	}
+	wg.Wait()
+}
+
+func (td *TestData) sendDM(workspaceID int) {
+	sendDMPump := func(userID uint32) {
+		for i := 0; i < 100; i ++ {
+			rr, m := controllers.SendDMTestFuncV2(
+				randomstring.EnglishFrequencyString(30),
+				td.jwtTokenMap[userID],
+				td.workspaceAndUsers[workspaceID][rand.Int() % len(td.workspaceAndUsers[workspaceID])].UserId,
+				workspaceID,
+				[]uint32{},
+				time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			)
+			if rr.Code == http.StatusOK {
+				td.dms = append(td.dms, m)
+			}
+		}
+	}
+
+	var wg sync.WaitGroup
+	for _, wau := range td.workspaceAndUsers[workspaceID] {
+		wg.Add(1)
+		go func(userID uint32) {
+			defer wg.Done()
+			sendDMPump(userID)
+		} (wau.UserId)
 	}
 	wg.Wait()
 }
