@@ -317,7 +317,8 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 
 	// 1. messageが存在する場合 200
 	// 2. messageが存在しない場合 200
-	// 3. userがchannelに所属していない場合 404
+	// 3. userがprivateのchannelに所属していない場合 403
+	// 4. userがpublicのchannelに所属していない(workspaceには所属している)場合 200
 
 	t.Run("1 messageが存在する場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
@@ -405,7 +406,7 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		assert.Equal(t, 0, len(messages))
 	})
 
-	t.Run("3 userがchannelに所属していない場合", func(t *testing.T) {
+	t.Run("3 userがprivateのchannelに所属していない場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		userName2 := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
@@ -446,8 +447,69 @@ func TestGetAllMessagesFromChannel(t *testing.T) {
 		}
 
 		rr = getMessagesByChannelIdTestFunc(ch.ID, lr2.Token)
-		assert.Equal(t, http.StatusNotFound, rr.Code)
-		assert.Equal(t, "{\"message\":\"user not found in channel\"}", rr.Body.String())
+		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, "{\"message\":\"not forbidden\"}", rr.Body.String())
+	})
+	t.Run("4 userがpublic channelに所属していない場合", func(t *testing.T) {
+		userName := randomstring.EnglishFrequencyString(30)
+		userName2 := randomstring.EnglishFrequencyString(30)
+		workspaceName := randomstring.EnglishFrequencyString(30)
+		channelName := randomstring.EnglishFrequencyString(30)
+		isPrivate := false
+		text := randomstring.EnglishFrequencyString(30)
+		messageCount := 3
+
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName, "pass").Code)
+		assert.Equal(t, http.StatusOK, signUpTestFunc(userName2, "pass").Code)
+
+		rr := loginTestFunc(userName, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ := io.ReadAll(rr.Body)
+		lr := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr)
+
+		rr = loginTestFunc(userName2, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		lr2 := new(LoginResponse)
+		json.Unmarshal(([]byte)(byteArray), lr2)
+
+		rr = createWorkSpaceTestFunc(workspaceName, lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		w := new(models.Workspace)
+		json.Unmarshal(([]byte)(byteArray), w)
+
+		rr = createChannelTestFunc(channelName, "", &isPrivate, lr.Token, w.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		ch := new(models.Channel)
+		json.Unmarshal(([]byte)(byteArray), ch)
+
+		rr, _ = addUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		for i := 0; i < messageCount; i++ {
+			assert.Equal(t, http.StatusOK, sendMessageTestFunc(text, ch.ID, lr.Token, []uint32{}).Code)
+		}
+		rr = getMessagesByChannelIdTestFunc(ch.ID, lr.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		byteArray, _ = io.ReadAll(rr.Body)
+		messages := make([]models.Message, messageCount)
+		json.Unmarshal(([]byte)(byteArray), &messages)
+		assert.Equal(t, messageCount, len(messages))
+
+		for i := 0; i < messageCount-1; i++ {
+			d1 := messages[i].CreatedAt
+			d2 := messages[i+1].CreatedAt
+			assert.True(t, d2.Before(d1))
+		}
+
+		for _, m := range messages {
+			assert.Equal(t, text, m.Text)
+			assert.Equal(t, lr.UserId, m.UserId)
+			assert.Equal(t, ch.ID, m.ChannelId)
+		}
 	})
 }
 

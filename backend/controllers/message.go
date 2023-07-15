@@ -107,9 +107,8 @@ func GetAllMessagesFromChannel(c *gin.Context) {
 		return
 	}
 
-	// channelにuserが所属していることを確認
-	if b, err := controllerUtils.IsExistCAUByChannelIdAndUserId(channelId, userId); !b || err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found in channel"})
+	if !controllerUtils.HasPermissionGetMessagesFromChannel(channelId, userId) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "not forbidden"})
 		return
 	}
 
