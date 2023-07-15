@@ -49,3 +49,7 @@ func GetTAMsByThreadId(tx *gorm.DB, threadId uint) ([]ThreadAndMessage, error) {
 func (tam ThreadAndMessage) Delete(tx *gorm.DB) error {
 	return tx.Where("thread_id = ? AND message_id = ?", tam.ThreadId, tam.MessageId).Delete(&ThreadAndMessage{}).Error
 }
+
+func DeleteThreadAndMessagesTableRecords() {
+	db.Exec("DELETE FROM thread_and_messages")
+}

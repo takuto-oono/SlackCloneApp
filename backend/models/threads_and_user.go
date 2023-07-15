@@ -61,3 +61,7 @@ func GetTAUsByThreadId(tx *gorm.DB, threadId uint) ([]ThreadAndUser, error) {
 	}
 	return result, nil
 }
+
+func DeleteThreadAndUsersTableRecords() {
+	db.Exec("DELETE FROM thread_and_users")
+}

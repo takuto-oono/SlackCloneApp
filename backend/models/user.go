@@ -47,3 +47,7 @@ func GetUsers(tx *gorm.DB) ([]User, error) {
 	}
 	return result, nil
 }
+
+func DeleteUsersTableRecords() {
+	db.Exec("DELETE FROM users")
+}

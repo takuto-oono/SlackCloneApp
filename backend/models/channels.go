@@ -37,7 +37,6 @@ func (c Channel) Delete(tx *gorm.DB) error {
 	return tx.Where("id = ?", c.ID).Delete(&Channel{}).Error
 }
 
-
 func GetChannelByIdAndWorkspaceId(tx *gorm.DB, id, workspaceId int) (Channel, error) {
 	var result Channel
 	err := tx.Model(&Channel{}).Where("id = ? AND workspace_id = ?", id, workspaceId).Take(&result).Error
@@ -51,7 +50,7 @@ func GetChannelsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]Channel, error) {
 		return result, err
 	}
 	defer rows.Close()
-	
+
 	for rows.Next() {
 		var c Channel
 		if err := tx.ScanRows(rows, &c); err != nil {
@@ -60,4 +59,8 @@ func GetChannelsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]Channel, error) {
 		result = append(result, c)
 	}
 	return result, nil
+}
+
+func DeleteChannelsTableRecords() {
+	db.Exec("DELETE FROM channels")
 }

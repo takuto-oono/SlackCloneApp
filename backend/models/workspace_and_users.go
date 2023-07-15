@@ -67,3 +67,7 @@ func GetWAUsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]WorkspaceAndUsers, er
 	}
 	return result, nil
 }
+
+func DeleteWorkspaceAndUsersTableRecords() {
+	db.Exec("DELETE FROM workspace_and_users")
+}

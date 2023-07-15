@@ -1544,33 +1544,33 @@ func TestGetAllUsersInChannel(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 
-	rr, user := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+	rr, user := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 	assert.Equal(t, http.StatusOK, rr.Code)
-	rr, lr := loginTestFuncV2(user.Name, user.PassWord)
+	rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
 	assert.Equal(t, http.StatusOK, rr.Code)
-	rr, w := createWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+	rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
 	assert.Equal(t, http.StatusOK, rr.Code)
 	userIDs := make([]uint32, 10)
 	for i := 0; i < 10; i++ {
-		rr, u := signUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		rr, u := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 		userIDs[i] = u.ID
 	}
 	isPrivate := false
-	rr, ch := createChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
+	rr, ch := CreateChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
 	assert.Equal(t, http.StatusOK, rr.Code)
 	for _, id := range userIDs {
-		rr, _ := addUserInWorkspaceV2(w.ID, id, 4, lr.Token)
+		rr, _ := AddUserInWorkspaceV2(w.ID, id, 4, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, _ = addUserInChannelTestFuncV2(ch.ID, id, lr.Token)
+		rr, _ = AddUserInChannelTestFuncV2(ch.ID, id, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 	}
-	rr, res := getAllUsersInChannelTestFuncV2(ch.ID, lr.Token)
+	rr, res := GetAllUsersInChannelTestFuncV2(ch.ID, lr.Token)
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Equal(t, 11, len(res))
-	
+
 	for _, r := range res {
-		if (r.ID == lr.UserId) {
+		if r.ID == lr.UserId {
 			continue
 		}
 		assert.Contains(t, userIDs, r.ID)

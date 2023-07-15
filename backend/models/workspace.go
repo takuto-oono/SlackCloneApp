@@ -36,3 +36,7 @@ func UpdateWorkspaceName(tx *gorm.DB, id int, name string) (Workspace, error) {
 	)
 	return result, err
 }
+
+func DeleteWorkspacesTableRecords() {
+	db.Exec("DELETE FROM workspaces")
+}

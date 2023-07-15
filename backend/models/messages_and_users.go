@@ -49,3 +49,7 @@ func GetMAUByMessageIDAndUserID(tx *gorm.DB, messageID uint, userID uint32) (Mes
 func (mau *MessageAndUser) UpdateIsRead(tx *gorm.DB, newIsRead bool) error {
 	return tx.Model(&MessageAndUser{}).Where("message_id = ? AND user_id = ?", mau.MessageID, mau.UserID).Update("is_read", newIsRead).Take(mau).Error
 }
+
+func DeleteMessagesAndUsersTableRecords() {
+	db.Exec("DELETE FROM message_and_users")
+}
