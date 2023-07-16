@@ -2,8 +2,8 @@ import React from "react";
 import { UserInWorkspace, getUsersInWorkspace } from '@fetchAPI/workspace'
 import { MenuItem } from "react-pro-sidebar";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { userChannelsState, usersInWState, workspaceIdState, workspacesState, workspaceChannelsState } from "@src/utils/atom";
-import { Channel, getChannelsInW, getUserChannelsInW } from "@src/fetchAPI/channel";
+import { userChannelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { Channel, getUserChannelsInW } from "@src/fetchAPI/channel";
 
 import { useRouter } from "next/router";
 
