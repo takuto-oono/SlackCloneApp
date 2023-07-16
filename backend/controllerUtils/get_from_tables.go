@@ -1,6 +1,8 @@
 package controllerUtils
 
 import (
+	"sort"
+
 	"backend/models"
 )
 
@@ -134,14 +136,9 @@ func GetThreadsByUserAndWorkspaceIDSortedByEditedTime(userID uint32, workspaceID
 	}
 
 	// 更新時間でソート
-	for i := 0; i < len(ths); i++ {
-		for j := i + 1; j < len(ths); j++ {
-			if ths[i].UpdatedAt.Before(ths[j].UpdatedAt) {
-				ths[i], ths[j] = ths[j], ths[i]
-			}
-		}
-	}
-
+	sort.Slice(ths, func(i, j int) bool {
+		return ths[i].UpdatedAt.After(ths[j].UpdatedAt)
+	})
 	return ths, nil
 }
 
