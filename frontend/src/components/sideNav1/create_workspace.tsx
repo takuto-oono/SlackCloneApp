@@ -20,31 +20,8 @@ function CreateWorkspace() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
     let workspaceName = name;
-    postWorkspace(workspaceName).then((workspaceId: number | undefined) => {
-      if (workspaceId != undefined) {
-        router.push({
-          pathname: `/main`,
-          query: { workspaceId: workspaceId },
-        })
-        setWorkspaceId(workspaceId);
-        getWorkspaces().then(
-        (workspaces: Workspace[]) => {
-          setWorkspaces(workspaces);
-          }
-        );
-        getUserChannelsInW(workspaceId).then(
-        (userChannels: Channel[]) => {
-          setUserChannels(userChannels);
-          }
-        );
-        getChannelsInW(workspaceId).then(
-        (workspaceChannels: Channel[]) => {
-          setWorkspaceChannels(workspaceChannels);
-          }
-        );
-        setName('');
-      }
-    });
+    postWorkspace(workspaceName);
+    // ワークスペースのリストを更新する(Todo)
   };
   return (
     <div>

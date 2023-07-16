@@ -36,26 +36,9 @@ const CreateChannelForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
     let channel = { name: name, description: description, is_private: isPrivate, workspace_id: Number(workspaceId) };
-    postChannel(channel).then((channelId: number | undefined) => {
-      if (channelId != undefined) {
-        router.push({
-          pathname: `/main`,
-          query: { channelId: channelId },
-        })
-        getUserChannelsInW(workspaceId).then(
-        (userChannels: Channel[]) => {
-          setUserChannels(userChannels);
-          }
-        );
-        getChannelsInW(workspaceId).then(
-        (workspaceChannels: Channel[]) => {
-          setWorkspaceChannels(workspaceChannels);
-          }
-        );
-        setName('');
-        setOpen(false);
-      }
-    });
+    postChannel(channel);
+    setOpen(false);
+    // チャンネルのリストを更新する(Todo)
   };
 
   return (
