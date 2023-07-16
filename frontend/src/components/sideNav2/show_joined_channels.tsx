@@ -1,17 +1,18 @@
 import React, { useRef, useState } from "react";
-import { MenuItem, SubMenu } from "react-pro-sidebar";
+import { Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import CreateChannelForm from "@src/components/popUp/create_channel";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { channelsState, usersInCState } from "@src/utils/atom";
+import { joinedChannelsState, usersInCState } from "@src/utils/atom";
 import { useRouter } from "next/router";
-import { UserInChannel, getUsersInChannel } from "@src/fetchAPI/channel";
+import { getUsersInChannel } from "@src/fetchAPI/channel";
+import { UserInWorkspace } from "@src/fetchAPI/workspace";
 
-function ShowUserChannels() {
+function ShowJoinedChannels() {
   const [open, setOpen] = useState(false);
   const divRef = useRef(null);
-  const channels = useRecoilValue(channelsState);
+  const joinedChannels = useRecoilValue(joinedChannelsState);
   const router = useRouter()
   const setUsersInC = useSetRecoilState(usersInCState);
 
@@ -24,7 +25,7 @@ function ShowUserChannels() {
 
   const getChannelInfo = (channelId: number) =>{
     getUsersInChannel(channelId).then(
-      (usersInC: UserInChannel[]) => {
+      (usersInC: UserInWorkspace[]) => {
         setUsersInC(usersInC);
       });
     router.push({
@@ -33,12 +34,12 @@ function ShowUserChannels() {
     })
   }
 
-  const list = channels.map((channel, index) => (
+  const list = joinedChannels.map((channel, index) => (
     <div key={index}>
-      <MenuItem className="bg-purple-200 text-pink-700">
-        <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm text-pink-700" >
+      <MenuItem className="bg-purple-200">
+        <button type="button" onClick={() => getChannelInfo(channel.id)} className="inline-block align-baseline text-sm" >
           <div className="truncate">
-            {channel.name}
+            #{channel.name}
           </div>
         </button>
       </MenuItem>
@@ -46,10 +47,10 @@ function ShowUserChannels() {
   ));
 
   return (
-    <div>
+    <Menu className="pd-5 bg-purple-200 text-pink-700">
       <SubMenu label="Channels" className="truncate w-36">
         {list}
-        <div ref={divRef}  className="bg-purple-200 text-pink-700">
+        <div ref={divRef}  className="bg-purple-200">
           <Button onClick={handleClickOpen}>
             <p className="bg-purple-200 text-pink-700">+ チャンネルを追加</p>
           </Button>
@@ -63,14 +64,19 @@ function ShowUserChannels() {
               }}
             >
             < CreateChannelForm />
-            <Button><p className="text-black">チャンネル一覧</p></Button>
-            {/* チャンネル一覧ページへの移動ボタンを設置する（未） */}
+            <button
+              className="px-4 py-1 border w-full border-slate-400 hover:bg-slate-50"
+              onClick={() => router.push({
+                pathname: `/main`,
+                query: { contents: "show_workspace_channels" },
+              })}>
+              <p className="text-black">チャンネル一覧</p></button>
           </Popover>
         </div>
       </SubMenu>
-    </div>
+    </Menu>
   )
 }
 
-export default ShowUserChannels;
+export default ShowJoinedChannels;
 

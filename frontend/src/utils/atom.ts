@@ -1,4 +1,4 @@
-import { Channel, UserInChannel } from "@src/fetchAPI/channel";
+import { Channel } from "@src/fetchAPI/channel";
 import { UserInWorkspace, Workspace } from "@src/fetchAPI/workspace";
 import { atom } from "recoil";
 
@@ -22,12 +22,17 @@ export const channelsState = atom<Channel[]>({
   default: []
 })
 
+export const joinedChannelsState = atom<Channel[]>({
+  key: "joinedChannels",
+  default: []
+})
+
 export const usersInWState = atom<UserInWorkspace[]>({
   key: "usersInW",
   default: []
 })
 
-export const usersInCState = atom<UserInChannel[]>({
+export const usersInCState = atom<UserInWorkspace[]>({
   key: "usersInC",
   default: []
 })

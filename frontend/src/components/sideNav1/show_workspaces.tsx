@@ -2,16 +2,15 @@ import React from "react";
 import { UserInWorkspace, getUsersInWorkspace } from '@fetchAPI/workspace'
 import { MenuItem } from "react-pro-sidebar";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { channelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
-import { Channel, getChannelsByWorkspaceId } from "@src/fetchAPI/channel";
-import { AddUserInWorkspaceForm } from "../popUp/add_user_in_workspace_form";
+import { joinedChannelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { Channel, getJoinedChannelsInW } from "@src/fetchAPI/channel";
 import { useRouter } from "next/router";
 
 function ShowWorkspaces() {
   const router = useRouter();
   const setWorkspaceId = useSetRecoilState(workspaceIdState);
   const setUsersInW = useSetRecoilState(usersInWState);
-  const setChannels = useSetRecoilState(channelsState);
+  const setJoinedChannels = useSetRecoilState(joinedChannelsState);
   const workspaces = useRecoilValue(workspacesState);
 
   const getWorkspaceInfo = (workspaceId: number) => {
@@ -19,11 +18,13 @@ function ShowWorkspaces() {
     getUsersInWorkspace(workspaceId).then(
     (usersInW: UserInWorkspace[]) => {
       setUsersInW(usersInW);
-    });
-    getChannelsByWorkspaceId(workspaceId).then(
-    (channels: Channel[]) => {
-      setChannels(channels);
-    });
+      }
+    );
+    getJoinedChannelsInW(workspaceId).then(
+    (joinedChannels: Channel[]) => {
+      setJoinedChannels(joinedChannels);
+      }
+    );
     router.push({
       query: { workspaceId: workspaceId },
     })

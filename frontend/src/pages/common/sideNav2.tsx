@@ -1,13 +1,17 @@
 import React from "react";
-import { Menu, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
-import ShowUserChannels from "@src/components/sideNav2/show_user_channels";
-import { workspaceIdState } from "@src/utils/atom";
+import { Menu, MenuItem, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
+import ShowJoinedChannels from "@src/components/sideNav2/show_joined_channels";
+import { workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
 import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
+import ShowContentsList from "@src/components/sideNav2/show_contents_list";
 
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState);
-  
+  const workspaces = useRecoilValue(workspacesState);
+  const currentWorkspace = workspaces.find(workspace => workspace.id === workspaceId)
+  const workspaceName = currentWorkspace?.name
+
   if (workspaceId) {
     return (
       <div className="h-full" id="container">
@@ -16,20 +20,23 @@ export default function SideNav2() {
             <ProSidebarProvider>
               <Sidebar>
                 <div className="grid grid-cols-1 divide-y divide-inherit">
-                  <div className="bg-purple-200 text-pink-700">
-                    {/* ToDo: WorkspaceNameを表示する */}
+                    <Menu className="pd-5 bg-purple-200 text-pink-800 text-lg">
+                      <MenuItem>
+                        <button>{workspaceName}</button>
+                      </MenuItem>
+                    </Menu>
+                  <div>
+                    < ShowContentsList />
                   </div>
                   <div>
-                    <Menu className="pd-5 bg-purple-200 text-pink-700">
-                      < ShowUserChannels />
-                    </Menu>
+                    < ShowJoinedChannels />
                   </div>
                   <div>
                     <Menu className="bg-purple-200 text-pink-700">
                     {/* ToDo: ShowDMs */}
                       <AddUserInWorkspaceForm workspaceID={workspaceId} />
                     </Menu>
-                  </div>                  
+                  </div>
                 </div>
               </Sidebar>
             </ProSidebarProvider>

@@ -32,7 +32,6 @@ const CreateChannelForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
-    console.log("create channel");
     let channel = { name: name, description: description, is_private: isPrivate, workspace_id: Number(workspaceId) };
     postChannel(channel);
     setOpen(false);
@@ -42,9 +41,9 @@ const CreateChannelForm = () => {
   return (
     <div>
       <div>
-        <Button onClick={handleOpen}>
+        <button className="px-4 py-1 border border-slate-400 hover:bg-slate-50" onClick={handleOpen}>
           <p className="text-black">新しいチャンネルを作成</p>
-        </Button>
+        </button>
       </div>
       <Dialog open={open} onClose={handleClose}>
         <form onSubmit={handleSubmit}>

@@ -54,9 +54,9 @@ export async function getWorkspaces(): Promise<Workspace[]> {
 }
 
 
-export async function postWorkspace(workspaceName:string){
+export async function postWorkspace(workspaceName:string): Promise< number | undefined >{
   const url = baseUrl + 'create'
-  console.log(getUserId());
+  let workspace: Workspace;
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -73,6 +73,9 @@ export async function postWorkspace(workspaceName:string){
         resetCookie();
         console.log("redirect");
         router.push("/")
+      } else if (res.status == 200) {
+        workspace = await res.json();
+        return workspace.id;
       }
     } catch (err) {
       console.log(err)

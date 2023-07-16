@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import { postWorkspace } from '@fetchAPI/workspace';
-import { useRouter } from "next/router";
 
 function CreateWorkspace() {
   const [name, setName] = useState("");
-  const router = useRouter()
+
   const nameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement> ) => {
     e.preventDefault();
-    console.log("create");
     let workspaceName = name;
     postWorkspace(workspaceName);
     // ワークスペースのリストを更新する(Todo)
