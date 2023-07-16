@@ -17,13 +17,13 @@ export const workspacesState = atom<Workspace[]>({
   default: [],
 })
 
-export const workspaceChannelsState = atom<Channel[]>({
-  key: "workspaceChannels",
+export const channelsState = atom<Channel[]>({
+  key: "channels",
   default: []
 })
 
-export const userChannelsState = atom<Channel[]>({
-  key: "userChannels",
+export const joinedChannelsState = atom<Channel[]>({
+  key: "joinedChannels",
   default: []
 })
 

@@ -3,31 +3,31 @@ import { Menu, MenuItem } from "react-pro-sidebar";
 import { useRouter } from "next/router";
 import { Channel, getChannelsInW } from "@src/fetchAPI/channel";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { workspaceChannelsState, workspaceIdState } from "@src/utils/atom";
+import { channelsState, workspaceIdState } from "@src/utils/atom";
 
 function ShowContentsList() {
   return (
     <Menu className="pd-5 bg-purple-200 text-pink-700">
-      < ShowWorkspaceChannels />
+      < ShowChannelsInWorkspace />
     </Menu>
   )
 }
 
 export default ShowContentsList;
 
-const ShowWorkspaceChannels = () => {
+const ShowChannelsInWorkspace = () => {
   const router = useRouter();
   const workspaceId = useRecoilValue(workspaceIdState);
-  const setWorkspaceChannels = useSetRecoilState(workspaceChannelsState);
+  const setChannels = useSetRecoilState(channelsState);
   const handleClick = () => {
     getChannelsInW(workspaceId).then(
-    (workspaceChannels: Channel[]) => {
-      setWorkspaceChannels(workspaceChannels);
+    (channels: Channel[]) => {
+      setChannels(channels);
       }
     );
     router.push({
       pathname: `/main`,
-      query: { contents: "show_workspace_channels" },
+      query: { contents: "show_channels" },
     })
   }
 

@@ -1,4 +1,4 @@
-import ShowWorkspaceChannels from "@src/components/main/show_workspace_channels";
+import ShowChannelsInWorkspace from "@src/components/main/show_channels";
 import { ChannelComponent } from "../components/main/channel";
 import { useRouter } from "next/router";
 
@@ -11,9 +11,9 @@ const Main: React.FC = () => {
     return (
       <ChannelComponent channelID={Number(channelId)} />
     );
-  } else if (contents == "show_workspace_channels") {
+  } else if (contents == "show_channels") {
     return (
-      <ShowWorkspaceChannels />
+      <ShowChannelsInWorkspace />
     );
   } else {
     return <></>;

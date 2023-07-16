@@ -2,17 +2,15 @@ import React from "react";
 import { UserInWorkspace, getUsersInWorkspace } from '@fetchAPI/workspace'
 import { MenuItem } from "react-pro-sidebar";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { userChannelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
-import { Channel, getUserChannelsInW } from "@src/fetchAPI/channel";
-
+import { joinedChannelsState, usersInWState, workspaceIdState, workspacesState } from "@src/utils/atom";
+import { Channel, getJoinedChannelsInW } from "@src/fetchAPI/channel";
 import { useRouter } from "next/router";
 
 function ShowWorkspaces() {
   const router = useRouter();
   const setWorkspaceId = useSetRecoilState(workspaceIdState);
   const setUsersInW = useSetRecoilState(usersInWState);
-  const setUserChannels = useSetRecoilState(userChannelsState);
-
+  const setJoinedChannels = useSetRecoilState(joinedChannelsState);
   const workspaces = useRecoilValue(workspacesState);
 
   const getWorkspaceInfo = (workspaceId: number) => {
@@ -22,9 +20,9 @@ function ShowWorkspaces() {
       setUsersInW(usersInW);
       }
     );
-    getUserChannelsInW(workspaceId).then(
-    (userChannels: Channel[]) => {
-      setUserChannels(userChannels);
+    getJoinedChannelsInW(workspaceId).then(
+    (joinedChannels: Channel[]) => {
+      setJoinedChannels(joinedChannels);
       }
     );
     router.push({

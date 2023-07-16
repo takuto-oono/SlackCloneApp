@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, MenuItem, ProSidebarProvider, Sidebar } from "react-pro-sidebar";
-import ShowUserChannels from "@src/components/sideNav2/show_user_channels";
+import ShowJoinedChannels from "@src/components/sideNav2/show_joined_channels";
 import { workspaceIdState, workspacesState } from "@src/utils/atom";
 import { useRecoilValue } from "recoil";
 import { AddUserInWorkspaceForm } from "@src/components/popUp/add_user_in_workspace_form";
@@ -11,7 +11,7 @@ export default function SideNav2() {
   const workspaces = useRecoilValue(workspacesState);
   const currentWorkspace = workspaces.find(workspace => workspace.id === workspaceId)
   const workspaceName = currentWorkspace?.name
-  
+
   if (workspaceId) {
     return (
       <div className="h-full" id="container">
@@ -29,7 +29,7 @@ export default function SideNav2() {
                     < ShowContentsList />
                   </div>
                   <div>
-                    < ShowUserChannels />
+                    < ShowJoinedChannels />
                   </div>
                   <div>
                     <Menu className="bg-purple-200 text-pink-700">

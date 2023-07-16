@@ -2,15 +2,15 @@ import { ShowMessagesComponent } from "@src/components/main/show_messages";
 import React from "react";
 import { SendMessageComponent } from "@src/components/main/send_message";
 import { useRecoilValue } from "recoil";
-import { workspaceChannelsState } from "@src/utils/atom";
+import { channelsState } from "@src/utils/atom";
 
 type Props = {
 	channelID: number;
 };
 
 export const ChannelComponent: React.FC<Props> = (props: Props) => {
-  const workspaceChannels = useRecoilValue(workspaceChannelsState);
-  const currentChannel = workspaceChannels.find(channel => channel.id === props.channelID)
+  const channels = useRecoilValue(channelsState);
+  const currentChannel = channels.find(channel => channel.id === props.channelID)
   const channelName = currentChannel?.name
 
 	return (
