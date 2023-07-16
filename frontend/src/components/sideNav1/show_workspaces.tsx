@@ -12,7 +12,6 @@ function ShowWorkspaces() {
   const setWorkspaceId = useSetRecoilState(workspaceIdState);
   const setUsersInW = useSetRecoilState(usersInWState);
   const setUserChannels = useSetRecoilState(userChannelsState);
-  const setWorkspaceChannels = useSetRecoilState(workspaceChannelsState);
 
   const workspaces = useRecoilValue(workspacesState);
 
@@ -26,11 +25,6 @@ function ShowWorkspaces() {
     getUserChannelsInW(workspaceId).then(
     (userChannels: Channel[]) => {
       setUserChannels(userChannels);
-      }
-    );
-    getChannelsInW(workspaceId).then(
-    (workspaceChannels: Channel[]) => {
-      setWorkspaceChannels(workspaceChannels);
       }
     );
     router.push({
