@@ -1,4 +1,5 @@
 {
+    // 単語登録
     "cSpell.words": [
         "auwi",
         "awau",
@@ -11,5 +12,11 @@
         "structs",
         "waus",
         "xyproto"
-    ]
+    ],
+    // ESLint & Prettier 設定
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
 }
