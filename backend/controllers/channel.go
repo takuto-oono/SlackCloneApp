@@ -402,7 +402,7 @@ func GetAllUsersInChannel(c *gin.Context) {
 			return
 		}
 		res[i] = UserResponse{
-			ID: u.ID,
+			ID:   u.ID,
 			Name: u.Name,
 		}
 	}

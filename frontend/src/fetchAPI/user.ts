@@ -1,83 +1,51 @@
-// TODO
-// user interfaceを改善
-// signup関数の改善
-// login関数の改善
-
-import router from 'next/router'
+import { createUrl, getFetcher, postFetcher } from './common'
 
 export interface User {
+  id: number
   name: string
-  password: string
 }
 
-const baseUrl = 'http://localhost:8080/api/user/'
-
-export async function signUp(user: User) {
-  const url = baseUrl + 'signUp'
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: user.name,
-        password: user.password,
-      }),
-    })
-    if (res.status == 200) {
-      console.log('redirect')
-      router.replace('/')
-    }
-  } catch (err) {
-    console.log(err)
-  }
-}
-
-export interface currentUser {
+export interface CurrentUser {
   token: string
   user_id: string
   username: string
 }
 
-export async function login(user: User): Promise<currentUser> {
-  const url = baseUrl + 'login'
-  const currentUser = {
-    token: '',
-    user_id: '',
-    username: '',
-  }
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: user.name,
-        password: user.password,
-      }),
-    })
-    console.log(res)
-    const User = await res.json()
-    if (res.status == 200) {
-      console.log('redirect')
-      return new Promise((resolve) => {
-        const currentUser: currentUser = {
-          token: User.token,
-          user_id: User.user_id,
-          username: User.username,
-        }
-        resolve(currentUser)
-      })
-    } else {
-      return new Promise((resolve) => {
-        resolve(currentUser)
-      })
-    }
-  } catch (err) {
-    console.log(err)
-  }
+export async function signUp(userName: string, password: string) {
+  await postFetcher(
+    createUrl('/user/signUp', new Array(0)),
+    new Map<string, string | number>([
+      ['name', userName],
+      ['password', password],
+    ]),
+  )
+}
 
-  return currentUser
+export async function login(userName: string, password: string): Promise<CurrentUser> {
+  const res = await postFetcher(
+    createUrl('/user/login', new Array(0)),
+    new Map<string, string | number>([
+      ['name', userName],
+      ['password', password],
+    ]),
+  )
+  const user: CurrentUser = {
+    token: res.token,
+    user_id: res.user_id,
+    username: res.username,
+  }
+  return user
+}
+
+export async function getAllUsers(): Promise<User[]> {
+  const res = await getFetcher(createUrl('/user/all', []))
+  let users: User[] = []
+  console.log(res)
+  for (const r of res) {
+    users.push({
+      id: r.id,
+      name: r.name,
+    })
+  }
+  return users
 }
