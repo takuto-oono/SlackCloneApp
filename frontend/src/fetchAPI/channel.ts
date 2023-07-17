@@ -17,7 +17,6 @@ export interface CurrentChannel {
   workspace_id: number;
 }
 
-
 const baseUrl = "http://localhost:8080/api/channel/";
 
 export async function getJoinedChannelsInW(
@@ -88,6 +87,37 @@ export async function getChannelsInW(
   return res_channels;
 }
 
+export async function getUsersInChannel(channelId: number): Promise<UserInWorkspace[]> {
+  const url = baseUrl + "all_user/" + channelId;
+  let resUsersInChannel: UserInWorkspace[];
+  const usersInChannel = [{
+    id: 0,
+    name: "",
+    roleid: 0,
+  }];
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: getToken(),
+      },
+    });
+    
+    if (res.status == 200) {
+      resUsersInChannel = await res.json();
+      return new Promise((resolve) => {
+        const usersInChannel: UserInWorkspace[] = resUsersInChannel;
+        resolve(usersInChannel);
+      });
+    }
+    
+  } catch (err) {
+    console.log(err);
+  }
+  return usersInChannel;
+}
+
 export async function postChannel(current: CurrentChannel): Promise<number | undefined> {
   const url = baseUrl + "create";
   let channel: Channel;
@@ -135,33 +165,5 @@ export async function addUserInChannel(chanelID: number, userID: number) {
   }
 }
 
-export async function getUsersInChannel(channelId: number): Promise<UserInWorkspace[]> {
-  const url = baseUrl + "all_user/" + channelId;
-  let resUsersInChannel: UserInWorkspace[];
-  const usersInChannel = [{
-    id: 0,
-    name: "",
-    roleid: 0,
-  }];
-
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    
-    if (res.status == 200) {
-      resUsersInChannel = await res.json();
-      return new Promise((resolve) => {
-        const usersInChannel: UserInWorkspace[] = resUsersInChannel;
-        resolve(usersInChannel);
-      });
-    }
-    
-  } catch (err) {
-    console.log(err);
-  }
-  return usersInChannel;
-}
+// TODO deleteuserfromchannel
+// TODO deletechannel

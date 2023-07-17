@@ -28,26 +28,7 @@ export interface  Message {
 
 const baseUrl = "http://localhost:8080/api";
 
-export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
-  const url = baseUrl + "dm/send";
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        received_user_id: form.receivedUserID,
-        workspace_id: form.workspaceID,
-        text: form.text,
-      }),
-    });
-    return await res.json();
-  } catch (err) {
-    console.log(err);
-  }
-}
-
+// channel message API
 export async function getMessagesFromChannel(channelID: number): Promise<Message[]|null> {
   const url: string = baseUrl + "/message/get_from_channel/" + channelID.toString();
   try {
@@ -118,3 +99,36 @@ export async function sendMessage(text: string, channelID: number, mentionedUser
   }
   return null
 }
+
+// TODO readmessagebyuser
+
+// TODO editmessage
+
+// direct message API
+// TODO getdmsinline
+
+// TODO getdmlines
+
+export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
+  const url = baseUrl + "dm/send";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: getToken(),
+      },
+      body: JSON.stringify({
+        received_user_id: form.receivedUserID,
+        workspace_id: form.workspaceID,
+        text: form.text,
+      }),
+    });
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+// TODO editdm
+
+// TODO deletedm

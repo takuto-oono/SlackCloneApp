@@ -1,47 +1,54 @@
-import { getToken } from "../utils/cookie";
+// TODO
+// user interfaceを改善
+// signup関数の改善
+// login関数の改善
+
+
+
+import router from "next/router";
 
 export interface User {
-    id: string;
-    name: string;
-    password: string;
+  name: string;
+  password: string;
 }
 
-const baseUrl = 'http://localhost:8080/'
+const baseUrl = "http://localhost:8080/api/user/";
 
-export async function getUsers() {
-    const url = baseUrl + 'users'
-    let users: User[]
-    try {
-        const res = await fetch(url, {
-            method: 'GET',
-        })
-        console.log(res)
-        users = await res.json()
-        console.log(users)
-        return users
-    } catch (err) {
-        console.log(err)
-    }
+export async function signUp(user: User) {
+  const url = baseUrl + "signUp";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: user.name,
+        password: user.password,
+      }),
+    });
+    if (res.status == 200) {
+        console.log("redirect");
+        router.replace('/')
+      }
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-export async function getUserById(user: User): Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'GET',
-        })
-        console.log(res)
-        const user: User = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
+export interface currentUser {
+  token: string;
+  user_id: string;
+  username: string;
 }
 
-export async function postUser(user: User): Promise<User> {
-    const url = baseUrl + 'user'
-
+export async function login(user: User): Promise<currentUser> {
+  const url = baseUrl + 'login';
+  const currentUser = {
+    token: "",
+    user_id: "",
+    username: ""
+  }
     try {
         const res = await fetch(url, {
             method: 'POST',
@@ -53,83 +60,28 @@ export async function postUser(user: User): Promise<User> {
                 password: user.password,
             })
         })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function updateUser(user: User) :Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: user.name,
-                password: user.password,
-            })
-        })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function deleteUser(user: User) :Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: user.name,
-                password: user.password,
-            })
-        })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function getAllUsers(): Promise<User[]|null>{
-  const url = baseUrl + 'api/user/all'
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    })
-    if (res.status === 200) {
-      const users: User[] = [];
-      const response = await res.json();
-      for (const r of response) {
-        users.push({
-          id: r.id,
-          name: r.name,
-          password: "",
-        })
+      console.log(res);
+      const User = await res.json();
+      if (res.status == 200) {
+        console.log("redirect");
+        return new Promise((resolve) => {
+          const currentUser: currentUser = {
+            token: User.token,
+            user_id: User.user_id,
+            username: User.username
+          };
+          resolve(currentUser);
+        });
       }
-      return users
-    }
-    console.log(res);
-  } catch(e) {
-    console.log(e);
+      else {
+        return new Promise((resolve) => {
+          resolve(currentUser);
+        });
+      }
+
+    } catch (err) {
+      console.log(err);
   }
-  return null
+
+  return currentUser;
 }

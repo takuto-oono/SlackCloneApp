@@ -15,6 +15,7 @@ export interface UserInWorkspace {
 
 const baseUrl = 'http://localhost:8080/api/workspace/'
 
+// TODO 改善
 export async function getWorkspaces(): Promise<Workspace[]> {
   const url = baseUrl + 'get_by_user'
   console.log("getWorkspaces")
@@ -53,36 +54,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
   return workspaces;
 }
 
-
-export async function postWorkspace(workspaceName:string): Promise< number | undefined >{
-  const url = baseUrl + 'create'
-  let workspace: Workspace;
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': getToken(),
-        },
-        body: JSON.stringify({
-          name: workspaceName,
-          user_id: getUserId(),
-        })
-      })
-      console.log(res)
-      if (res.status == 401) {
-        resetCookie();
-        console.log("redirect");
-        router.push("/")
-      } else if (res.status == 200) {
-        workspace = await res.json();
-        return workspace.id;
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  return
-}
-
+// TODO 改善
 export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWorkspace[]> {
   const url = baseUrl + "get_users/" + workspaceId;
   let resUsersInWorkspace: UserInWorkspace[];
@@ -116,6 +88,37 @@ export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWo
   return usersInWorkspace;
 }
 
+// TODO 改善
+export async function postWorkspace(workspaceName:string): Promise< number | undefined >{
+  const url = baseUrl + 'create'
+  let workspace: Workspace;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': getToken(),
+        },
+        body: JSON.stringify({
+          name: workspaceName,
+          user_id: getUserId(),
+        })
+      })
+      console.log(res)
+      if (res.status == 401) {
+        resetCookie();
+        console.log("redirect");
+        router.push("/")
+      } else if (res.status == 200) {
+        workspace = await res.json();
+        return workspace.id;
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  return
+}
+
+// TODO 改善
 export async function addUserInWorkspace(workspaceID: number, userID: number): Promise<void> {
   const url = baseUrl + "add_user";
   try {
@@ -136,3 +139,7 @@ export async function addUserInWorkspace(workspaceID: number, userID: number): P
     console.log(e);
   }
 }
+
+// TODO renameworkspacename
+
+// TODO deleteuserfromworkspace
