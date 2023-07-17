@@ -1,46 +1,46 @@
-import { getToken } from "../utils/cookie";
+import { getToken } from '../utils/cookie'
 
 export interface SendDMForm {
-  receivedUserID: number;
-  workspaceID: number;
-  text: string;
+  receivedUserID: number
+  workspaceID: number
+  text: string
 }
 
 export interface ResSendDM {
-  id: number;
-  text: string;
-  sendUserId: number;
-  dmLineId: number;
-  createdAt: string;
-  updatedAt: string;
+  id: number
+  text: string
+  sendUserId: number
+  dmLineId: number
+  createdAt: string
+  updatedAt: string
 }
 
-export interface  Message {
-  id: number;
-  text: string;
-  ChannelID: number;
-  dmLineID: number;
-  userID: number;
-  threadID: number;
-  createdAt: string;
-  updatedAt: string;
+export interface Message {
+  id: number
+  text: string
+  ChannelID: number
+  dmLineID: number
+  userID: number
+  threadID: number
+  createdAt: string
+  updatedAt: string
 }
 
-const baseUrl = "http://localhost:8080/api";
+const baseUrl = 'http://localhost:8080/api'
 
 // channel message API
-export async function getMessagesFromChannel(channelID: number): Promise<Message[]|null> {
-  const url: string = baseUrl + "/message/get_from_channel/" + channelID.toString();
+export async function getMessagesFromChannel(channelID: number): Promise<Message[] | null> {
+  const url: string = baseUrl + '/message/get_from_channel/' + channelID.toString()
   try {
     const res: Response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: getToken(),
       },
-    });
+    })
     if (res.status == 200) {
-      const response = await res.json();
-      const messages: Message[] = [];
+      const response = await res.json()
+      const messages: Message[] = []
       if (!response) {
         return messages
       }
@@ -65,22 +65,26 @@ export async function getMessagesFromChannel(channelID: number): Promise<Message
   return null
 }
 
-export async function sendMessage(text: string, channelID: number, mentionedUserIDs: number[]): Promise<Message|null> {
-  const url: string = baseUrl + "/message/send";
+export async function sendMessage(
+  text: string,
+  channelID: number,
+  mentionedUserIDs: number[],
+): Promise<Message | null> {
+  const url: string = baseUrl + '/message/send'
   try {
     const res: Response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: getToken(),
       },
       body: JSON.stringify({
         text: text,
         channel_id: channelID,
-        mentioned_user_ids: mentionedUserIDs
-      })
-    });
+        mentioned_user_ids: mentionedUserIDs,
+      }),
+    })
     if (res.status == 200) {
-      const response = await res.json();
+      const response = await res.json()
       const message: Message = {
         id: response.id,
         text: response.text,
@@ -91,11 +95,11 @@ export async function sendMessage(text: string, channelID: number, mentionedUser
         createdAt: response.created_at,
         updatedAt: response.updated_at,
       }
-      return message;
+      return message
     }
-    console.log(res);
+    console.log(res)
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
   return null
 }
@@ -109,11 +113,11 @@ export async function sendMessage(text: string, channelID: number, mentionedUser
 
 // TODO getdmlines
 
-export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
-  const url = baseUrl + "dm/send";
+export async function sendDM(form: SendDMForm): Promise<ResSendDM | void> {
+  const url = baseUrl + 'dm/send'
   try {
     const res = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: getToken(),
       },
@@ -122,10 +126,10 @@ export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
         workspace_id: form.workspaceID,
         text: form.text,
       }),
-    });
-    return await res.json();
+    })
+    return await res.json()
   } catch (err) {
-    console.log(err);
+    console.log(err)
   }
 }
 
