@@ -21,7 +21,6 @@ export const postFetcher = async (
   bodyMap: Map<string, number | string | boolean | number[] | string[]> = new Map(),
   headerMap: Map<string, string> = new Map(),
 ): Promise<any> => {
-  console.log(url)
   return await fetcher(url, 'POST', headerMap, bodyMap)
 }
 
@@ -47,7 +46,6 @@ export const fetcher = async (
   headerMap: Map<string, string>,
   bodyMap: Map<string, number | string | boolean | number[] | string[]>,
 ): Promise<any> => {
-  console.log(url)
   if (!(method == 'GET' || method == 'POST' || method == 'PATCH' || method == 'DELETE')) {
     throw new Error('fetcher error: method setting')
   }
@@ -62,9 +60,6 @@ export const fetcher = async (
   if (!headerMap.has('Content-Type')) {
     headerMap.set('Content-Type', 'application/json')
   }
-
-  console.log(Object.fromEntries(headerMap))
-  console.log(JSON.stringify(Object.fromEntries(bodyMap)))
 
   let response: Response
   if (method == 'GET') {
