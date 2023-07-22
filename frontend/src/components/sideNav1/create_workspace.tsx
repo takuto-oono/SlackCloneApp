@@ -11,7 +11,7 @@ function CreateWorkspace() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     let workspaceName = name
-    const workspace: Workspace = await postWorkspace(workspaceName)
+    await postWorkspace(workspaceName)
     // ワークスペースのリストを更新する(Todo)
     // workspaceにAPIの結果が入っているはずです。
   }
