@@ -31,7 +31,7 @@ const CreateChannelForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const userInChannel = await postChannel(name, description, isPrivate, workspaceId)
+    await postChannel(name, description, isPrivate, workspaceId)
     setOpen(false)
     // チャンネルのリストを更新する(Todo)
   }
