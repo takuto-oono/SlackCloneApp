@@ -4,7 +4,7 @@ import ShowJoinedChannels from '@src/components/channel/show_joined_channels'
 import { workspaceIdState, workspacesState } from '@src/utils/atom'
 import { useRecoilValue } from 'recoil'
 import { AddUserInWorkspaceForm } from '@src/components/workspace/add_user_in_workspace_form'
-import ShowContentsList from '@src/components/contents/show_contents_list'
+import ShowContentsList from '@src/components/content/show_contents_list'
 
 export default function SideNav2() {
   const workspaceId = useRecoilValue(workspaceIdState)

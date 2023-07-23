@@ -1,6 +1,6 @@
 import { atom, useRecoilValue, useResetRecoilState } from 'recoil'
-import { usersInWState } from '@src/components/workspace/show_workspaces'
 import { UserInWorkspace } from '@src/fetchAPI/workspace'
+import { usersInWState } from './atom'
 
 interface SearchMemo {
   User: UserInWorkspace
