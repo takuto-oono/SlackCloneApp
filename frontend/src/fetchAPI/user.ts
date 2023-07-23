@@ -1,135 +1,51 @@
-import { getToken } from "../utils/cookie";
+import { createUrl, getFetcher, postFetcher } from './common'
 
 export interface User {
-    id: string;
-    name: string;
-    password: string;
+  id: number
+  name: string
 }
 
-const baseUrl = 'http://localhost:8080/'
-
-export async function getUsers() {
-    const url = baseUrl + 'users'
-    let users: User[]
-    try {
-        const res = await fetch(url, {
-            method: 'GET',
-        })
-        console.log(res)
-        users = await res.json()
-        console.log(users)
-        return users
-    } catch (err) {
-        console.log(err)
-    }
+export interface CurrentUser {
+  token: string
+  user_id: string
+  username: string
 }
 
-export async function getUserById(user: User): Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'GET',
-        })
-        console.log(res)
-        const user: User = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
+export async function signUp(userName: string, password: string) {
+  await postFetcher(
+    createUrl('/user/signUp', new Array(0)),
+    new Map<string, string | number>([
+      ['name', userName],
+      ['password', password],
+    ]),
+  )
 }
 
-export async function postUser(user: User): Promise<User> {
-    const url = baseUrl + 'user'
-
-    try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: user.name,
-                password: user.password,
-            })
-        })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function updateUser(user: User) :Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: user.name,
-                password: user.password,
-            })
-        })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function deleteUser(user: User) :Promise<User> {
-    const url = baseUrl + 'user/' + user.id
-    try {
-        const res = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: user.name,
-                password: user.password,
-            })
-        })
-        console.log(res)
-        user = await res.json()
-        console.log(user)
-    } catch (err) {
-        console.log(err)
-    }
-    return user
-}
-
-export async function getAllUsers(): Promise<User[]|null>{
-  const url = baseUrl + 'api/user/all'
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    })
-    if (res.status === 200) {
-      const users: User[] = [];
-      const response = await res.json();
-      for (const r of response) {
-        users.push({
-          id: r.id,
-          name: r.name,
-          password: "",
-        })
-      }
-      return users
-    }
-    console.log(res);
-  } catch(e) {
-    console.log(e);
+export async function login(userName: string, password: string): Promise<CurrentUser> {
+  const res = await postFetcher(
+    createUrl('/user/login', new Array(0)),
+    new Map<string, string | number>([
+      ['name', userName],
+      ['password', password],
+    ]),
+  )
+  const user: CurrentUser = {
+    token: res.token,
+    user_id: res.user_id,
+    username: res.username,
   }
-  return null
+  return user
+}
+
+export async function getAllUsers(): Promise<User[]> {
+  const res = await getFetcher(createUrl('/user/all', []))
+  let users: User[] = []
+  console.log(res)
+  for (const r of res) {
+    users.push({
+      id: r.id,
+      name: r.name,
+    })
+  }
+  return users
 }

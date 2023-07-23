@@ -1,167 +1,122 @@
-import { getToken } from "../utils/cookie";
-import { UserInWorkspace } from "./workspace";
+import { createUrl, getFetcher, postFetcher } from './common'
+import { UserInWorkspace } from './workspace'
 
+// TODO 命名規則を守るように変更
 export interface Channel {
-  id: number;
-  name: string;
-  description: string;
-  is_private: boolean;
-  is_archive: boolean;
-  workspace_id: number;
+  id: number
+  name: string
+  description: string
+  is_private: boolean
+  is_archive: boolean
+  workspace_id: number
 }
 
+// TODO 命名規則を守るように変更
 export interface CurrentChannel {
-  name: string;
-  description: string;
-  is_private: boolean;
-  workspace_id: number;
-}
-
-
-const baseUrl = "http://localhost:8080/api/channel/";
-
-export async function getJoinedChannelsInW(
+  name: string
+  description: string
+  is_private: boolean
   workspace_id: number
-): Promise<Channel[]> {
-  const url = baseUrl + "get_by_user_and_workspace/" + workspace_id;
-  console.log(url);
-  let res_channels = [
-    {
-      id: 0,
-      name: "",
-      description: "",
-      is_private: false,
-      is_archive: false,
-      workspace_id: 0,
-    },
-  ];
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    console.log(res);
-    res_channels = await res.json();
-    return new Promise((resolve) => {
-      resolve(res_channels);
-    });
-  } catch (err) {
-    console.log("err");
-    console.log(err);
-  }
-  return res_channels;
 }
 
-export async function getChannelsInW(
-  workspace_id: number
-): Promise<Channel[]> {
-  const url = baseUrl + workspace_id;
-  console.log(url);
-  let res_channels = [
-    {
-      id: 0,
-      name: "",
-      description: "",
-      is_private: false,
-      is_archive: false,
-      workspace_id: 0,
-    },
-  ];
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    console.log(res);
-    res_channels = await res.json();
-    return new Promise((resolve) => {
-      resolve(res_channels);
-    });
-  } catch (err) {
-    console.log("err");
-    console.log(err);
-  }
-  return res_channels;
+export interface UserInChannel {
+  userID: number
+  channelID: number
 }
 
-export async function postChannel(current: CurrentChannel): Promise<number | undefined> {
-  const url = baseUrl + "create";
-  let channel: Channel;
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        name: current.name,
-        description: current.description,
-        is_private: current.is_private,
-        workspace_id: current.workspace_id,
-      }),
-    });
-    if (res.status == 200) {
-      channel = await res.json();
-      return channel.id;
-    }
-  } catch (err) {
-    console.log(err);
-  }
-  return;
-}
-
-export async function addUserInChannel(chanelID: number, userID: number) {
-  const url = baseUrl + "add_user";
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        channel_id: chanelID,
-        user_id: userID,
-      }),
+export const getJoinedChannelsInW = async (workspaceID: number): Promise<Channel[]> => {
+  const res = await getFetcher(createUrl('/channel/get_by_user_and_workspace', [workspaceID]))
+  let channels: Channel[] = []
+  for (const r of res) {
+    channels.push({
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      is_private: r.is_private,
+      is_archive: r.is_archive,
+      workspace_id: r.workspace_id,
     })
-    if (res.status != 200) {
-      console.log(res);
-    }
-  } catch (e) {
-    console.log(e);
+  }
+  return channels
+}
+
+export const getChannelsInW = async (workspaceID: number): Promise<Channel[]> => {
+  const res = await getFetcher(createUrl('/channel', [workspaceID]))
+  let channels: Channel[] = []
+  for (const r of res) {
+    channels.push({
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      is_private: r.is_private,
+      is_archive: r.is_archive,
+      workspace_id: r.workspace_id,
+    })
+  }
+  return channels
+}
+
+export const getUsersInChannel = async (channelID: number): Promise<UserInWorkspace[]> => {
+  const res = await getFetcher(createUrl('/channel/all_user', [channelID]))
+  let usersInWorkspace: UserInWorkspace[] = []
+  for (const r of res) {
+    usersInWorkspace.push({
+      id: r.id,
+      name: r.name,
+      roleId: r.role_id,
+    })
+  }
+  return usersInWorkspace
+}
+
+export const postChannel = async (
+  channelName: string,
+  description: string,
+  isPrivate: boolean,
+  workspaceID: number,
+): Promise<Channel> => {
+  const res = await postFetcher(
+    createUrl('/channel/create', []),
+    new Map<string, number | string | boolean>([
+      ['name', channelName],
+      ['description', description],
+      ['is_private', isPrivate],
+      ['workspace_id', workspaceID],
+    ]),
+  )
+  return {
+    id: res.id,
+    name: res.name,
+    description: res.description,
+    is_private: res.is_private,
+    is_archive: res.is_archive,
+    workspace_id: res.workspace_id,
   }
 }
 
-export async function getUsersInChannel(channelId: number): Promise<UserInWorkspace[]> {
-  const url = baseUrl + "all_user/" + channelId;
-  let resUsersInChannel: UserInWorkspace[];
-  const usersInChannel = [{
-    id: 0,
-    name: "",
-    roleid: 0,
-  }];
-
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    
-    if (res.status == 200) {
-      resUsersInChannel = await res.json();
-      return new Promise((resolve) => {
-        const usersInChannel: UserInWorkspace[] = resUsersInChannel;
-        resolve(usersInChannel);
-      });
-    }
-    
-  } catch (err) {
-    console.log(err);
+export const addUserInChannel = async (
+  channelID: number,
+  userID: number,
+): Promise<UserInChannel> => {
+  const res = await postFetcher(
+    createUrl('/channel/add_user', []),
+    new Map<string, number>([
+      ['channel_id', channelID],
+      ['user_id', userID],
+    ]),
+  )
+  return {
+    channelID: res.channel_id,
+    userID: res.user_id,
   }
-  return usersInChannel;
 }
+
+// TODO deleteuserfromchannel
+// backendの仕様変更待ち
+// issueのurl: https://github.com/TO053037/SlackCloneApp/issues/238
+export const deleteUserFromChannel = async () => {}
+
+// TODO deletechannel
+// backendの仕様変更待ち
+// issueのurl: https://github.com/TO053037/SlackCloneApp/issues/239
+export const deleteChannel = async () => {}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useCookies } from "react-cookie";
-import { currentUser, login } from '@fetchAPI/login';
+import { CurrentUser, login } from '@fetchAPI/user';
 import { resetCookie } from "@src/utils/cookie";
 import router from "next/router";
 import Button from "@mui/material/Button";
@@ -27,7 +27,7 @@ const LoginForm = () => {
     e.preventDefault();
     console.log("login");
     let user = { name: name, password: password };
-    login(user).then((currentUser: currentUser) => { 
+    login(name, password).then((currentUser: CurrentUser) => { 
       if (currentUser.token) {
         setCookie("token", currentUser.token);
         setCookie("user_id", currentUser.user_id);
