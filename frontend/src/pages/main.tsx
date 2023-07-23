@@ -1,6 +1,6 @@
-import ShowChannelsInWorkspace from "@src/components/main/show_channels";
-import { ChannelComponent } from "../components/main/channel";
-import { useRouter } from "next/router";
+import ShowChannelsInWorkspace from '@src/components/channel/show_channels'
+import { ChannelComponent } from '../components/channel/channel'
+import { useRouter } from 'next/router'
 
 const Main: React.FC = () => {
   const router = useRouter()
@@ -8,16 +8,12 @@ const Main: React.FC = () => {
   const { contents } = router.query
 
   if (channelId) {
-    return (
-      <ChannelComponent channelID={Number(channelId)} />
-    );
-  } else if (contents == "show_channels") {
-    return (
-      <ShowChannelsInWorkspace />
-    );
+    return <ChannelComponent channelID={Number(channelId)} />
+  } else if (contents == 'show_channels') {
+    return <ShowChannelsInWorkspace />
   } else {
-    return <></>;
+    return <></>
   }
-};
+}
 
-export default Main;
+export default Main
