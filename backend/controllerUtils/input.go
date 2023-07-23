@@ -149,8 +149,10 @@ func InputAndValidateDeleteUserFromWorkspace(c *gin.Context) (DeleteUserFromWork
 func InputAndValidateCreateChannel(c *gin.Context) (CreateChannelInput, error) {
 	var in CreateChannelInput
 	if err := c.ShouldBindJSON(&in); err != nil {
+		fmt.Println(err)
 		return in, err
 	}
+	fmt.Println(in)
 	if in.WorkspaceId == 0 {
 		return in, fmt.Errorf("workspace_id not found")
 	}

@@ -1,120 +1,103 @@
-import { getToken } from "../utils/cookie";
+import { createUrl, getFetcher, patchFetcher, postFetcher } from './common'
 
 export interface SendDMForm {
-  receivedUserID: number;
-  workspaceID: number;
-  text: string;
+  receivedUserID: number
+  workspaceID: number
+  text: string
 }
 
 export interface ResSendDM {
-  id: number;
-  text: string;
-  sendUserId: number;
-  dmLineId: number;
-  createdAt: string;
-  updatedAt: string;
+  id: number
+  text: string
+  sendUserId: number
+  dmLineId: number
+  createdAt: string
+  updatedAt: string
 }
 
-export interface  Message {
-  id: number;
-  text: string;
-  ChannelID: number;
-  dmLineID: number;
-  userID: number;
-  threadID: number;
-  createdAt: string;
-  updatedAt: string;
+export interface Message {
+  id: number
+  text: string
+  ChannelID: number
+  dmLineID: number
+  userID: number
+  threadID: number
+  createdAt: string
+  updatedAt: string
 }
 
-const baseUrl = "http://localhost:8080/api";
+export interface MessageAndUser {
+  messageID: number
+  userID: number
+  isRead: boolean
+}
 
-export async function sendDM(form: SendDMForm): Promise<ResSendDM|void> {
-  const url = baseUrl + "dm/send";
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        received_user_id: form.receivedUserID,
-        workspace_id: form.workspaceID,
-        text: form.text,
-      }),
-    });
-    return await res.json();
-  } catch (err) {
-    console.log(err);
+// channel message API
+export async function getMessagesFromChannel(channelID: number): Promise<Message[]> {
+  const res = await getFetcher(createUrl('/message/get_from_channel', [channelID]))
+  let messages: Message[] = []
+  for (const r of res) {
+    messages.push({
+      id: r.id,
+      text: r.text,
+      ChannelID: r.channel_id,
+      dmLineID: r.dm_line_id,
+      userID: r.user_id,
+      threadID: r.thread_id,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    })
+  }
+  return messages
+}
+
+export const sendMessage = async (
+  text: string,
+  channelID: number,
+  mentionedUserIDs: number[],
+): Promise<Message> => {
+  const res = await postFetcher(
+    createUrl('/message/send', []),
+    new Map<string, number | string | number[]>([
+      ['text', text],
+      ['channel_id', channelID],
+      ['mentioned_user_ids', mentionedUserIDs],
+    ]),
+  )
+  return {
+    id: res.id,
+    text: res.text,
+    ChannelID: res.channel_id,
+    dmLineID: res.dm_line_id,
+    userID: res.user_id,
+    threadID: res.thread_id,
+    createdAt: res.created_at,
+    updatedAt: res.updated_at,
   }
 }
 
-export async function getMessagesFromChannel(channelID: number): Promise<Message[]|null> {
-  const url: string = baseUrl + "/message/get_from_channel/" + channelID.toString();
-  try {
-    const res: Response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: getToken(),
-      },
-    });
-    if (res.status == 200) {
-      const response = await res.json();
-      const messages: Message[] = [];
-      if (!response) {
-        return messages
-      }
-      for (const r of response) {
-        messages.push({
-          id: r.id,
-          text: r.text,
-          ChannelID: r.channel_id,
-          dmLineID: r.dm_line_id,
-          userID: r.user_id,
-          threadID: r.thread_id,
-          createdAt: r.created_at,
-          updatedAt: r.updated_at,
-        })
-      }
-      return messages
-    }
-    console.log(res)
-  } catch (e) {
-    console.log(e)
+export const readMessageByUser = async (messageID: number): Promise<MessageAndUser> => {
+  const res = await postFetcher(createUrl('/message/read_by_user', [messageID]))
+  return {
+    messageID: res.message_id,
+    userID: res.user_id,
+    isRead: res.is_read,
   }
-  return null
 }
 
-export async function sendMessage(text: string, channelID: number, mentionedUserIDs: number[]): Promise<Message|null> {
-  const url: string = baseUrl + "/message/send";
-  try {
-    const res: Response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getToken(),
-      },
-      body: JSON.stringify({
-        text: text,
-        channel_id: channelID,
-        mentioned_user_ids: mentionedUserIDs
-      })
-    });
-    if (res.status == 200) {
-      const response = await res.json();
-      const message: Message = {
-        id: response.id,
-        text: response.text,
-        ChannelID: response.channel_id,
-        dmLineID: response.dm_line_id,
-        userID: response.user_id,
-        threadID: response.thread_id,
-        createdAt: response.created_at,
-        updatedAt: response.updated_at,
-      }
-      return message;
-    }
-    console.log(res);
-  } catch (e) {
-    console.log(e);
+export const editMessage = async (messageID: number, newText: string): Promise<Message> => {
+  const res = await patchFetcher(
+    createUrl('/message/edit', [messageID]),
+    new Map<string, string>([['text', newText]]),
+  )
+  return {
+    id: res.id,
+    text: res.text,
+    ChannelID: res.channel_id,
+    dmLineID: res.dm_line_id,
+    userID: res.user_id,
+    threadID: res.thread_id,
+    createdAt: res.created_at,
+    updatedAt: res.updated_at,
   }
-  return null
 }

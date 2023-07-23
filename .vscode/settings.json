@@ -1,22 +1,30 @@
 {
-    // 単語登録
-    "cSpell.words": [
-        "auwi",
-        "awau",
-        "fatih",
-        "gonic",
-        "gorm",
-        "mattn",
-        "randomstring",
-        "rwau",
-        "structs",
-        "waus",
-        "xyproto"
-    ],
-    // ESLint & Prettier 設定
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    }
+	// 単語登録
+	"cSpell.words": [
+		"auwi",
+		"awau",
+		"fatih",
+		"gonic",
+		"gorm",
+		"mattn",
+		"randomstring",
+		"rwau",
+		"structs",
+		"waus",
+		"xyproto"
+	],
+	// ESLint & Prettier 設定
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+
+	// 言語ごとにどのフォーマッターが動くかを定義
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[go]": {
+		"editor.defaultFormatter": "golang.go"
+	}
 }
