@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -306,32 +305,7 @@ func GetDMsInLine(c *gin.Context) {
 	c.JSON(http.StatusOK, createResponse(dms))
 }
 
-type DMLineInfo struct {
-	ID     uint   `json:"id"`
-	ToName string `json:"to_name"`
-}
-
 func GetDMLines(c *gin.Context) {
-	var response []DMLineInfo
-
-	setToName := func(userId1, userId2, requestUserId uint32) (string, error) {
-		var toId uint32
-		if userId1 == requestUserId && userId2 == requestUserId {
-			toId = requestUserId
-		} else if userId1 == requestUserId && userId2 != requestUserId {
-			toId = userId2
-		} else if userId1 != requestUserId && userId2 == requestUserId {
-			toId = userId1
-		} else {
-			return "", fmt.Errorf("request_user not found")
-		}
-		u, err := models.GetUserById(db, toId)
-		if err != nil {
-			return "", err
-		}
-		return u.Name, nil
-	}
-
 	c.Header("Access-Control-Allow-Origin", "*")
 	userId, err := Authenticate(c)
 	if err != nil {
@@ -359,20 +333,7 @@ func GetDMLines(c *gin.Context) {
 		return
 	}
 
-	// 取得した情報をDMLineInfoに変換する
-	for _, dl := range dls {
-		toName, err := setToName(dl.UserId1, dl.UserId2, userId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-		response = append(response, DMLineInfo{
-			ID:     dl.ID,
-			ToName: toName,
-		})
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, dls)
 }
 
 func EditDM(c *gin.Context) {

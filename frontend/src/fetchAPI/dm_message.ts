@@ -1,6 +1,13 @@
 import { createUrl, deleteFetcher, getFetcher, patchFetcher, postFetcher } from './common'
 import { Message } from './message'
 
+export interface DmLine {
+  id: number
+  workspaceID: number
+  userID1: number
+  userID2: number
+}
+
 export const getDmsInLine = async (dmLineID: number): Promise<Message[]> => {
   const res = await getFetcher(createUrl('/dm', [dmLineID]))
   let messages: Message[] = []
@@ -19,9 +26,19 @@ export const getDmsInLine = async (dmLineID: number): Promise<Message[]> => {
   return messages
 }
 
-// TODO backendの仕様変更後に実装
-// issueのurl: https://github.com/TO053037/SlackCloneApp/issues/241
-export const getDmLinesByUserInWorkspace = async (workspaceID: number) => {}
+export const getDmLinesByUserInWorkspace = async (workspaceID: number) => {
+  const res = await getFetcher(createUrl('/dm/dm_lines', [workspaceID]))
+  let dmLines: DmLine[] = []
+  for (const r of res) {
+    dmLines.push({
+      id: r.id,
+      workspaceID: r.workspace_id,
+      userID1: r.user_id_1,
+      userID2: r.user_id_2,
+    })
+  }
+  return dmLines
+}
 
 export const sendDM = async (
   text: string,

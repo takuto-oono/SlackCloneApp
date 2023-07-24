@@ -567,14 +567,10 @@ func TestGetDMLines(t *testing.T) {
 		rr = getDMLinesTestFunc(w.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		response := new([]DMLineInfo)
+		response := new([]models.DMLine)
 		json.Unmarshal(([]byte)(byteArray), response)
 
 		assert.Equal(t, 10, len(*response))
-
-		for _, res := range *response {
-			assert.Contains(t, toUserNames, res.ToName)
-		}
 	})
 
 	t.Run("2 正常な場合 データが存在しない場合", func(t *testing.T) {
@@ -597,7 +593,7 @@ func TestGetDMLines(t *testing.T) {
 		rr = getDMLinesTestFunc(w.ID, lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		byteArray, _ = io.ReadAll(rr.Body)
-		response := new([]DMLineInfo)
+		response := new([]models.DMLine)
 		json.Unmarshal(([]byte)(byteArray), response)
 
 		assert.Equal(t, 0, len(*response))
