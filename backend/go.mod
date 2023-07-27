@@ -6,10 +6,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.2
-	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/ini.v1 v1.67.0
-	gorm.io/driver/sqlite v1.4.4
 	gorm.io/gorm v1.25.1
 )
 
