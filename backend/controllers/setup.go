@@ -76,5 +76,7 @@ func SetupRouter2() *gin.Engine {
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"message": "server2 OK"})
 	})
+	socket := r.Group("/socket")
+	socket.GET("/channel_socket", ChannelSocket)
 	return r
 }
