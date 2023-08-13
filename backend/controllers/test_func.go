@@ -163,3 +163,13 @@ func GetDMsInLineTestFuncV2(dmLineID uint, jwtToken string) (*httptest.ResponseR
 	json.Unmarshal(([]byte)(byteArray), &messages)
 	return rr, messages
 }
+
+func RenameWorkspaceNameTestFunc(workspaceID int, jwtToken, newWorkspaceName string) (*httptest.ResponseRecorder, models.Workspace) {
+	rr := Req(http.MethodPatch, "/api/workspace/rename/" + strconv.Itoa(workspaceID), jwtToken, controllerUtils.RenameWorkspaceNameInput{
+		WorkspaceName: newWorkspaceName,
+	})
+	byteArray, _ := io.ReadAll(rr.Body)
+	var workspace models.Workspace
+	json.Unmarshal(([]byte)(byteArray), &workspace)
+	return rr, workspace
+}
