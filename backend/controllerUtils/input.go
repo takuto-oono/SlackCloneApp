@@ -24,7 +24,6 @@ type AddUserInWorkspaceInput struct {
 }
 
 type RenameWorkspaceNameInput struct {
-	UserId        uint32 `json:"user_id"`
 	WorkspaceName string `json:"workspace_name"`
 }
 
@@ -122,9 +121,6 @@ func InputAndValidateRenameWorkspace(c *gin.Context) (RenameWorkspaceNameInput, 
 	var in RenameWorkspaceNameInput
 	if err := c.ShouldBindJSON(&in); err != nil {
 		return in, err
-	}
-	if in.UserId == 0 {
-		return in, fmt.Errorf("user_id not found")
 	}
 	if in.WorkspaceName == "" {
 		return in, fmt.Errorf("workspace_name not found")

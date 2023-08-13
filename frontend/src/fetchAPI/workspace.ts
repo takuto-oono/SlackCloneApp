@@ -1,5 +1,5 @@
 import { getUserId } from '../utils/cookie'
-import { createUrl, deleteFetcher, getFetcher, postFetcher } from './common'
+import { createUrl, deleteFetcher, getFetcher, patchFetcher, postFetcher } from './common'
 
 export interface Workspace {
   id: number
@@ -77,10 +77,20 @@ export async function addUserInWorkspace(
   }
 }
 
-// TODO renameworkspacename
-// バックエンドの仕様が残念なので、バックエンドの修正が先
-// issueのurl: https://github.com/TO053037/SlackCloneApp/issues/60
-export const renameWorkspaceName = (workspaceID: number) => {}
+export const renameWorkspaceName = async (
+  workspaceID: number,
+  newWorkspaceName: string,
+): Promise<Workspace> => {
+  const res = await patchFetcher(
+    createUrl('/workspace/rename', [workspaceID]),
+    new Map<string, string>([['workspace_name', newWorkspaceName]]),
+  )
+  return {
+    id: res.id,
+    name: res.name,
+    primary_owner_id: res.primary_owner_id,
+  }
+}
 
 export const deleteUserFromWorkspace = async (
   deletingUserID: number,

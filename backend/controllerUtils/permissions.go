@@ -1,6 +1,7 @@
 package controllerUtils
 
 import (
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -19,6 +20,9 @@ func HasPermissionAddUserInWorkspace(userId uint32, workspaceId int) bool {
 func HasPermissionRenamingWorkspaceName(workspaceId int, userId uint32) (bool, error) {
 	wau, err := models.GetWAUByWorkspaceIdAndUserId(db, workspaceId, userId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
 		return false, err
 	}
 	return (wau.RoleId == 1 || wau.RoleId == 2 || wau.RoleId == 3), nil
