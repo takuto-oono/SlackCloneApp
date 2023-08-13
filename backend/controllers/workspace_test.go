@@ -490,13 +490,59 @@ func TestAddUserInWorkspace(t *testing.T) {
 }
 
 func TestRenameWorkspaceName(t *testing.T) {
-	// 1. 正常時 200
-	// 2. headerに認証情報がない場合 400
-	// 3. 認証が正常にできない場合 401
-	// 4. 認証したユーザーがworkspaceに参加していない場合 404
-	// 5. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれか出ない場合 403
-	// 6. 変更したいNameがすでに使用されていた場合 409
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
+	// 1. 正常時 200
+	// 2. アクセスしたユーザーがworkspaceに参加していない場合 403
+	// 3. 認証したユーザーが対象のworkspaceでrole = 1 or role = 2 or role = 3のいずれかでない場合 403
+
+	t.Run("正常時", func(t *testing.T) {
+		newWorkspaceName := randomstring.EnglishFrequencyString(30)
+		rr, u := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr := LoginTestFuncV2(u.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, nw := RenameWorkspaceNameTestFunc(w.ID, lr.Token, newWorkspaceName)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.NotEqual(t, w.Name, nw.Name)
+		assert.Equal(t, newWorkspaceName, nw.Name)
+	})
+	
+	t.Run("workspaceに参加していないユーザーからのアクセスの場合", func(t *testing.T) {
+		rr, u1 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr1 := LoginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, u2 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, _ = RenameWorkspaceNameTestFunc(w.ID, lr2.Token, randomstring.EnglishFrequencyString(30))
+		assert.Equal(t, http.StatusForbidden, rr.Code)
+	})
+	
+	t.Run("権限のないユーザーからのアクセスだった場合", func(t *testing.T) {
+		rr, u1 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr1 := LoginTestFuncV2(u1.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, u2 := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, _ = RenameWorkspaceNameTestFunc(w.ID, lr2.Token, randomstring.EnglishFrequencyString(30))
+		assert.Equal(t, http.StatusForbidden, rr.Code)
+	})
 }
 
 func TestDeleteUserFromWorkSpace(t *testing.T) {
