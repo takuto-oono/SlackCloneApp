@@ -13,6 +13,17 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+func readPump(conn *websocket.Conn) {
+	for {
+		_, m, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		fmt.Println(string(m[:]))
+	}
+}
+
 func WsController(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -22,4 +33,5 @@ func WsController(ctx *gin.Context) {
 		return
 	}
 	fmt.Println(conn)
+	go readPump(conn)
 }
