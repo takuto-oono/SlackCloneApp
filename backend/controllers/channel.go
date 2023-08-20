@@ -408,7 +408,3 @@ func GetAllUsersInChannel(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, res)
 }
-
-func ChannelSocket(ctx *gin.Context) {
-	
-}
