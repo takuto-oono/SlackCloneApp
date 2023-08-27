@@ -20,12 +20,17 @@ func readPump(conn *websocket.Conn) {
 			fmt.Println(err)
 			break
 		}
-		fmt.Println(string(m[:]))
+		fmt.Println(string(m))
 	}
 }
 
 func WsController(ctx *gin.Context) {
 	ctx.Header("Access-Control-Allow-Origin", "*")
+	_, err := Authenticate(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
