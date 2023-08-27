@@ -24,8 +24,19 @@ func GenerateToken(userId uint32) (string, error) {
 	return token.SignedString([]byte(config.Config.SecretKey))
 }
 
+func GetTokenFromHeader(c *gin.Context) string {
+	return c.Request.Header.Get("Authorization")
+}
+
+func GetTokenFromQueryParams(c *gin.Context) string {
+	return c.Request.URL.Query().Get("token")
+}
+
 func GetTokenFromContext(c *gin.Context) string {
-	token := c.Request.Header.Get("Authorization")
+	token := GetTokenFromHeader(c)
+	if token == "" {
+		token = GetTokenFromQueryParams(c)
+	}
 	if len(strings.Split(token, "\"")) == 3 {
 		return strings.Split(token, "\"")[1]
 	}
