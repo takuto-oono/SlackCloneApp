@@ -4,13 +4,10 @@ import { LoginForm } from '@src/components/user/user'
 import { Workspace, getWorkspaces } from '@src/fetchAPI/workspace'
 import { useSetRecoilState } from 'recoil'
 import { workspacesState } from '@src/utils/atom'
-import { connectSocket, sendMessage } from '@src/utils/websocket'
 
 function LoginPage() {
   const [cookies, setCookie, removeCookie] = useCookies(['token', 'user_id'])
   const setWorkspaces = useSetRecoilState(workspacesState)
-  connectSocket()
-  sendMessage('testmess')
 
   // useEffect削除（未）
   useEffect(() => {
