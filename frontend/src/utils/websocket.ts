@@ -26,5 +26,5 @@ export const sendMessage = (message: any) => {
 }
 
 const getSocketUrl = (): string => {
-  return 'ws://' + getToken() + 'localhost:8000/websocket/'
+  return 'ws://localhost:8000/websocket/?token=' + getToken()
 }
