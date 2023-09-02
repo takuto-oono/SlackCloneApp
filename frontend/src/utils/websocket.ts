@@ -2,7 +2,7 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getToken } from '../utils/cookie'
 
 export const connectSocket = () => {
-  const { sendMessage } = useWebSocket(getSocketUrl(), {
+  const {} = useWebSocket(getSocketUrl(), {
     onOpen: () => {
       console.log('websocket open')
     },
