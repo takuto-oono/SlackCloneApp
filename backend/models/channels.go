@@ -61,6 +61,38 @@ func GetChannelsByWorkspaceId(tx *gorm.DB, workspaceId int) ([]Channel, error) {
 	return result, nil
 }
 
+func GetAllChannels(tx *gorm.DB) ([]Channel, error) {
+	var result []Channel
+	rows, err := tx.Model(&Channel{}).Rows()
+	if err != nil {
+		return result, err
+	}
+	for rows.Next() {
+		var c Channel
+		if err := tx.ScanRows(rows, &c); err != nil {
+			return result, err
+		}
+		result = append(result, c)
+	}
+	return result, nil
+}
+
+func GetAllChannelsByUserID(tx *gorm.DB, userID uint32) ([]Channel, error) {
+	var result []Channel
+	rows, err := tx.Model(&Channel{}).Where("user_id = ?", userID).Rows()
+	if err != nil {
+		return result, err
+	}
+	for rows.Next() {
+		var c Channel
+		if err := tx.ScanRows(rows, &c); err != nil {
+			return result, err
+		}
+		result = append(result, c)
+	}
+	return result, nil
+}
+
 func DeleteChannelsTableRecords() {
 	db.Exec("DELETE FROM channels")
 }
