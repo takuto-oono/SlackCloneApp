@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+
+	"backend/ws"
 )
 
 var upgrader = websocket.Upgrader{
@@ -13,30 +15,24 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func readPump(conn *websocket.Conn) {
-	for {
-		_, m, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-		fmt.Println(string(m))
-	}
-}
-
-func WsController(ctx *gin.Context) {
+func WsController(ctx *gin.Context, h *ws.Hub) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ctx.Header("Access-Control-Allow-Origin", "*")
-	_, err := Authenticate(ctx)
+	userID, err := Authenticate(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	fmt.Println(conn)
-	go readPump(conn)
+
+	client := ws.NewClient(h, conn, userID)
+	go client.ReadPump(conn)
+
 }

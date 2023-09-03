@@ -54,6 +54,34 @@ func TestDeleteChannel(t *testing.T) {
 	assert.NotEmpty(t, err)
 }
 
+func TestGetAllChannels(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	t.Run("1 データが存在する場合", func(t *testing.T) {
+		chCnt := 100
+		channels := make([]Channel, chCnt)
+		for i := 0; i < chCnt; i++ {
+			ch := NewChannel(
+				randomstring.EnglishFrequencyString(30),
+				"",
+				false,
+				false,
+				int(rand.Uint64()),
+			)
+			assert.Empty(t, ch.Create(db))
+			channels[i] = *ch
+		}
+		res, err := GetAllChannels(db)
+		assert.Empty(t, err)
+		assert.Equal(t, chCnt, len(res))
+		for _, ch := range channels {
+			assert.Contains(t, res, ch)
+		}
+	})
+}
+
 func TestGetChannelsByWorkspaceId(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")

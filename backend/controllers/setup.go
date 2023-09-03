@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"backend/ws"
 )
 
 func settingRouter() *gin.Engine {
@@ -73,13 +75,16 @@ func SetupRouter1() *gin.Engine {
 
 func SetupRouter2() *gin.Engine {
 	r := settingRouter()
+	h := ws.NewHub()
+	go h.Run()
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"message": "server2 OK"})
 	})
-	
+
 	socket := r.Group("/websocket")
 	socket.GET("/", func(ctx *gin.Context) {
-		WsController(ctx)
+		WsController(ctx, h)
 	})
 	return r
 }
