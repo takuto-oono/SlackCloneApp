@@ -14,20 +14,20 @@ services:
       - db
     links:
       - "db:database"
-  backend2:
-    build:
-      context: backend
-      dockerfile: backend.Dockerfile
-    command: sh -c "sleep 15 && go run main.go 2"
-    tty: true
-    volumes:
-      - ./backend:/go/src
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    links:
-      - "db:database"
+  # backend2:
+  #   build:
+  #     context: backend
+  #     dockerfile: backend.Dockerfile
+  #   command: sh -c "sleep 15 && go run main.go 2"
+  #   tty: true
+  #   volumes:
+  #     - ./backend:/go/src
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - db
+  #   links:
+  #     - "db:database"
   frontend:
     build:
       context: frontend

@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gin-gonic/gin"
+
 	"backend/controllers"
 	"backend/models"
 	"backend/testdata"
 )
 
 func main() {
+	gin.SetMode(gin.DebugMode)
+
 	fmt.Println(models.DbConnection)
 	switch os.Args[1:][0] {
 	case "1":
