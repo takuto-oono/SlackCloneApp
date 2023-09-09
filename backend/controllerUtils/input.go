@@ -13,8 +13,7 @@ type SignUpAndLoginInput struct {
 }
 
 type CreateWorkspaceInput struct {
-	Name          string `json:"name"`
-	RequestUserId uint32 `json:"user_id"`
+	Name string `json:"name"`
 }
 
 type AddUserInWorkspaceInput struct {
@@ -92,9 +91,6 @@ func InputAndValidateCreateWorkspace(c *gin.Context) (CreateWorkspaceInput, erro
 	}
 	if in.Name == "" {
 		return in, fmt.Errorf("name not found")
-	}
-	if in.RequestUserId == 0 {
-		return in, fmt.Errorf("user_id not found")
 	}
 	return in, nil
 }

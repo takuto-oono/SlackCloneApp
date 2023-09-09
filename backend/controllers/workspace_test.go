@@ -23,8 +23,7 @@ var workspaceRouter = SetupRouter1()
 func createWorkSpaceTestFunc(workspaceName, jwtToken string, userId uint32) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	inputWorkspace := controllerUtils.CreateWorkspaceInput{
-		Name:          workspaceName,
-		RequestUserId: userId,
+		Name: workspaceName,
 	}
 	jsonInput, _ := json.Marshal(inputWorkspace)
 	req, err := http.NewRequest("POST", "/api/workspace/create", bytes.NewBuffer(jsonInput))
@@ -95,9 +94,8 @@ func TestCreateWorkspace(t *testing.T) {
 	}
 
 	// 1. 正常な状態(ログイン中のユーザーがworkspaceを作成する) 200
-	// 2. jwtTokenから復元されるUserIdとbodyのprimaryOwnerUserIdが一致しない場合 400
-	// 3. bodyにNameかPrimaryOwnerIdが含まれていない場合 400
-	// 4. 既に同じ名前のworkspaceが存在する場合 409
+	// 2. bodyにNameが含まれていない場合 400
+	// 3. 既に同じ名前のworkspaceが存在する場合 409
 
 	// 1
 	t.Run("correctCase", func(t *testing.T) {
@@ -140,93 +138,15 @@ func TestCreateWorkspace(t *testing.T) {
 
 	// 2
 	t.Run("2", func(t *testing.T) {
-		userIds := []uint32{}
-		UserNames := []string{}
-		WorkSpaceNames := []string{}
-		jwtTokens := []string{}
-
-		for i := 0; i < 10; i++ {
-			UserNames = append(UserNames, randomstring.EnglishFrequencyString(30))
-		}
-
-		for i := 0; i < 100; i++ {
-			WorkSpaceNames = append(WorkSpaceNames, randomstring.EnglishFrequencyString(30))
-		}
-
-		for _, name := range UserNames {
-			rr := signUpTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			byteArray, _ := ioutil.ReadAll(rr.Body)
-			jsonBody := ([]byte)(byteArray)
-			u := new(models.User)
-			json.Unmarshal(jsonBody, u)
-			userIds = append(userIds, u.ID)
-		}
-
-		for i, name := range UserNames {
-			rr := loginTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			byteArray, _ := ioutil.ReadAll(rr.Body)
-			jsonBody := ([]byte)(byteArray)
-			lr := new(LoginResponse)
-			json.Unmarshal(jsonBody, lr)
-			assert.Equal(t, userIds[i], lr.UserId)
-			jwtTokens = append(jwtTokens, lr.Token)
-		}
-
-		for i, workspaceName := range WorkSpaceNames {
-			assert.Equal(t, http.StatusBadRequest, createWorkSpaceTestFunc(workspaceName, jwtTokens[i%10], userIds[(i+1)%10]).Code)
-		}
+		rr, u := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, lr := LoginTestFuncV2(u.Name, "pass")
+		assert.Equal(t, http.StatusOK, rr.Code)
+		rr, _ = CreateWorkspaceTestFuncV2("", lr.Token)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
-	// 3
-	t.Run("3", func(t *testing.T) {
-		userIds := []uint32{}
-		UserNames := []string{}
-		WorkSpaceNames := []string{}
-		jwtTokens := []string{}
-
-		for i := 0; i < 10; i++ {
-			UserNames = append(UserNames, randomstring.EnglishFrequencyString(30))
-		}
-
-		for i := 0; i < 100; i++ {
-			WorkSpaceNames = append(WorkSpaceNames, randomstring.EnglishFrequencyString(30))
-		}
-
-		for i, name := range UserNames {
-			rr := signUpTestFunc(name, "pass")
-			assert.Equal(t, http.StatusOK, rr.Code)
-			byteArray, _ := ioutil.ReadAll(rr.Body)
-			jsonBody := ([]byte)(byteArray)
-			u := new(models.User)
-			json.Unmarshal(jsonBody, u)
-			userIds = append(userIds, u.ID)
-			assert.Equal(t, UserNames[i], u.Name)
-
-			rr = loginTestFunc(name, "pass")
-			byteArray, _ = ioutil.ReadAll(rr.Body)
-			jsonBody = ([]byte)(byteArray)
-			lr := new(LoginResponse)
-			json.Unmarshal(jsonBody, lr)
-			assert.Equal(t, http.StatusOK, rr.Code)
-			jwtTokens = append(jwtTokens, lr.Token)
-		}
-
-		for i, workspaceName := range WorkSpaceNames {
-			var rr *httptest.ResponseRecorder
-			if i%3 == 0 {
-				rr = createWorkSpaceTestFunc("", jwtTokens[i%10], userIds[i%10])
-			} else if i%3 == 1 {
-				rr = createWorkSpaceTestFunc(workspaceName, jwtTokens[i%10], 0)
-			} else {
-				rr = createWorkSpaceTestFunc("", jwtTokens[i%10], 0)
-			}
-			assert.Equal(t, http.StatusBadRequest, rr.Code)
-		}
-	})
-
-	t.Run("4 同じ名前のworkspaceが存在している場合", func(t *testing.T) {
+	t.Run("3 同じ名前のworkspaceが存在している場合", func(t *testing.T) {
 		userName := randomstring.EnglishFrequencyString(30)
 		workspaceName := randomstring.EnglishFrequencyString(30)
 

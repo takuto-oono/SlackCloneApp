@@ -40,16 +40,9 @@ export async function getUsersInWorkspace(workspaceId: number): Promise<UserInWo
 }
 
 export async function postWorkspace(workspaceName: string): Promise<Workspace> {
-  const userID = getUserId()
-  if (!userID) {
-    throw new Error('not found userID')
-  }
   const res = await postFetcher(
     createUrl('/workspace/create', []),
-    new Map<string, string | number>([
-      ['name', workspaceName],
-      ['user_id', userID],
-    ]),
+    new Map<string, string>([['name', workspaceName]]),
   )
   return {
     id: res.id,
