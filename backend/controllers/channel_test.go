@@ -1548,7 +1548,7 @@ func TestGetAllUsersInChannel(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rr.Code)
 	rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
 	assert.Equal(t, http.StatusOK, rr.Code)
-	rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+	rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token)
 	assert.Equal(t, http.StatusOK, rr.Code)
 	userIDs := make([]uint32, 10)
 	for i := 0; i < 10; i++ {

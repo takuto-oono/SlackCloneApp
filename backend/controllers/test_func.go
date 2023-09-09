@@ -58,10 +58,9 @@ func LoginTestFuncV2(name, password string) (*httptest.ResponseRecorder, LoginRe
 	return rr, lr
 }
 
-func CreateWorkspaceTestFuncV2(workspaceName, jwtToken string, userID uint32) (*httptest.ResponseRecorder, models.Workspace) {
+func CreateWorkspaceTestFuncV2(workspaceName, jwtToken string) (*httptest.ResponseRecorder, models.Workspace) {
 	rr := Req(http.MethodPost, "/api/workspace/create", jwtToken, controllerUtils.CreateWorkspaceInput{
-		Name:          workspaceName,
-		RequestUserId: userID,
+		Name: workspaceName,
 	})
 	byteArray, _ := io.ReadAll(rr.Body)
 	var w models.Workspace

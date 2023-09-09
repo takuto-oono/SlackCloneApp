@@ -13,7 +13,7 @@ import (
 
 func CreateWorkspace(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	primaryOwnerId, err := Authenticate(c)
+	userID, err := Authenticate(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
@@ -22,11 +22,6 @@ func CreateWorkspace(c *gin.Context) {
 	in, err := controllerUtils.InputAndValidateCreateWorkspace(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-	// requestをしたuserとbodyのprimaryOwnerIdが等しいか確認
-	if in.RequestUserId != primaryOwnerId {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "not equal request user and primary owner id"})
 		return
 	}
 
@@ -38,7 +33,7 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// dbに保存
-	w := models.NewWorkspace(in.Name, in.RequestUserId)
+	w := models.NewWorkspace(in.Name, userID)
 	if err := w.Create(db); err != nil {
 		if ok, myerr := my.Error(err); ok {
 			if myerr == my.ErrDupeKey {
@@ -53,7 +48,7 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// workspace_and_users tableにもuserを保存する
-	wau := models.NewWorkspaceAndUsers(w.ID, w.PrimaryOwnerId, 1)
+	wau := models.NewWorkspaceAndUsers(w.ID, userID, 1)
 	err = wau.Create(tx)
 	if err != nil {
 		tx.Rollback()
@@ -70,7 +65,7 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// general channelにuserを追加する
-	cau := models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
+	cau := models.NewChannelsAndUses(ch.ID, userID, true)
 	if err := cau.Create(tx); err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -86,7 +81,7 @@ func CreateWorkspace(c *gin.Context) {
 	}
 
 	// random channelにuserを追加する
-	cau = models.NewChannelsAndUses(ch.ID, primaryOwnerId, true)
+	cau = models.NewChannelsAndUses(ch.ID, userID, true)
 	if err := cau.Create(tx); err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

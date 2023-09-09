@@ -282,7 +282,7 @@ func TestSendMessage(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 		rr, ch := CreateChannelTestFuncV2(randomstring.EnglishFrequencyString(30), "", &isPrivate, lr.Token, w.ID)
 		assert.Equal(t, http.StatusOK, rr.Code)
@@ -712,7 +712,7 @@ func TestReadMessageByUser(t *testing.T) {
 		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)
@@ -749,7 +749,7 @@ func TestReadMessageByUser(t *testing.T) {
 		rr, lr2 := LoginTestFuncV2(u2.Name, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token, lr1.UserId)
+		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr1.Token)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		rr, _ = AddUserInWorkspaceV2(w.ID, lr2.UserId, 4, lr1.Token)

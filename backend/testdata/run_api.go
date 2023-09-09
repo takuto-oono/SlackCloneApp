@@ -1,10 +1,10 @@
 package testdata
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"sync"
-	"fmt"
 	"time"
 
 	"github.com/xyproto/randomstring"
@@ -55,7 +55,7 @@ func (td *TestData) createWorkspace() {
 	func() {
 		for i, w := range td.workspaces {
 			if w.ID == 0 {
-				_, td.workspaces[i] = controllers.CreateWorkspaceTestFuncV2(w.Name, td.users[0].Token, td.users[0].UserId)
+				_, td.workspaces[i] = controllers.CreateWorkspaceTestFuncV2(w.Name, td.users[0].Token)
 			}
 			if td.workspaces[i].ID == 0 {
 				panic(errMes)
@@ -73,7 +73,6 @@ func (td *TestData) createWorkspace() {
 		rr, w := controllers.CreateWorkspaceTestFuncV2(
 			randomstring.EnglishFrequencyString(10),
 			td.users[0].Token,
-			td.users[0].UserId,
 		)
 		if rr.Code != http.StatusOK {
 			panic("api err")
@@ -209,11 +208,11 @@ func (td *TestData) sendMessage(workspaceID int) {
 
 func (td *TestData) sendDM(workspaceID int) {
 	sendDMPump := func(userID uint32) {
-		for i := 0; i < 100; i ++ {
+		for i := 0; i < 100; i++ {
 			rr, m := controllers.SendDMTestFuncV2(
 				randomstring.EnglishFrequencyString(30),
 				td.jwtTokenMap[userID],
-				td.workspaceAndUsers[workspaceID][rand.Int() % len(td.workspaceAndUsers[workspaceID])].UserId,
+				td.workspaceAndUsers[workspaceID][rand.Int()%len(td.workspaceAndUsers[workspaceID])].UserId,
 				workspaceID,
 				[]uint32{},
 				time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -230,7 +229,7 @@ func (td *TestData) sendDM(workspaceID int) {
 		go func(userID uint32) {
 			defer wg.Done()
 			sendDMPump(userID)
-		} (wau.UserId)
+		}(wau.UserId)
 	}
 	wg.Wait()
 }
