@@ -35,6 +35,7 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	u.PassWord = ""
 	c.IndentedJSON(http.StatusOK, u)
 }
 

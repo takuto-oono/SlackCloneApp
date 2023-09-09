@@ -280,7 +280,7 @@ func TestSendMessage(t *testing.T) {
 		isPrivate := false
 		rr, user := SignUpTestFuncV2(randomstring.EnglishFrequencyString(30), "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
-		rr, lr := LoginTestFuncV2(user.Name, user.PassWord)
+		rr, lr := LoginTestFuncV2(user.Name, "pass")
 		assert.Equal(t, http.StatusOK, rr.Code)
 		rr, w := CreateWorkspaceTestFuncV2(randomstring.EnglishFrequencyString(30), lr.Token, lr.UserId)
 		assert.Equal(t, http.StatusOK, rr.Code)
